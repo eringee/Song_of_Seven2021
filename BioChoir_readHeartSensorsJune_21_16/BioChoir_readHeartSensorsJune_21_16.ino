@@ -116,9 +116,11 @@ AudioConnection          patchCord11(mixer2, dac1);
 
 void setup(void)
 {
+ //// KEEP BG TONE SETUP 
   sine_fm1.frequency(311);
   waveform1.amplitude(0.2);
   
+
   Serial.begin(9600);  
   AudioMemory(10);   //This might need to be adjusted, depending.
   
@@ -135,6 +137,7 @@ void setup(void)
   envelope2.attack(1);            //attack envelope for heartbeat
   envelope2.decay(200);
   envelope2.release(100);
+//////
   
   pinMode(blinkPin,OUTPUT);       // pin that will blink to heartbeat
   pinMode(heartLed, OUTPUT);      //led for heart signal
@@ -223,8 +226,8 @@ void loop() {
     if(HQS) {
       HBPMav.push(HBPM);     //smooth out the Heartbeat per minute data
       Hampav.push(HeartAmp); //smooth out amplitude of heart signal data
-      waveform1.frequency(1000+HeartAmp);
-      envelope1.noteOn();
+      waveform1.frequency(1000+HeartAmp); //set frequency from heartbeat
+      envelope1.noteOn(); //happens every heartbeat
       heartOn = 0;
       HQS = false;           //reset quantified heart
     }
@@ -346,4 +349,3 @@ void LEDwriting() {
   heartLight=map(HeartSignal, HT, HP, 30, 255);
   analogWrite(heartLed, heartLight);
 }
-
