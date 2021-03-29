@@ -6,6 +6,7 @@
 #define SDCARD_CS_PIN    10
 #define SDCARD_MOSI_PIN  7
 #define SDCARD_SCK_PIN   14
+#define VOL_POT_PIN A1
 
 #define NO_TOUCH_DELAY 3000
 

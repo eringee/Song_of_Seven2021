@@ -1,5 +1,13 @@
-void setupAudioShield(float masterVol)
+
+float setVolume()
 {
+    int vol = analogRead(VOL_POT_PIN);
+    return map(float(vol) , 0, 1023, 0.0, 0.75);
+}
+
+void setupAudioShield()
+{
+    pinMode(VOL_POT_PIN,INPUT);
     AudioMemory(10);
     if(USE_SDCARD)
     {
@@ -16,7 +24,7 @@ void setupAudioShield(float masterVol)
     } 
 
   sgtl5000_1.enable();
-  sgtl5000_1.volume(masterVol); //set master volume here
+  sgtl5000_1.volume(setVolume()); //set master volume here
 }
 
 void setupSounds()

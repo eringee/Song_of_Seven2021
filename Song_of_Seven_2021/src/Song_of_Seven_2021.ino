@@ -10,12 +10,13 @@ void setup() {
 
   //delay(2000); // power-up safety delay
   
-  setupAudioShield(0.5); //argument is master volume
+  setupAudioShield(); //argument is master volume
   biosynth.setup();
   setupSounds();
   setupEnvelopes();
   
   openingMessageTimer.restart();
+  
 }
 
 void loop() 
@@ -23,4 +24,6 @@ void loop()
   openingMessage();
   checkSectionChange();
   biosynth.update(); 
+  sgtl5000_1.volume(setVolume());
+  
 }
