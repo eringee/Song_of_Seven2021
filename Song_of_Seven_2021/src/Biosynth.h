@@ -5,6 +5,7 @@ It handles the encoder, the buttons,  the screen and the Leds
 
 #define PLOT_SENSOR  false //Set to true to print sensor value in the serial plotter
 #define FOOT_PEDAL false //set to true if using the foot pedal in the project
+#define REVERSE_ENCODER false
 //BIO SYNTH HARDWARE PINS
 #define LED_PIN 0
 #define HEART_SENSOR_PIN A7
@@ -28,7 +29,13 @@ It handles the encoder, the buttons,  the screen and the Leds
 #include <FastLED.h>
 
 #include <Encoder.h>
-Encoder myEnc(ENCODER_PHASE_A, ENCODER_PHASE_B);
+
+#if REVERSE_ENCODER == true
+    Encoder myEnc(ENCODER_PHASE_B, ENCODER_PHASE_A);
+#else
+    Encoder myEnc(ENCODER_PHASE_A, ENCODER_PHASE_B);
+#endif
+
 #include <LiquidCrystal_I2C.h>
 LiquidCrystal_I2C lcd(0x27, 16 , 2); // set the LCD address to 0x27 for a 16 chars and 2 line display
 #include <Respiration.h>
@@ -55,7 +62,7 @@ private:
     int ledColors [NUM_LEDS][3] = {{252, 186, 3},{252, 28, 3},{10, 48, 240},{140, 10, 240}};
 
     int lcdState = 0;
-    long currentEncoderValue = -999;
+    long currentEncoderValue = 0;
     
     Chrono  confirmTimer; //timer used to reset lcd state if section change not confirmed 
     
@@ -123,7 +130,7 @@ private:
                   and set back the lcd to the current section state
      */
         if(confirmTimer.hasPassed(NO_TOUCH_DELAY) && getLCDState() == 1 )
-        {   Serial.println("test");
+        {   
             setEncoder(currentSection);
             setLCDState(2);
             confirmTimer.restart();
@@ -196,11 +203,13 @@ private:
         encoderButton.interval(BUTTON_REFRESH_RATE);
         //encoderButton.update();
         //encoderButton.read();
-        if(FOOT_PEDAL)
-        {
-            pinMode(FOOT_PEDAL_PIN , INPUT_PULLUP);
+        
+                    pinMode( FOOT_PEDAL_PIN , INPUT_PULLUP);
             footPedal.attach(FOOT_PEDAL_PIN);
             footPedal.interval(BUTTON_REFRESH_RATE);
+        if(FOOT_PEDAL)
+        {   
+
         }
     }
 //---------------
@@ -210,9 +219,13 @@ private:
      @abstract    update the state of the buttons every loop
      */
         encoderButton.update();
-        Serial.println(encoderButton.read());
-        
-        if(FOOT_PEDAL)footPedal.update();
+        //Serial.println(encoderButton.read());
+         footPedal.update();
+            //Serial.println(footPedal.read());
+        if(FOOT_PEDAL)
+        {
+           
+        }
     }
 //---------------        
     void updateEncoder()
@@ -220,22 +233,24 @@ private:
      @function    updateEncoder
      @abstract    update the state of the encoder every loop
      */
+
         long newPosition = myEnc.read()/4; //divided by 4 because its a quadrature encore
         
-
         //prevents the encoder from going out of bounds
         if(newPosition < 0)
         {   
-            setEncoder(0);
+                setEncoder(0); 
+                newPosition = myEnc.read()/4;
         }
         else if( newPosition > NUM_SECTIONS-1)
         {   
-            setEncoder(NUM_SECTIONS -1);
+                setEncoder(NUM_SECTIONS -1);
+                newPosition = myEnc.read()/4;
         }
 
         if (newPosition != currentEncoderValue) //encoder has been moved  
-        { 
-                currentEncoderValue = constrain(newPosition,0,NUM_SECTIONS-1) ;
+        {            
+                    currentEncoderValue = constrain(newPosition,0,NUM_SECTIONS-1);          
         }
     }
 //---------------
@@ -329,30 +344,30 @@ private:
                         if(connectedSensors[i])
                         {   
                             heart.update();
-                            //sensorData[i] = heart.getNormalized();
+                            sensorData[i] = heart.getNormalized();
                             //setLedBrightness(i , sensorData[i]);
 
                             //this is a combination of the heartbeat detection example and the song of seven 2016 code.
-                            if(heart.beatDetected()) // using beatDetected to trigger note
-                            {
-                               if(heartDoOnce)
-                                {   
-                                    sensorData[i] = 1.0;
-                                    waveform1.frequency(sectionTones[currentSection]); //set frequency from heartbeat
-                                    envelope1.noteOn(); //play note
-                                    setLedBrightness(i , sensorData[i]);
+                            // if(heart.beatDetected()) // using beatDetected to trigger note
+                            // {
+                            //    if(heartDoOnce)
+                            //     {   
+                            //         //sensorData[i] = 1.0;
+                            //         waveform1.frequency(sectionTones[currentSection]); //set frequency from heartbeat
+                            //         envelope1.noteOn(); //play note
+                            //         setLedBrightness(i , sensorData[i]);
                                     
-                                    bpmArray[bpmCounter] = heart.getBPM();  // grab a BPM snapshot every time a heartbeat occurs
-                                    bpmCounter++;                           // increment the BPMcounter value
-                                    heartDoOnce = false;
-                                }
-                            }
-                            else
-                            {
-                               heartDoOnce = true;
-                               sensorData[i] = 0.0;
-                               setLedBrightness(i , 0);
-                            }
+                            //         bpmArray[bpmCounter] = heart.getBPM();  // grab a BPM snapshot every time a heartbeat occurs
+                            //         bpmCounter++;                           // increment the BPMcounter value
+                            //         heartDoOnce = false;
+                            //     }
+                            // }
+                            // else
+                            // {
+                            //    heartDoOnce = true;
+                            //    sensorData[i] = 0.0;
+                            //    setLedBrightness(i , 0);
+                            // }
                         }
                         break;
 
