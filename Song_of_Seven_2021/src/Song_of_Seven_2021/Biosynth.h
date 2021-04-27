@@ -378,7 +378,7 @@ private:
                         {
                             sc1.update();
                             sensorData[i] = sc1.getSCR();
-                            sine_fm2.amplitude(sensorData[i]-0.3); //was limited to 0.75 if greater in old code
+                            sine_fm2.amplitude(sensorData[i]-0.3); //clamp the sensorData down a bit to avoid clipping
                             setLedBrightness(i , sensorData[i]);
                         }
                         else
