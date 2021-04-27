@@ -27,53 +27,26 @@ void setupAudioShield()
   sgtl5000_1.volume(setVolume()); //set master volume here
 }
 
-void setupSounds()
+void setupSounds()  //initial sounds for Section A
 {
 
-
-    /******************************  OLD CODE
-    waveform1.begin(0.4, 1020, WAVEFORM_SINE);  //something below 32Hz displays a clear beating pattern rathern than modulation
-    waveform1.amplitude(0.2);
-    sine_fm1.frequency(311);
-    
-
-    sine2.frequency(frequency[BOARD_ID-1]);           //harmonics of Eb -  1-622 2-933 
-                                    // 3-1244 4- 1555 5-1866 
-                                    // 6- 2177 7- 2488  
-    sine2.amplitude(0.0);
-
-    ********/
-    
     //GSR dependent variables
-    noise1.amplitude(0.3);
+    noise1.amplitude(0.01);
 
-    sine_fm2.frequency[BOARD_ID-1]);      //harmonics of Eb -  1-622 2-933 
-                                          // 3-1244 4- 1555 5-1866 
-                                          // 6- 2177 7- 2488  
+    sine_fm2.frequency(sectionGlobal[0][BOARD_ID]); 
     sine_fm2.amplitude(0.0);
     
     //HEART dependent variables
-    waveform1.begin(0.4, 1020, WAVEFORM_SINE);  //something below 32Hz displays a clear beating pattern rathern than modulation
-    sine_fm1.frequency(500);   
-    sine_fm1.amplitude(0.05);  
+    waveform3.begin(0.01, 0.005, WAVEFORM_SINE);
+    sine_fm4.frequency(622);
+    sine_fm4.amplitude(0.02);
 
     //ATMOSPHERIC SINES
     waveform2.begin(0.004, 1, WAVEFORM_SINE);
     sine_fm3.frequency(311);           //atmospheric sines
     sine1.frequency(424);
     sine_fm3.amplitude(0.1);
-    sine1.amplitude(0.03);
-
-    waveform3.begin(0.05, 1, WAVEFORM_SINE);
-    sine_fm4.frequency(622);
-    sine_fm4.amplitude(0.075);
-}
-
-void setupEnvelopes()
-{
-    envelope1.attack(1);            //attack envelope for heartbeat
-    envelope1.decay(200);
-    envelope1.release(100);
+    sine1.amplitude(0.05);
 }
 
 void openingMessage()
@@ -86,11 +59,12 @@ void openingMessage()
     }
 }
 
-void checkSectionChange()
+void checkSectionChange()  //this is where we change sections AND frequencies...
 {
     if( encoderButton.read() == 0 && biosynth.getLCDState() == 1)
     {   //section has been confirmed
-        currentSection = biosynth.getEncoderValue(); 
+        currentSection = biosynth.getEncoderValue();
+        Serial.println(sectionGlobal[currentSection][BOARD_ID]);  /// THIS IS WHERE YOU NEED TO UPDATE THE VALUES
         biosynth.setLCDState(2);
     }
 }

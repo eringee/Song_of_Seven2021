@@ -14,7 +14,6 @@ void setup() {
   setupAudioShield(); //argument is master volume
   biosynth.setup();
   setupSounds();
-  setupEnvelopes();
   
   openingMessageTimer.restart();
   

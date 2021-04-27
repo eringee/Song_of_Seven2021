@@ -1,5 +1,6 @@
 #define BOARD_ID 1
 #define NUM_SECTIONS 4
+#define NUM_BOARDS 7
 
 // Use these with the Teensy Audio Shield
 #define USE_SDCARD false
@@ -13,9 +14,13 @@
 #include <Chrono.h>
 #include <LightChrono.h>
 
+int sectionGlobal[NUM_SECTIONS][NUM_BOARDS] = {
+ {622,933,1244,1555,1866,2177,2488}, // going to canada
+ {174,348,1244,1555,1566,1740,2488}, // cat died
+ {392,416,448,587,659,1046,1174}, // fluffy bunny
+ {1148,1312,1476,1640,1804,1968,2132} // board games
+};
 
-int frequency[7] = {622,933,1244,1555,1866,2177,2488}; //Tone of the sinewave according to board id
-int sectionTones[NUM_SECTIONS] = {1000,800,600,440}; //change the tone of every section here
 Chrono openingMessageTimer;
 int openingMessageTime = 3000;
 

@@ -60,7 +60,7 @@ private:
     CRGB leds[NUM_LEDS];  //array holding led colors data
 
     //Here you can modify the RGB Values to determine the colors of the leds 0=HEART 1=GSR1 2=GSR2 3=RESP
-    int ledColors [NUM_LEDS][3] = {{252, 186, 3},{252, 28, 3},{10, 48, 240},{140, 10, 240}};
+    int ledColors [NUM_LEDS][3] = {{252, 28, 3},{252, 186, 3},{10, 48, 240},{140, 10, 240}};
 
     int lcdState = 0;
     long currentEncoderValue = 0;
@@ -346,8 +346,9 @@ private:
                         {   
                             heart.update();
                             sensorData[i] = heart.getNormalized();
-                            //setLedBrightness(i , sensorData[i]);
-
+                            setLedBrightness(i , sensorData[i]);
+                            waveform3.amplitude(sensorData[i]-0.7);
+                            
                             //this is a combination of the heartbeat detection example and the song of seven 2016 code.
                             // if(heart.beatDetected()) // using beatDetected to trigger note
                             // {
@@ -377,7 +378,7 @@ private:
                         {
                             sc1.update();
                             sensorData[i] = sc1.getSCR();
-                            sine_fm2.amplitude(sensorData[i]); //was limited to 0.75 if greater in old code
+                            sine_fm2.amplitude(sensorData[i]-0.3); //was limited to 0.75 if greater in old code
                             setLedBrightness(i , sensorData[i]);
                         }
                         else
