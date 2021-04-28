@@ -2,13 +2,15 @@
 float setVolume()
 {
     int vol = analogRead(VOL_POT_PIN);
-    return map(float(vol) , 0, 1023, 0.0, 0.75);
+
+    return (float)vol /1280;
 }
 
 void setupAudioShield()
 {
     pinMode(VOL_POT_PIN,INPUT);
-    AudioMemory(10);
+    AudioMemory(50);  //put in Audio Memory or weird clicks happen
+   
     if(USE_SDCARD)
     {
         SPI.setMOSI(SDCARD_MOSI_PIN);  // Audio shield has MOSI on pin 7
@@ -27,32 +29,26 @@ void setupAudioShield()
   sgtl5000_1.volume(setVolume()); //set master volume here
 }
 
-void setupSounds()
+void setupSounds()  //initial sounds for Section A
 {
+
+    //GSR dependent variables
+    noise1.amplitude(0.01);
+
+    sine_fm2.frequency(sectionGlobal[0][BOARD_ID]); 
+    sine_fm2.amplitude(0.0);
     
-    waveform1.begin(0.01, 1, WAVEFORM_SINE);  //something below 32Hz displays a clear beating pattern rathern than modulation
-    waveform1.amplitude(0.2);
-    sine_fm1.frequency(311);
-    
+    //HEART dependent variables
+    waveform3.begin(0.01, 0.005, WAVEFORM_SINE);
+    sine_fm4.frequency(622);
+    sine_fm4.amplitude(0.02);
 
-    sine2.frequency(frequency[BOARD_ID-1]);           //harmonics of Eb -  1-622 2-933 
-                                    // 3-1244 4- 1555 5-1866 
-                                    // 6- 2177 7- 2488  
-    sine2.amplitude(0.0);
-}
-
-void setupEnvelopes()
-{
-    envelope1.attack(1);            //attack envelope for heartbeat
-    envelope1.decay(200);
-    envelope1.release(100);
-
-    //not used
-    envelope2.attack(1);            //attack envelope for GSR
-    envelope2.decay(200);
-    envelope2.release(100);
-
-    envelope1.noteOn(); 
+    //ATMOSPHERIC SINES
+    waveform2.begin(0.004, 1, WAVEFORM_SINE);
+    sine_fm3.frequency(311);           //atmospheric sines
+    sine1.frequency(424);
+    sine_fm3.amplitude(0.1);
+    sine1.amplitude(0.05);
 }
 
 void openingMessage()
@@ -65,11 +61,38 @@ void openingMessage()
     }
 }
 
-void checkSectionChange()
+void checkSectionChange()  //this is where we change sections AND frequencies...
 {
     if( encoderButton.read() == 0 && biosynth.getLCDState() == 1)
     {   //section has been confirmed
-        currentSection = biosynth.getEncoderValue(); 
+ 
+        lastSection = currentSection;
+        currentSection = biosynth.getEncoderValue();
+        updateLCDBool = true;
+
+        /// THIS IS WHERE YOU NEED TO UPDATE THE FREQUENCY VALUES
+        sine_fm2.frequency(sectionGlobal[currentSection][BOARD_ID]);
+        if (currentSection==0){
+          sine_fm3.frequency(311);   //atmospheric sine1
+          sine1.frequency(424);      //atmospheric sine2
+        }
+        else if (currentSection==1){
+          sine_fm3.frequency(311);   //atmospheric sine1
+          sine1.frequency(369);      //atmospheric sine2
+        }
+        else if (currentSection==2){
+          sine_fm3.frequency(261.63);   //atmospheric sine1
+          sine1.frequency(329.63);      //atmospheric sine2
+          sine_fm3.amplitude(0.1);  
+          sine1.amplitude(0.1);
+        }
+        else if (currentSection==3){
+          waveform2.frequency(1);
+          sine_fm3.frequency(659);   //atmospheric sine1
+          sine1.frequency(985);      //atmospheric sine2
+          sine_fm3.amplitude(0.1);  
+          sine1.amplitude(0.1);
+        }
         biosynth.setLCDState(2);
     }
 }

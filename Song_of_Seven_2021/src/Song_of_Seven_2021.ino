@@ -1,3 +1,4 @@
+//#include <LCD_I2C_Teensy36.h>
 #include "Global.h" //include file containing global variables
 #include "Biosynth.h"
 //Set to true the sensors used with the bioSynth for the project
@@ -10,11 +11,11 @@ void setup() {
 
   //delay(2000); // power-up safety delay
   
+  
   setupAudioShield(); //argument is master volume
   biosynth.setup();
   setupSounds();
-  setupEnvelopes();
-  
+  biosynth.openingMessage();
   openingMessageTimer.restart();
   
 }
@@ -23,7 +24,6 @@ void loop()
 {
   openingMessage();
   checkSectionChange();
-  biosynth.update(); 
+  biosynth.update();
   sgtl5000_1.volume(setVolume());
-  
 }
