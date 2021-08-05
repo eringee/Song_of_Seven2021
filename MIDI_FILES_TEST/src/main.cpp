@@ -30,18 +30,11 @@
 #endif // USE_MIDI
 
 
-// SD chip select pin for SPI comms.
-// Arduino Ethernet shield, pin 4.
-// Default SD chip select is the SPI SS pin (10).
-// Other hardware will be different as documented for that hardware.
+//SD CARD DEFINITION
 const uint8_t SD_SELECT = 10;
 #define SDCARD_MOSI_PIN  7
 #define SDCARD_SCK_PIN   14
-// LED definitions for status and user indicators
-const uint8_t READY_LED = 7;      // when finished
-const uint8_t SMF_ERROR_LED = 6;  // SMF error
-const uint8_t SD_ERROR_LED = 5;   // SD error
-const uint8_t BEAT_LED = 4;       // toggles to the 'beat'
+
 
 const uint16_t WAIT_DELAY = 2000; // ms
 
@@ -129,41 +122,26 @@ void midiSilence(void)
 
 void setup(void)
 {
-   DEBUG("HELLO");
-
-  // Set up LED pins
-  pinMode(READY_LED, OUTPUT);
-  pinMode(SD_ERROR_LED, OUTPUT);
-  pinMode(SMF_ERROR_LED, OUTPUT);
-  pinMode(BEAT_LED, OUTPUT);
-
-  // reset LEDs
-  digitalWrite(READY_LED, LOW);
-  digitalWrite(SD_ERROR_LED, LOW);
-  digitalWrite(SMF_ERROR_LED, LOW);
-  digitalWrite(BEAT_LED, LOW);
   
   Serial.begin(SERIAL_RATE);
-
+  Serial.println("HELLO");
   DEBUG("\n[MidiFile Play List]");
 
+ // Initialize SD
   SPI.setMOSI(SDCARD_MOSI_PIN);  // Audio shield has MOSI on pin 7
   SPI.setSCK(SDCARD_SCK_PIN);  // Audio shield has SCK on pin 14
-
-  // Initialize SD
+ 
   if (!SD.begin(SD_SELECT))
   {
     DEBUG("\nSD init fail!");
-    digitalWrite(SD_ERROR_LED, HIGH);
     while (true) ;
   }
 
   // Initialize MIDIFile
   SMF.begin(&SD);
+  //set callback functions
   SMF.setMidiHandler(midiCallback);
   SMF.setSysexHandler(sysexCallback);
-
-  digitalWrite(READY_LED, HIGH);
 }
 
 void tickMetronome(void)
@@ -179,7 +157,7 @@ void tickMetronome(void)
     if ((millis() - lastBeatTime) >= beatTime)
     {
       lastBeatTime = millis();
-      digitalWrite(BEAT_LED, HIGH);
+      //digitalWrite(BEAT_LED, HIGH);
       inBeat = true;
     }
   }
@@ -187,7 +165,7 @@ void tickMetronome(void)
   {
     if ((millis() - lastBeatTime) >= 100)	// keep the flash on for 100ms only
     {
-      digitalWrite(BEAT_LED, LOW);
+      //digitalWrite(BEAT_LED, LOW);
       inBeat = false;
     }
   }
@@ -207,23 +185,21 @@ void loop(void)
 
       DEBUGS("\nS_IDLE");
 
-      digitalWrite(READY_LED, LOW);
-      digitalWrite(SMF_ERROR_LED, LOW);
-
       currTune++;
-      if (currTune >= ARRAY_SIZE(tuneList))
+      if (currTune >= ARRAY_SIZE(tuneList)) //prevent overflow in array
         currTune = 0;
 
       // use the next file name and play it
       DEBUG("\nFile: ");
       DEBUG(tuneList[currTune]);
+
       //load the track
       err = SMF.load(tuneList[currTune]);
       if (err != MD_MIDIFile::E_OK)
       {
         DEBUG(" - SMF load Error ");
         DEBUG(err);
-        digitalWrite(SMF_ERROR_LED, HIGH);
+        //digitalWrite(SMF_ERROR_LED, HIGH);
         timeStart = millis();
         state = S_WAIT_BETWEEN;
         DEBUGS("\nWAIT_BETWEEN");
@@ -238,11 +214,10 @@ void loop(void)
 
   case S_PLAYING: // play the file
     //DEBUGS("\nS_PLAYING");
-    if (!SMF.isEOF())
+    if (!SMF.isEOF()) //if not at the end of the file
     {
-      if (SMF.getNextEvent())
-        //DEBUG("\n THINGS");
-        tickMetronome();
+      if (SMF.getNextEvent()) 
+          tickMetronome();
     }
     else
       state = S_END;
@@ -258,7 +233,7 @@ void loop(void)
     break;
 
   case S_WAIT_BETWEEN:    // signal finished with a dignified pause
-    digitalWrite(READY_LED, HIGH);
+    //digitalWrite(READY_LED, HIGH);
     if (millis() - timeStart >= WAIT_DELAY)
       state = S_IDLE;
     break;
