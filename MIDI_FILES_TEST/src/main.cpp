@@ -206,7 +206,7 @@ void loop(void)
       }
       else
       {
-        DEBUGS("\nS_PLAYING");
+        //DEBUGS("\nS_PLAYING");
         state = S_PLAYING;
       }
     }
