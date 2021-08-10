@@ -4,7 +4,7 @@ void midiCallback(midi_event *pev)
 // This callback is set up in the setup() function.
 {
   //Serial.println("POTATO");
-  MIDISERIAL.write(pev.data);
+  //MIDISERIAL.write(pev -> data);
   DEBUG("\n");
   DEBUG(millis());
   DEBUG("\tM T");
@@ -12,11 +12,19 @@ void midiCallback(midi_event *pev)
   DEBUG(":  Ch ");
   DEBUG(pev->channel+1);
   DEBUG(" Data ");
-  for (uint8_t i=0; i<pev->size; i++)
-  {
-  DEBUGX(pev->data[i]);
-    DEBUG(' ');
-  }
+  DEBUGX(pev->data[0]);
+  Serial.println();
+
+   DEBUG(pev->data[1]);
+  Serial.println();
+   DEBUG(pev->data[2]);
+  Serial.println();
+
+  // for (uint8_t i=0; i<pev->size; i++)
+  // {
+  //   DEBUG(pev->data[i]);
+  //   DEBUG(' ');
+  // }
 }
 
 void midiSilence(void)
