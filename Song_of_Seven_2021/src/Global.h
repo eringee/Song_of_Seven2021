@@ -19,6 +19,10 @@
 #include <MD_MIDIFile.h>
 #include <MIDI.h>
 
+#define MIDISERIAL Serial1
+MIDI_CREATE_INSTANCE(HardwareSerial, MIDISERIAL, MIDI);
+
+
 
 // The files in the tune list should be located on the SD card 
 // or an error will occur opening the file and the next in the 

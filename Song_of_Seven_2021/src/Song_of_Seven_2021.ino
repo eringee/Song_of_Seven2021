@@ -10,7 +10,7 @@ Biosynth biosynth(true,true,false,false);
 void setup() {
 
   Serial.begin(9600);
-
+  MIDISERIAL.begin(9600);   //find midi baudrate
   //delay(2000); // power-up safety delay
   
   
@@ -20,7 +20,8 @@ void setup() {
   SMF.begin(&test);
   //set callback functions
   SMF.setMidiHandler(midiCallback);
- 
+  MIDI.begin(MIDI_CHANNEL_OMNI);
+
  
   biosynth.openingMessage();
   openingMessageTimer.restart();
@@ -31,7 +32,12 @@ void setup() {
 
 void loop() 
 {
+  
   updateMidi();
+  if(MIDI.read())
+  {
+    Serial.print("it works");
+  }
   // openingMessage();
   // checkSectionChange();
   // biosynth.update();

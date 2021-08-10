@@ -3,7 +3,8 @@ void midiCallback(midi_event *pev)
 // thru the midi communications interface.
 // This callback is set up in the setup() function.
 {
-  Serial.println("POTATO");
+  //Serial.println("POTATO");
+  MIDISERIAL.write(pev.data);
   DEBUG("\n");
   DEBUG(millis());
   DEBUG("\tM T");

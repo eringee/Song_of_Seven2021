@@ -1,15 +1,17 @@
+/*
+MIDI FILE READER FOR ERIN GEE'S BIOSYNTH
+
+READ A MIDI FILE AND PASSES THE INFORMATION OF EACH TRACK
+TO THE ATTACHED VOICE ON THE SYNTHESIZER
+*/
+
 #include <Arduino.h>
-// Test playing a succession of MIDI files from the SD card.
-// Example program to demonstrate the use of the MIDFile library
-// Just for fun light up a LED in time to the music.
-//
-// Hardware required:
-//  SD card interface - change SD_SELECT for SPI comms
-//  3 LEDs (optional) - to display current status and beat. 
-//  Change pin definitions for specific hardware setup - defined below.
 #include <SPI.h>
-#include <SdFat.h>
+#include <Audio.h>
+#include <SdFat.h> //NOT THE SAME AS THE SD LIBRARY USED ON THE BIOSYNTH
 #include <MD_MIDIFile.h>
+
+
 
 #define USE_MIDI  0   // set to 1 to enable MIDI output, otherwise debug output
 
@@ -43,20 +45,13 @@ const uint16_t WAIT_DELAY = 2000; // ms
 // The files in the tune list should be located on the SD card 
 // or an error will occur opening the file and the next in the 
 // list will be opened (skips errors).
-const char *tuneList[] = 
-{
-  "midi_test.mid"  // simplest and shortest file
-  
-};
+const char *partsList[] = { "midi_test.mid"}; //this should autopopulate looking through a folder in setup
 
-// These don't play as they need more than 16 tracks but will run if MIDIFile.h is changed
-//#define MIDI_FILE  "SYMPH9.MID"     // 29 tracks
-//#define MIDI_FILE  "CHATCHOO.MID"   // 17 tracks
-//#define MIDI_FILE  "STRIPPER.MID"   // 25 tracks
-
-SdFat	SD;
+SdFat	card;
 MD_MIDIFile SMF;
 
+
+//function that receive the midi events. Parse here
 void midiCallback(midi_event *pev)
 // Called by the MIDIFile library when a file event needs to be processed
 // thru the midi communications interface.
@@ -85,6 +80,7 @@ void midiCallback(midi_event *pev)
   }
 }
 
+//could be removed
 void sysexCallback(sysex_event *pev)
 // Called by the MIDIFile library when a system Exclusive (sysex) file event needs 
 // to be processed through the midi communications interface. Most sysex events cannot 
@@ -101,6 +97,8 @@ void sysexCallback(sysex_event *pev)
   }
 }
 
+
+//helpers
 void midiSilence(void)
 // Turn everything off on every channel.
 // Some midi files are badly behaved and leave notes hanging, so between songs turn
@@ -120,33 +118,34 @@ void midiSilence(void)
     midiCallback(&ev);
 }
 
+
 void setup(void)
 {
   
   Serial.begin(SERIAL_RATE);
-  Serial.println("HELLO");
-  DEBUG("\n[MidiFile Play List]");
 
  // Initialize SD
   SPI.setMOSI(SDCARD_MOSI_PIN);  // Audio shield has MOSI on pin 7
   SPI.setSCK(SDCARD_SCK_PIN);  // Audio shield has SCK on pin 14
  
-  if (!SD.begin(SD_SELECT))
+  //verify sd card. Could be passed to midihandler object if transformed in class
+  if (!card.begin(SD_SELECT, SPI_FULL_SPEED)) 
   {
     DEBUG("\nSD init fail!");
     while (true) ;
   }
 
   // Initialize MIDIFile
-  SMF.begin(&SD);
+  SMF.begin(&card);
   //set callback functions
   SMF.setMidiHandler(midiCallback);
-  SMF.setSysexHandler(sysexCallback);
+  SMF.setSysexHandler(sysexCallback); //could be removed
 }
 
-void tickMetronome(void)
-// flash a LED to the beat
+void tickMetronome(void) //propose to implement this to erin
 {
+  // flash a LED to the beat
+
   static uint32_t lastBeatTime = 0;
   static boolean  inBeat = false;
   uint16_t  beatTime;
@@ -171,10 +170,11 @@ void tickMetronome(void)
   }
 }
 
-void loop(void)
+void loop(void) //transform in update method
 {
+  //dont understant why this is reinitialised every loop
   static enum { S_IDLE, S_PLAYING, S_END, S_WAIT_BETWEEN } state = S_IDLE;
-  static uint16_t currTune = ARRAY_SIZE(tuneList);
+  static uint16_t currPart = ARRAY_SIZE(partsList);
   static uint32_t timeStart;
 
   switch (state)
@@ -185,16 +185,16 @@ void loop(void)
 
       DEBUGS("\nS_IDLE");
 
-      currTune++;
-      if (currTune >= ARRAY_SIZE(tuneList)) //prevent overflow in array
-        currTune = 0;
+      currPart++;
+      if (currPart >= ARRAY_SIZE(partsList)) //prevent overflow in array
+        currPart = 0;
 
       // use the next file name and play it
       DEBUG("\nFile: ");
-      DEBUG(tuneList[currTune]);
+      DEBUG(partsList[currPart]);
 
       //load the track
-      err = SMF.load(tuneList[currTune]);
+      err = SMF.load(partsList[currPart]);
       if (err != MD_MIDIFile::E_OK)
       {
         DEBUG(" - SMF load Error ");
@@ -216,13 +216,15 @@ void loop(void)
     //DEBUGS("\nS_PLAYING");
     if (!SMF.isEOF()) //if not at the end of the file
     {
-      if (SMF.getNextEvent()) 
-          tickMetronome();
+      if (SMF.getNextEvent())
+      {
+        //tickMetronome();
+      }
     }
     else
       state = S_END;
     break;
-
+  
   case S_END:   // done with this one
     DEBUGS("\nS_END");
     SMF.close();
@@ -232,8 +234,8 @@ void loop(void)
     DEBUGS("\nWAIT_BETWEEN");
     break;
 
+  //veriify if needed
   case S_WAIT_BETWEEN:    // signal finished with a dignified pause
-    //digitalWrite(READY_LED, HIGH);
     if (millis() - timeStart >= WAIT_DELAY)
       state = S_IDLE;
     break;
