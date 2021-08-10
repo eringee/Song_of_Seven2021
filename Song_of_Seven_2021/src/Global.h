@@ -3,15 +3,43 @@
 #define NUM_BOARDS 7
 
 // Use these with the Teensy Audio Shield
-#define USE_SDCARD false
+#define USE_SDCARD true
 #define SDCARD_CS_PIN    10
 #define SDCARD_MOSI_PIN  7
 #define SDCARD_SCK_PIN   14
 #define VOL_POT_PIN A1
 
 #define NO_TOUCH_DELAY 3000
-
+#include <Audio.h>
+#include <SerialFlash.h>
 #include <Chrono.h>
+#include <SPI.h>
+//#include <SD.h>
+#include <SdFat.h>
+#include <MD_MIDIFile.h>
+#include <MIDI.h>
+
+
+// The files in the tune list should be located on the SD card 
+// or an error will occur opening the file and the next in the 
+// list will be opened (skips errors).
+const char *tuneList[] = 
+{
+  "midi_test.mid"  // simplest and shortest file
+  
+};
+SdFat test;
+
+MD_MIDIFile SMF;
+const uint16_t WAIT_DELAY = 2000; // ms
+
+
+
+#define DEBUG(x)  Serial.print(x)
+#define DEBUGX(x) Serial.print(x, HEX)
+#define DEBUGS(s) Serial.print(F(s))
+#define SERIAL_RATE 57600
+
 
 
 int sectionGlobal[NUM_SECTIONS][NUM_BOARDS] = {
@@ -28,10 +56,7 @@ int currentSection = 0;
 int lastSection = -1;
 bool updateLCDBool = true;
 /////////////////////////////AUDIO VARS//////////////////////////
-#include <Audio.h>
-#include <SPI.h>
-#include <SD.h>
-#include <SerialFlash.h>
+
 
 // GUItool: begin automatically generated code
 AudioSynthWaveform       waveform2;      //xy=278,354
