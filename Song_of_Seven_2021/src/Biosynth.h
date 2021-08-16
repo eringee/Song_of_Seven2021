@@ -484,4 +484,61 @@ public:
         lcd.setCursor(0, 1);
         lcd.print(lcdLine2Buffer);
     }  
+
+//---------------
+    void playNote(int channel , int midiNote , int velocity)
+    {
+        switch(channel)
+        {
+            case 1: //heart synth
+                Serial.println("PLAY NOTE HEART");
+                waveform3.frequency((float)mtof.toFrequency(midiNote));
+                waveform3.amplitude((float) velocity / 127 ); //fetch sensor value to multiply sensor signal to max amplitude
+                envelopeHeart.noteOn();
+                break;
+            
+            case 2: //gsr1 synth
+                Serial.println("PLAY NOTE GSR1");
+                sine_fm2.frequency((float)mtof.toFrequency(midiNote));
+                sine_fm2.amplitude((float) velocity / 127);
+                envelopeGSR1.noteOn();
+                break;
+
+            case 3: //gsr2 synth
+                Serial.println("PLAY NOTE GSR2");
+                sine_fm3.frequency((float)mtof.toFrequency(midiNote));
+                sine_fm3.amplitude((float) velocity / 127);
+                break;
+
+            case 4: //temp synth
+                Serial.println("PLAY NOTE TEMP");
+                sine1.frequency((float)mtof.toFrequency(midiNote));
+                sine1.amplitude((float) velocity / 127);
+                break;
+        }
+    }
+
+//---------------
+    void StopNote(int channel)
+    {
+        switch(channel)
+        {
+            case 1: //heart synth
+
+                envelopeHeart.noteOff();
+                break;
+            
+            case 2: //gsr1 synth
+                envelopeGSR1.noteOff();
+                break;
+
+            case 3: //gsr2 synth
+                envelopeGSR2.noteOff();
+                break;
+
+            case 4: //temp synth
+                envelopeTemp.noteOff();
+                break;
+        }
+    }
 };

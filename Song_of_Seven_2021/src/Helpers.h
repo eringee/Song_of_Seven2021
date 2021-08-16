@@ -5,26 +5,55 @@ void midiCallback(midi_event *pev)
 {
   //Serial.println("POTATO");
   //MIDISERIAL.write(pev -> data);
-  DEBUG("\n");
-  DEBUG(millis());
-  DEBUG("\tM T");
-  DEBUG(pev->track);
-  DEBUG(":  Ch ");
-  DEBUG(pev->channel+1);
-  DEBUG(" Data ");
-  DEBUGX(pev->data[0]);
-  Serial.println();
+  // DEBUG("\n");
+  // DEBUG(millis());
+  // DEBUG("\tM T");
+  // DEBUG(pev->track);
+  // DEBUG(":  Ch ");
+  // DEBUG(pev->channel+1);
+  // DEBUG(" Data ");
+  // DEBUGX(pev->data[0]);
+  // Serial.println();
 
-   DEBUG(pev->data[1]);
-  Serial.println();
-   DEBUG(pev->data[2]);
-  Serial.println();
+  //  DEBUG(pev->data[1]);
+  // Serial.println();
+  //  DEBUG(pev->data[2]);
+  // Serial.println();
+  Serial.println("MIDI EVENT:");
+  int channel = pev->channel+1;
+  int messageType = pev->data[0];
+  int midiNote = pev->data[1];
+  int velocity = pev->data[2];
+  
+  if( DEBUG_MIDI)
+  { 
+    Serial.println("Channel");
+    Serial.println(channel);
+    Serial.println("Event type:");
+    Serial.println(messageType,HEX);
+    Serial.println(messageType);
+    Serial.println("Midi note:");
+    Serial.println(midiNote);
+    Serial.println("Note velocity:");
+    Serial.println(velocity);
+  }
+  switch(messageType)
+  {
+    case 144 : //NOTE ON
+      biosynth.playNote(channel, midiNote,velocity);
+      break;
+    
+    case 128 : //NOTE OFF
+      //biosynth.stopNote(channel, midiNote,velocity);
+      break;
 
-  // for (uint8_t i=0; i<pev->size; i++)
-  // {
-  //   DEBUG(pev->data[i]);
-  //   DEBUG(' ');
-  // }
+    case 176 : //ALL NOTE OFF
+      Serial.println("potato");
+      //biosynth.stopNote(channel, midiNote,velocity);
+      break;
+    
+  }
+
 }
 
 void midiSilence(void)
@@ -32,18 +61,9 @@ void midiSilence(void)
 // Some midi files are badly behaved and leave notes hanging, so between songs turn
 // off all the notes and sound
 {
-  midi_event ev;
-
-  // All sound off
-  // When All Sound Off is received all oscillators will turn off, and their volume
-  // envelopes are set to zero as soon as possible.
-  ev.size = 0;
-  ev.data[ev.size++] = 0xb0;
-  ev.data[ev.size++] = 120;
-  ev.data[ev.size++] = 0;
-
-  for (ev.channel = 0; ev.channel < 16; ev.channel++)
-    midiCallback(&ev);
+  for (int c = 0; c < 16; c++)
+    biosynth.StopNote(c);
+    
 }
 
 void tickMetronome(void)

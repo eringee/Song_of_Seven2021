@@ -15,9 +15,12 @@
 #include <Chrono.h>
 #include <SPI.h>
 //#include <SD.h>
+
+#define DEBUG_MIDI true
 #include <SdFat.h>
 #include <MD_MIDIFile.h>
 #include <MIDI.h>
+#include  <mtof.h>
 
 #define MIDISERIAL Serial1
 MIDI_CREATE_INSTANCE(HardwareSerial, MIDISERIAL, MIDI);
@@ -29,8 +32,8 @@ MIDI_CREATE_INSTANCE(HardwareSerial, MIDISERIAL, MIDI);
 // list will be opened (skips errors).
 const char *tuneList[] = 
 {
-  "midi_test.mid"  // simplest and shortest file
-  
+  "midi_test.mid",  // simplest and shortest file
+  "ff7_test.mid"
 };
 SdFat test;
 
@@ -62,32 +65,51 @@ bool updateLCDBool = true;
 /////////////////////////////AUDIO VARS//////////////////////////
 
 
+#include <Audio.h>
+#include <Wire.h>
+#include <SPI.h>
+#include <SD.h>
+#include <SerialFlash.h>
+
+#include <Audio.h>
+#include <Wire.h>
+#include <SPI.h>
+#include <SD.h>
+#include <SerialFlash.h>
+
 // GUItool: begin automatically generated code
-AudioSynthWaveform       waveform2;      //xy=278,354
-AudioSynthNoiseWhite     noise1;         //xy=307,214
-AudioSynthWaveform       waveform3;      //xy=318,469
-AudioSynthWaveform       waveform1;      //xy=352,98
-AudioSynthWaveformSineModulated sine_fm3;       //xy=435,358
-AudioSynthWaveformSine   sine1;          //xy=439,398
-AudioSynthWaveformSineModulated sine_fm4;       //xy=457,465
-AudioSynthWaveformSineModulated sine_fm2;       //xy=462,209
-AudioSynthWaveformSineModulated sine_fm1;       //xy=493,96
-AudioEffectEnvelope      envelope1;      //xy=634,100
-AudioMixer4              mixer1;         //xy=685,195
-AudioMixer4              mixer2;         //xy=739,388
-AudioOutputI2S           i2s1;           //xy=920,266
-AudioConnection          patchCord1(waveform2, sine_fm3);
-AudioConnection          patchCord2(noise1, sine_fm2);
-AudioConnection          patchCord3(waveform3, sine_fm4);
-AudioConnection          patchCord4(waveform1, sine_fm1);
-AudioConnection          patchCord5(sine_fm3, 0, mixer2, 1);
-AudioConnection          patchCord6(sine1, 0, mixer2, 2);
-AudioConnection          patchCord7(sine_fm4, 0, mixer2, 3);
-AudioConnection          patchCord8(sine_fm2, 0, mixer1, 1);
-AudioConnection          patchCord9(sine_fm1, envelope1);
-AudioConnection          patchCord10(envelope1, 0, mixer1, 0);
-AudioConnection          patchCord11(mixer1, 0, mixer2, 0);
-AudioConnection          patchCord12(mixer2, 0, i2s1, 0);
-AudioConnection          patchCord13(mixer2, 0, i2s1, 1);
-AudioControlSGTL5000     sgtl5000_1;     //xy=979,355
+AudioSynthNoiseWhite     noise1;         //xy=69.19999694824219,544.800048828125
+AudioSynthWaveform       waveform1;      //xy=76.20001220703125,447.79998779296875
+AudioSynthWaveform       waveform2;      //xy=81.19999694824219,700.7999877929688
+AudioSynthWaveform       waveform3;      //xy=84.19999694824219,842.7999877929688
+AudioSynthWaveformSineModulated sine_fm2;       //xy=213.1999969482422,543.8000183105469
+AudioSynthWaveformSineModulated sine_fm1;       //xy=215.1999969482422,447.79998779296875
+AudioSynthWaveformSineModulated sine_fm3;       //xy=220.1999969482422,700.7999877929688
+AudioSynthWaveformSine   sine1;          //xy=225.1999969482422,760.7999877929688
+AudioSynthWaveformSineModulated sine_fm4;       //xy=227.1999969482422,842.7999877929688
+AudioMixer4              mixer1;         //xy=375.20001220703125,510.79998779296875
+AudioEffectEnvelope      envelopeHeart;      //xy=446.20001220703125,844.2000122070312
+AudioEffectEnvelope      envelopeTemp; //xy=448.20001220703125,761.7999877929688
+AudioEffectEnvelope      envelopeGSR2; //xy=452.20001220703125,701.7999877929688
+AudioEffectEnvelope      envelopeGSR1;      //xy=525.2000122070312,510.20001220703125
+AudioMixer4              mixer2;         //xy=762.2000122070312,687.7999877929688
+AudioOutputI2S           i2s1;           //xy=921.2000122070312,686.7999877929688
+AudioConnection          patchCord1(noise1, sine_fm2);
+AudioConnection          patchCord2(waveform1, sine_fm1);
+AudioConnection          patchCord3(waveform2, sine_fm3);
+AudioConnection          patchCord4(waveform3, sine_fm4);
+AudioConnection          patchCord5(sine_fm2, 0, mixer1, 1);
+AudioConnection          patchCord6(sine_fm1, 0, mixer1, 0);
+AudioConnection          patchCord7(sine_fm3, envelopeGSR2);
+AudioConnection          patchCord8(sine1, envelopeTemp);
+AudioConnection          patchCord9(sine_fm4, envelopeHeart);
+AudioConnection          patchCord10(mixer1, envelopeGSR1);
+AudioConnection          patchCord11(envelopeHeart, 0, mixer2, 3);
+AudioConnection          patchCord12(envelopeTemp, 0, mixer2, 2);
+AudioConnection          patchCord13(envelopeGSR2, 0, mixer2, 1);
+AudioConnection          patchCord14(envelopeGSR1, 0, mixer2, 0);
+AudioConnection          patchCord15(mixer2, 0, i2s1, 0);
+AudioConnection          patchCord16(mixer2, 0, i2s1, 1);
+AudioControlSGTL5000     sgtl5000_1;     //xy=911.2000122070312,762.7999877929688
 // GUItool: end automatically generated code
+
