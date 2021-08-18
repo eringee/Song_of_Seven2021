@@ -1,11 +1,13 @@
 
 
 #include "Global.h" //include file containing global variables
-
 #include "Biosynth.h"
+
 //Set to true the sensors used with the bioSynth for the project
-Biosynth biosynth(true,true,false,false);
+Biosynth biosynth(true,true,true,true);
 #include "Helpers.h"
+
+File root;
 
 void setup() {
 
@@ -16,7 +18,8 @@ void setup() {
   setupAudioShield(); //argument is master volume
   biosynth.setup();
   setupSounds();
-  SMF.begin(&test);
+  setupEnvelopes();
+  SMF.begin(&card);
   //set callback functions
   SMF.setMidiHandler(midiCallback);
 
@@ -26,7 +29,6 @@ void setup() {
   openingMessageTimer.restart();
 
 
-  
 }
 
 void loop() 
@@ -34,8 +36,8 @@ void loop()
   
   updateMidi();
 
-  // openingMessage();
-  // checkSectionChange();
-  // biosynth.update();
+  openingMessage();
+  checkSectionChange();
+  biosynth.update();
   sgtl5000_1.volume(setVolume());
 }

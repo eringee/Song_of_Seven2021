@@ -3,30 +3,16 @@ void midiCallback(midi_event *pev)
 // thru the midi communications interface.
 // This callback is set up in the setup() function.
 {
-  //Serial.println("POTATO");
-  //MIDISERIAL.write(pev -> data);
-  // DEBUG("\n");
-  // DEBUG(millis());
-  // DEBUG("\tM T");
-  // DEBUG(pev->track);
-  // DEBUG(":  Ch ");
-  // DEBUG(pev->channel+1);
-  // DEBUG(" Data ");
-  // DEBUGX(pev->data[0]);
-  // Serial.println();
 
-  //  DEBUG(pev->data[1]);
-  // Serial.println();
-  //  DEBUG(pev->data[2]);
-  // Serial.println();
-  Serial.println("MIDI EVENT:");
+  
   int channel = pev->channel+1;
   int messageType = pev->data[0];
   int midiNote = pev->data[1];
   int velocity = pev->data[2];
   
-  if( DEBUG_MIDI)
+  if( DEBUG_MIDI )
   { 
+    Serial.println("MIDI EVENT:");
     Serial.println("Channel");
     Serial.println(channel);
     Serial.println("Event type:");
@@ -44,14 +30,9 @@ void midiCallback(midi_event *pev)
       break;
     
     case 128 : //NOTE OFF
-      //biosynth.stopNote(channel, midiNote,velocity);
+      biosynth.stopNote(channel);
       break;
-
-    case 176 : //ALL NOTE OFF
-      Serial.println("potato");
-      //biosynth.stopNote(channel, midiNote,velocity);
-      break;
-    
+   
   }
 
 }
@@ -62,7 +43,7 @@ void midiSilence(void)
 // off all the notes and sound
 {
   for (int c = 0; c < 16; c++)
-    biosynth.StopNote(c);
+    biosynth.stopNote(c);
     
 }
 
@@ -105,37 +86,37 @@ static enum { S_IDLE, S_PLAYING, S_END, S_WAIT_BETWEEN } state = S_IDLE;
     {
       int err;
 
-      DEBUGS("\nS_IDLE");
+      Serial.println("IDLE");
 
-      currTune++;
-      if (currTune >= ARRAY_SIZE(tuneList)) //prevent overflow in array
-        currTune = 0;
+      //currTune++;
+      if (currentSection >= ARRAY_SIZE(tuneList)) //prevent overflow in array
+        currentSection = 0;
 
       // use the next file name and play it
-      DEBUG("\nFile: ");
-      DEBUG(tuneList[currTune]);
+      Serial.println("File: ");
+      Serial.println(tuneList[currentSection]);
 
       //load the track
-      err = SMF.load(tuneList[currTune]);
+      err = SMF.load(tuneList[currentSection]);
       if (err != MD_MIDIFile::E_OK)
       {
-        DEBUG(" - SMF load Error ");
-        DEBUG(err);
+        Serial.println(" - SMF load Error ");
+        Serial.println(err);
         //digitalWrite(SMF_ERROR_LED, HIGH);
         timeStart = millis();
         state = S_WAIT_BETWEEN;
-        DEBUGS("\nWAIT_BETWEEN");
+        Serial.println("WAIT_BETWEEN");
       }
       else
       {
-        //DEBUGS("\nS_PLAYING");
+        Serial.println("PLAYING");
         state = S_PLAYING;
       }
     }
     break;
 
   case S_PLAYING: // play the file
-    //DEBUGS("\nS_PLAYING");
+    
     if (!SMF.isEOF()) //if not at the end of the file
     {
       if (SMF.getNextEvent()) 
@@ -146,19 +127,13 @@ static enum { S_IDLE, S_PLAYING, S_END, S_WAIT_BETWEEN } state = S_IDLE;
     break;
 
   case S_END:   // done with this one
-    DEBUGS("\nS_END");
+    Serial.println("END");
     SMF.close();
     midiSilence();
     timeStart = millis();
-    state = S_WAIT_BETWEEN;
-    DEBUGS("\nWAIT_BETWEEN");
+    state = S_IDLE;
     break;
 
-  case S_WAIT_BETWEEN:    // signal finished with a dignified pause
-    //digitalWrite(READY_LED, HIGH);
-    if (millis() - timeStart >= WAIT_DELAY)
-      state = S_IDLE;
-    break;
 
   default:
     state = S_IDLE;
@@ -199,19 +174,19 @@ void setupAudioShield()
 void setupSounds()  //initial sounds for Section A
 {
 
-    //GSR dependent variables
-    noise1.amplitude(0.01);
+    // //GSR dependent variables
+     noise1.amplitude(0.01);
 
-    sine_fm2.frequency(sectionGlobal[0][BOARD_ID]); 
+    sine_fm2.frequency(440); 
     sine_fm2.amplitude(0.0);
     
-    //HEART dependent variables
-    waveform3.begin(0.01, 0.005, WAVEFORM_SINE);
+    // //HEART dependent variables
+     waveform3.begin(0.01, 0.005, WAVEFORM_SINE);
     sine_fm4.frequency(622);
     sine_fm4.amplitude(0.02);
 
-    //ATMOSPHERIC SINES
-    waveform2.begin(0.004, 1, WAVEFORM_SINE);
+    // //ATMOSPHERIC SINES
+     waveform2.begin(0.004, 1, WAVEFORM_SINE);
     sine_fm3.frequency(311);           //atmospheric sines
     sine1.frequency(424);
     sine_fm3.amplitude(0.1);
@@ -228,6 +203,13 @@ void openingMessage()
     }
 }
 
+
+void setupEnvelopes()
+{//SETUP THE ADSR ENVELOPE OF EACH SYNTH HERE
+ // IF LEFT BLANK IT WILL USE THE DEFAULT ENV OF THE AUDIO LIBRARY
+
+}
+
 void checkSectionChange()  //this is where we change sections AND frequencies...
 {
     if( encoderButton.read() == 0 && biosynth.getLCDState() == 1)
@@ -237,29 +219,29 @@ void checkSectionChange()  //this is where we change sections AND frequencies...
         currentSection = biosynth.getEncoderValue();
         updateLCDBool = true;
 
-        /// THIS IS WHERE YOU NEED TO UPDATE THE FREQUENCY VALUES
-        sine_fm2.frequency(sectionGlobal[currentSection][BOARD_ID]);
-        if (currentSection==0){
-          sine_fm3.frequency(311);   //atmospheric sine1
-          sine1.frequency(424);      //atmospheric sine2
-        }
-        else if (currentSection==1){
-          sine_fm3.frequency(311);   //atmospheric sine1
-          sine1.frequency(369);      //atmospheric sine2
-        }
-        else if (currentSection==2){
-          sine_fm3.frequency(261.63);   //atmospheric sine1
-          sine1.frequency(329.63);      //atmospheric sine2
-          sine_fm3.amplitude(0.1);  
-          sine1.amplitude(0.1);
-        }
-        else if (currentSection==3){
-          waveform2.frequency(1);
-          sine_fm3.frequency(659);   //atmospheric sine1
-          sine1.frequency(985);      //atmospheric sine2
-          sine_fm3.amplitude(0.1);  
-          sine1.amplitude(0.1);
-        }
+        // /// THIS IS WHERE YOU NEED TO UPDATE THE FREQUENCY VALUES
+        // sine_fm2.frequency(sectionGlobal[currentSection][BOARD_ID]);
+        // if (currentSection==0){
+        //   sine_fm3.frequency(311);   //atmospheric sine1
+        //   sine1.frequency(424);      //atmospheric sine2
+        // }
+        // else if (currentSection==1){
+        //   sine_fm3.frequency(311);   //atmospheric sine1
+        //   sine1.frequency(369);      //atmospheric sine2
+        // }
+        // else if (currentSection==2){
+        //   sine_fm3.frequency(261.63);   //atmospheric sine1
+        //   sine1.frequency(329.63);      //atmospheric sine2
+        //   sine_fm3.amplitude(0.1);  
+        //   sine1.amplitude(0.1);
+        // }
+        // else if (currentSection==3){
+        //   waveform2.frequency(1);
+        //   sine_fm3.frequency(659);   //atmospheric sine1
+        //   sine1.frequency(985);      //atmospheric sine2
+        //   sine_fm3.amplitude(0.1);  
+        //   sine1.amplitude(0.1);
+        // }
         biosynth.setLCDState(2);
     }
 }

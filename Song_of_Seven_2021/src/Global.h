@@ -14,47 +14,45 @@
 #include <SerialFlash.h>
 #include <Chrono.h>
 #include <SPI.h>
-//#include <SD.h>
 
-#define DEBUG_MIDI true
+
+#define DEBUG_MIDI false
 #include <SdFat.h>
 #include <MD_MIDIFile.h>
-#include <MIDI.h>
 #include  <mtof.h>
 
-#define MIDISERIAL Serial1
-MIDI_CREATE_INSTANCE(HardwareSerial, MIDISERIAL, MIDI);
 
 
 
 // The files in the tune list should be located on the SD card 
 // or an error will occur opening the file and the next in the 
 // list will be opened (skips errors).
+
+
+//make a function to autopopulate this array with files in MIDI_FILE FOLDER
+
+//ADD THE NAME OF THE FILE ON THE CARD SD YOU WANT TO PLAY HERE vvv
 const char *tuneList[] = 
 {
-  "midi_test.mid",  // simplest and shortest file
+  "midi_test.mid",
+ "naruto.mid", 
+  "mario.mid",
+  "tetris.mid",
   "ff7_test.mid"
 };
-SdFat test;
 
+
+SdFat card;
 MD_MIDIFile SMF;
-const uint16_t WAIT_DELAY = 2000; // ms
 
 
 
-#define DEBUG(x)  Serial.print(x)
-#define DEBUGX(x) Serial.print(x, HEX)
-#define DEBUGS(s) Serial.print(F(s))
-#define SERIAL_RATE 57600
-
-
-
-int sectionGlobal[NUM_SECTIONS][NUM_BOARDS] = {
- {622,933,1244,1555,1866,2177,2488}, // going to canada
- {174,348,1244,1555,1566,1740,2488}, // cat died
- {392,416,448,587,659,1046,1174}, // fluffy bunny
- {1148,1312,1476,1640,1804,1968,2132} // board games
-};
+// int sectionGlobal[NUM_SECTIONS][NUM_BOARDS] = {
+//  {622,933,1244,1555,1866,2177,2488}, // going to canada
+//  {174,348,1244,1555,1566,1740,2488}, // cat died
+//  {392,416,448,587,659,1046,1174}, // fluffy bunny
+//  {1148,1312,1476,1640,1804,1968,2132} // board games
+// };
 
 Chrono openingMessageTimer;
 int openingMessageTime = 3000;
@@ -63,19 +61,6 @@ int currentSection = 0;
 int lastSection = -1;
 bool updateLCDBool = true;
 /////////////////////////////AUDIO VARS//////////////////////////
-
-
-#include <Audio.h>
-#include <Wire.h>
-#include <SPI.h>
-#include <SD.h>
-#include <SerialFlash.h>
-
-#include <Audio.h>
-#include <Wire.h>
-#include <SPI.h>
-#include <SD.h>
-#include <SerialFlash.h>
 
 // GUItool: begin automatically generated code
 AudioSynthNoiseWhite     noise1;         //xy=69.19999694824219,544.800048828125

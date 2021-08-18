@@ -5,7 +5,7 @@ It handles the encoder, the buttons,  the screen and the Leds
 
 #define PLOT_SENSOR  false //Set to true to print sensor value in the serial plotter
 #define FOOT_PEDAL false //set to true if using the foot pedal in the project
-#define REVERSE_ENCODER true
+#define REVERSE_ENCODER false
 
 //BIO SYNTH HARDWARE PINS
 #define LED_PIN 0
@@ -319,13 +319,51 @@ private:
             }
         }
     }
+
+
+//-------------
+    float updateHeart()
+    {
+        heart.update();
+        float val = heart.getNormalized();
+        return val;
+    }
+    float updateGSR( int id)
+    {
+        float val;
+        int raw;
+        switch(id)
+        {
+            case 1:
+                sc1.update();
+                raw = sc1.getRaw();
+                val = (float) raw/1024 ; 
+                break;
+
+            case 2:
+                sc2.update();
+                raw = sc2.getRaw();
+                val = (float) raw/1024 ; 
+                break;
+        }
+
+        return val;
+    }  
+    float updateTemp()
+    {
+        float val;
+        resp.update();
+        val = resp.getNormalized();
+        return val;
+    }
+
 //---------------   
-    void updateSensors() 
+    void updateLEDS() 
     {/*!
      @function    updateSensors
      @abstract    sample the value of the used sensor every loop. To link sensors with audio, add interaction here
      */  
-        float sensorData[4] = {0.0,0.0,0.0,0.0}; 
+        
 
         for( int i = 0 ; i < 4 ; i++ )
             {    
@@ -334,24 +372,21 @@ private:
                     case 0:
                         if(connectedSensors[i])
                         {   
-                            heart.update();
-                            sensorData[i] = heart.getNormalized();
-                            setLedBrightness(i , sensorData[i]);
-                            waveform3.amplitude((float)sensorData[i]/2);
+                            setLedBrightness(i , updateHeart());
+                            //waveform3.amplitude((float)sensorData[i]/2);
 
+                        }
+                        else
+                        {
+                            setLedBrightness(i , 0);
                         }
                         break;
 
                     case 1:
                         if(connectedSensors[i])
                         {
-
-                            sc1.update();
-                            sensorData[i] = sc1.getRaw();
-                            Serial.println(sensorData[i]);
-                            sine_fm2.amplitude((float)sensorData[i]/1024 -0.2); //clamp the sensorData down a bit to avoid clipping
-
-                            setLedBrightness(i , sensorData[i]);
+                            // sine_fm2.amplitude((float)sensorData[i]/1024 -0.2); //clamp the sensorData down a bit to avoid clipping
+                            setLedBrightness(i ,  updateGSR(1));
                         }
                         else
                         {
@@ -361,9 +396,8 @@ private:
                     case 2:
                         if(connectedSensors[i])
                         {
-                            sc2.update();
-                            sensorData[i] = sc2.getSCR();
-                            setLedBrightness(i , sensorData[i]);
+
+                            setLedBrightness(i , updateGSR(2));
                         }
                         else
                         {
@@ -373,9 +407,7 @@ private:
                     case 3:
                         if(connectedSensors[i])
                         {
-                            resp.update();
-                            sensorData[i] = resp.getNormalized();
-                            setLedBrightness(i , sensorData[i]);
+                            setLedBrightness(i , updateTemp());
                         }
                         else
                         {
@@ -383,15 +415,22 @@ private:
                         }
                         break;    
                 }
-            }
-
-        if(PLOT_SENSOR) //used for debugging purpose
-        {
-        Serial.printf("%.2f,%.2f,%.2f,%.2f",sensorData[0],sensorData[1],sensorData[2],sensorData[3] );
-        Serial.println();
-        }    
+            }    
     }
 
+    void plotSensors( bool plotHeart , bool plotGSR1 , bool plotGSR2 , bool plotTemp)
+    {   
+        float sensorData[4] = {0.0,0.0,0.0,0.0}; 
+
+        if( plotHeart) sensorData[0] = updateHeart();
+        if( plotGSR1) sensorData[1] = updateGSR(1);
+        if( plotGSR2) sensorData[2] = updateGSR(2);
+        if( plotTemp) sensorData[3] = updateTemp();
+
+        Serial.printf("%.2f,%.2f,%.2f,%.2f",sensorData[0],sensorData[1],sensorData[2],sensorData[3]);
+        Serial.println();
+        
+    }
 
 /************************************************************************/
 public:
@@ -421,7 +460,7 @@ public:
      @function    update
      @abstract    wrapper function running all the hardware update routines and the necessary verifications
      */  
-        updateSensors();
+        updateLEDS();
         updateButtons();
         updateEncoder();
 
@@ -491,35 +530,41 @@ public:
         switch(channel)
         {
             case 1: //heart synth
-                Serial.println("PLAY NOTE HEART");
+
                 waveform3.frequency((float)mtof.toFrequency(midiNote));
-                waveform3.amplitude((float) velocity / 127 ); //fetch sensor value to multiply sensor signal to max amplitude
+                waveform3.amplitude(0.9); //fetch sensor value to multiply sensor signal to max amplitude
+                //waveform3.amplitude(updateHeart() -0.2); //fetch sensor value to set  amplitude
                 envelopeHeart.noteOn();
                 break;
             
             case 2: //gsr1 synth
-                Serial.println("PLAY NOTE GSR1");
+
                 sine_fm2.frequency((float)mtof.toFrequency(midiNote));
-                sine_fm2.amplitude((float) velocity / 127);
+                sine_fm2.amplitude(0.9 );
+                // sine_fm2.amplitude(updateGSR(1) -0.2 );
                 envelopeGSR1.noteOn();
                 break;
 
             case 3: //gsr2 synth
-                Serial.println("PLAY NOTE GSR2");
+
                 sine_fm3.frequency((float)mtof.toFrequency(midiNote));
-                sine_fm3.amplitude((float) velocity / 127);
+                sine_fm3.amplitude(0.9);               
+                //sine_fm3.amplitude(updateGSR(2) - 0.2 );
+                envelopeGSR2.noteOn();
                 break;
 
             case 4: //temp synth
-                Serial.println("PLAY NOTE TEMP");
+               
                 sine1.frequency((float)mtof.toFrequency(midiNote));
-                sine1.amplitude((float) velocity / 127);
+                sine1.amplitude(0.9 );
+                //sine1.amplitude(updateTemp() -0.2);
+                envelopeTemp.noteOn();
                 break;
         }
     }
 
 //---------------
-    void StopNote(int channel)
+    void stopNote(int channel)
     {
         switch(channel)
         {
