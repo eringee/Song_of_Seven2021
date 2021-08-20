@@ -526,7 +526,10 @@ public:
 
 //---------------
     void playNote(int channel , int midiNote , int velocity)
-    {
+    {   /*
+            (float)mtof.toFrequency(midiNote) <- this needs to be passed as argument to the .frequency() method of
+            any synth that wants to be played from the midifile
+        */
         switch(channel)
         {
             case 1: //heart synth

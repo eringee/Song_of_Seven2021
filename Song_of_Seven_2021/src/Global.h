@@ -8,6 +8,7 @@
 #define SDCARD_MOSI_PIN  7
 #define SDCARD_SCK_PIN   14
 #define VOL_POT_PIN A1
+#define AUDIO_MEM 50
 
 #define NO_TOUCH_DELAY 3000
 #include <Audio.h>
@@ -31,29 +32,18 @@
 
 //make a function to autopopulate this array with files in MIDI_FILE FOLDER
 
+
 //ADD THE NAME OF THE FILE ON THE CARD SD YOU WANT TO PLAY HERE vvv
 const char *tuneList[] = 
 {
   "midi_test.mid",
- "naruto.mid", 
-  "mario.mid",
+  "naruto.mid", 
   "tetris.mid",
   "ff7_test.mid"
 };
 
-
 SdFat card;
 MD_MIDIFile SMF;
-
-
-
-// int sectionGlobal[NUM_SECTIONS][NUM_BOARDS] = {
-//  {622,933,1244,1555,1866,2177,2488}, // going to canada
-//  {174,348,1244,1555,1566,1740,2488}, // cat died
-//  {392,416,448,587,659,1046,1174}, // fluffy bunny
-//  {1148,1312,1476,1640,1804,1968,2132} // board games
-// };
-
 Chrono openingMessageTimer;
 int openingMessageTime = 3000;
 
@@ -61,6 +51,12 @@ int currentSection = 0;
 int lastSection = -1;
 bool updateLCDBool = true;
 /////////////////////////////AUDIO VARS//////////////////////////
+/* 
+AUDIO DESIGN TOOL LINK
+https://www.pjrc.com/teensy/gui/index.html 
+
+Import the code below to modify the audio pipeline
+ */
 
 // GUItool: begin automatically generated code
 AudioSynthNoiseWhite     noise1;         //xy=69.19999694824219,544.800048828125

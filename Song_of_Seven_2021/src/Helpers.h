@@ -4,11 +4,12 @@ void midiCallback(midi_event *pev)
 // This callback is set up in the setup() function.
 {
 
-  
+  //get the midi data from the passed midi event
   int channel = pev->channel+1;
   int messageType = pev->data[0];
   int midiNote = pev->data[1];
   int velocity = pev->data[2];
+  
   
   if( DEBUG_MIDI )
   { 
@@ -23,6 +24,8 @@ void midiCallback(midi_event *pev)
     Serial.println("Note velocity:");
     Serial.println(velocity);
   }
+
+  //parse the received midi message. In this project we only care for noteOn/noteOff messages
   switch(messageType)
   {
     case 144 : //NOTE ON
@@ -42,13 +45,13 @@ void midiSilence(void)
 // Some midi files are badly behaved and leave notes hanging, so between songs turn
 // off all the notes and sound
 {
-  for (int c = 0; c < 16; c++)
-    biosynth.stopNote(c);
-    
+  for (int c = 0; c < 16; c++) //could be set to 4 because we use only for channel on the bio synth
+    biosynth.stopNote(c); 
 }
 
-void tickMetronome(void)
-// flash a LED to the beat
+void tickMetronome(void) 
+// use to make flash something to the beat. Ask Erin if this is something we'd like to implement
+// otherwise this function is not useful
 {
   static uint32_t lastBeatTime = 0;
   static boolean  inBeat = false;
@@ -76,6 +79,9 @@ void tickMetronome(void)
 
 void updateMidi()
 {
+/*
+  Runs every loop. This function handles the update of the midi file reading
+*/
 static enum { S_IDLE, S_PLAYING, S_END, S_WAIT_BETWEEN } state = S_IDLE;
   static uint16_t currTune = ARRAY_SIZE(tuneList);
   static uint32_t timeStart;
@@ -142,16 +148,22 @@ static enum { S_IDLE, S_PLAYING, S_END, S_WAIT_BETWEEN } state = S_IDLE;
 }
 
 float setVolume()
-{
+{   /*
+      This function reads the potentiometer that control the master volume
+      It returns a scaled float representing the volume value
+    */
     int vol = analogRead(VOL_POT_PIN);
 
     return (float)vol /1280;
 }
 
 void setupAudioShield()
-{
-    pinMode(VOL_POT_PIN,INPUT);
-   AudioMemory(50);  //put in Audio Memory or weird clicks happen
+{/*
+  This function setup the audio shield hardware
+
+  */
+   pinMode(VOL_POT_PIN,INPUT);
+   AudioMemory(AUDIO_MEM);  //put in Audio Memory or weird clicks happen
    
     if(USE_SDCARD)
     {
@@ -173,6 +185,11 @@ void setupAudioShield()
 
 void setupSounds()  //initial sounds for Section A
 {
+  /*
+    In this function you set up the initial states of every synth in the project
+    It should be rewritten when the audio pipeline is rewritten
+    Make sure to keep the same name convention used in the audio pipieline 
+  */
 
     // //GSR dependent variables
      noise1.amplitude(0.01);
@@ -203,10 +220,13 @@ void openingMessage()
     }
 }
 
-
 void setupEnvelopes()
-{//SETUP THE ADSR ENVELOPE OF EACH SYNTH HERE
- // IF LEFT BLANK IT WILL USE THE DEFAULT ENV OF THE AUDIO LIBRARY
+{ /*
+    In this function you set up the initial states of every enveloppe in the project
+    In order to play notes from the midi file every synth linked to the file has an envelope
+    It should be rewritten when the audio pipeline is rewritten
+    Make sure to keep the same name convention used in the audio pipieline 
+  */
 
 }
 

@@ -5,6 +5,8 @@
 
 //Set to true the sensors used with the bioSynth for the project
 Biosynth biosynth(true,true,true,true);
+
+
 #include "Helpers.h"
 
 File root;
@@ -15,16 +17,16 @@ void setup() {
   delay(2000); // power-up safety delay
   
   
-  setupAudioShield(); //argument is master volume
+  setupAudioShield();
   biosynth.setup();
-  setupSounds();
+
+  //Set the synths and envelopes to their initial state for the performance
+  setupSounds(); 
   setupEnvelopes();
+  
   SMF.begin(&card);
-  //set callback functions
-  SMF.setMidiHandler(midiCallback);
+  SMF.setMidiHandler(midiCallback);  //set callback functions
 
-
- 
   biosynth.openingMessage();
   openingMessageTimer.restart();
 
@@ -33,11 +35,9 @@ void setup() {
 
 void loop() 
 {
-  
-  updateMidi();
-
-  openingMessage();
-  checkSectionChange();
-  biosynth.update();
-  sgtl5000_1.volume(setVolume());
+  openingMessage(); //update the UI
+  checkSectionChange(); //update the section system
+  updateMidi(); //update the midifile reading
+  biosynth.update(); //update the hardware 
+  sgtl5000_1.volume(setVolume()); //update master volume level
 }
