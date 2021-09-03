@@ -5,7 +5,7 @@ It handles the encoder, the buttons,  the screen and the Leds
 
 #define PLOT_SENSOR  false //Set to true to print sensor value in the serial plotter
 #define FOOT_PEDAL false //set to true if using the foot pedal in the project
-#define REVERSE_ENCODER true
+#define REVERSE_ENCODER false
 
 //BIO SYNTH HARDWARE PINS
 #define LED_PIN 0
@@ -28,7 +28,7 @@ It handles the encoder, the buttons,  the screen and the Leds
 
 //#define FASTLED_INTERNAL //turn off build messages
 #include <FastLED.h>
-
+#define ENCODER_DO_NOT_USE_INTERRUPTS
 #include <Encoder.h>
 
 #if REVERSE_ENCODER == true
@@ -39,6 +39,8 @@ It handles the encoder, the buttons,  the screen and the Leds
 
 #include <LiquidCrystal_I2C.h>
 LiquidCrystal_I2C lcd(0x27, 16 , 2); // set the LCD address to 0x27 for a 16 chars and 2 line display
+
+
 #include <Respiration.h>
 #include <SkinConductance.h>
 #include <Heart.h>
@@ -59,14 +61,15 @@ private:
 
     CRGB leds[NUM_LEDS];  //array holding led colors data
 
-    //Here you can modify the RGB Values to determine the colors of the leds 0=HEART 1=GSR1 2=RESP 3=
+    //Here you can modify the RGB Values to determine the colors of the leds 0=HEART 1=GSR1 2=GSR2 3=RESP
     int ledColors [NUM_LEDS][3] = {{252, 28, 3},{252, 186, 3},{10, 48, 240},{140, 10, 240}};
 
     int lcdState = 0;
     long currentEncoderValue = 0;
     
     Chrono  confirmTimer; //timer used to reset lcd state if section change not confirmed 
-    
+    Chrono  lcdUpdate;
+    int lcdInterval = 40;
     //buffers use one more char than the screen can display for a null terminator
     char lcdLine1Buffer[17];
     char lcdLine2Buffer[17];
@@ -78,11 +81,6 @@ private:
     Chrono confirmBlinkTimer;
     int  confirmBlinkInterval = 500;
     
-    //used to average heart bpm
-    int bpmCounter = 0; 
-    int bpmArray[HEART_SAMPLE];
-    int totalBPM = 0;
-    bool heartDoOnce = true;
 
 //-----------------LCD------------------//
     void lcdSetup()
@@ -105,24 +103,33 @@ private:
      */
 
         //select the good message to display and update buffers
-        switch(lcdState)
+
+        if(currentSection != lastSection && updateLCDBool == true)
         {
-            case 0:
-                openingMessage();
-                break;
-            case 1:
-                sectionConfirmMessage();
-                break;
-            case 2:
-                currentSectionMessage();
+
+            switch(lcdState)
+            {
+
+                case 1:
+                    sectionConfirmMessage();
+                    lcd.setCursor(0, 0);
+                    lcd.print(lcdLine1Buffer);
+                    lcd.setCursor(0, 1);
+                    lcd.print(lcdLine2Buffer);
+                    break;
+                case 2:
+                    currentSectionMessage();
+                    lcd.setCursor(0, 0);
+                    lcd.print(lcdLine1Buffer);
+                    lcd.setCursor(0, 1);
+                    lcd.print(lcdLine2Buffer);
+            }
         }
 
-        //update the screen
-        lcd.setCursor(0, 0);
-        lcd.print(lcdLine1Buffer);
-        lcd.setCursor(0, 1);
-        lcd.print(lcdLine2Buffer);
+
+
     }
+
 //---------------
     void verifyNoTouch()
     {/*!
@@ -134,6 +141,7 @@ private:
         {   
             setEncoder(currentSection);
             setLCDState(2);
+            updateLCDBool = true;
             confirmTimer.restart();
             confirmTimer.stop();
         }
@@ -145,20 +153,13 @@ private:
      @abstract    Verify if the program needs to put the lcd in sectionChange mode
      */
         if( getEncoderValue() != currentSection && getLCDState() == 2)
-        {            
+        {      
+            updateLCDBool = true;      
             setLCDState(1);
             confirmTimer.start();
         }
     }
-//---------------
-    void openingMessage()
-    {/*!
-     @function    openingMessage
-     @abstract    update the lcd buffers with the greeting message
-     */
-        sprintf(lcdLine1Buffer, "Hello!");
-        sprintf(lcdLine2Buffer, "I am board #%d",BOARD_ID);
-    }   
+ 
 //---------------
     void sectionConfirmMessage()
     {/*!
@@ -166,23 +167,9 @@ private:
      @abstract    update the lcd buffers section change message
      */
         sprintf(lcdLine1Buffer, "  Section : %s",sections[getEncoderValue()]);
-        
-        //timer for blink effect
-        if(confirmBlinkTimer.hasPassed(confirmBlinkInterval))
-        {   
-            confirmBlink = !confirmBlink;
-            
-            confirmBlinkTimer.restart();
-        }
+        sprintf(lcdLine2Buffer, "   Confirm ?   ");
 
-        if(confirmBlink)
-        {
-            sprintf(lcdLine2Buffer, "   Confirm ?   "); 
-        }
-        else
-        {
-            sprintf(lcdLine2Buffer, "                ");
-        }     
+        updateLCDBool = false;    
     }        
 //---------------
     void currentSectionMessage()
@@ -192,6 +179,7 @@ private:
      */
         sprintf(lcdLine1Buffer, "  Section  %s    ",sections[currentSection]);
         sprintf(lcdLine2Buffer, "                ");
+        updateLCDBool = false;  
     }
 //---------------
     void buttonSetup()
@@ -251,6 +239,8 @@ private:
 
         if (newPosition != currentEncoderValue) //encoder has been moved  
         {            
+                    lastSection = -1;
+                    updateLCDBool = true;
                     currentEncoderValue = constrain(newPosition,0,NUM_SECTIONS-1);          
         }
     }
@@ -329,13 +319,51 @@ private:
             }
         }
     }
+
+
+//-------------
+    float updateHeart()
+    {
+        heart.update();
+        float val = heart.getNormalized();
+        return val;
+    }
+    float updateGSR( int id)
+    {
+        float val;
+        int raw;
+        switch(id)
+        {
+            case 1:
+                sc1.update();
+                raw = sc1.getRaw();
+                val = (float) raw/1024 ; 
+                break;
+
+            case 2:
+                sc2.update();
+                raw = sc2.getRaw();
+                val = (float) raw/1024 ; 
+                break;
+        }
+
+        return val;
+    }  
+    float updateTemp()
+    {
+        float val;
+        resp.update();
+        val = resp.getNormalized();
+        return val;
+    }
+
 //---------------   
-    void updateSensors() 
+    void updateLEDS() 
     {/*!
      @function    updateSensors
      @abstract    sample the value of the used sensor every loop. To link sensors with audio, add interaction here
      */  
-        float sensorData[4] = {0.0,0.0,0.0,0.0}; 
+        
 
         for( int i = 0 ; i < 4 ; i++ )
             {    
@@ -344,42 +372,21 @@ private:
                     case 0:
                         if(connectedSensors[i])
                         {   
-                            heart.update();
-                            sensorData[i] = heart.getNormalized();
-                            setLedBrightness(i , sensorData[i]);
-                            waveform3.amplitude(sensorData[i]-0.7);
-                            
-                            //this is a combination of the heartbeat detection example and the song of seven 2016 code.
-                            // if(heart.beatDetected()) // using beatDetected to trigger note
-                            // {
-                            //    if(heartDoOnce)
-                            //     {   
-                            //         //sensorData[i] = 1.0;
-                            //         waveform1.frequency(sectionTones[currentSection]); //set frequency from heartbeat
-                            //         envelope1.noteOn(); //play note
-                            //         setLedBrightness(i , sensorData[i]);
-                                    
-                            //         bpmArray[bpmCounter] = heart.getBPM();  // grab a BPM snapshot every time a heartbeat occurs
-                            //         bpmCounter++;                           // increment the BPMcounter value
-                            //         heartDoOnce = false;
-                            //     }
-                            // }
-                            // else
-                            // {
-                            //    heartDoOnce = true;
-                            //    sensorData[i] = 0.0;
-                            //    setLedBrightness(i , 0);
-                            // }
+                            setLedBrightness(i , updateHeart());
+                            //waveform3.amplitude((float)sensorData[i]/2);
+
+                        }
+                        else
+                        {
+                            setLedBrightness(i , 0);
                         }
                         break;
 
                     case 1:
                         if(connectedSensors[i])
                         {
-                            sc1.update();
-                            sensorData[i] = sc1.getSCR();
-                            sine_fm2.amplitude(sensorData[i]-0.3); //clamp the sensorData down a bit to avoid clipping
-                            setLedBrightness(i , sensorData[i]);
+                            // sine_fm2.amplitude((float)sensorData[i]/1024 -0.2); //clamp the sensorData down a bit to avoid clipping
+                            setLedBrightness(i ,  updateGSR(1));
                         }
                         else
                         {
@@ -389,9 +396,8 @@ private:
                     case 2:
                         if(connectedSensors[i])
                         {
-                            sc2.update();
-                            sensorData[i] = sc2.getSCR();
-                            setLedBrightness(i , sensorData[i]);
+
+                            setLedBrightness(i , updateGSR(2));
                         }
                         else
                         {
@@ -401,9 +407,7 @@ private:
                     case 3:
                         if(connectedSensors[i])
                         {
-                            resp.update();
-                            sensorData[i] = resp.getNormalized();
-                            setLedBrightness(i , sensorData[i]);
+                            setLedBrightness(i , updateTemp());
                         }
                         else
                         {
@@ -411,35 +415,21 @@ private:
                         }
                         break;    
                 }
-            }
-
-        if(PLOT_SENSOR) //used for debugging purpose
-        {
-        Serial.printf("%.2f,%.2f,%.2f,%.2f",sensorData[0],sensorData[1],sensorData[2],sensorData[3] );
-        Serial.println();
-        }    
+            }    
     }
-//---------------    
-    int averageBPM() //STARTED TO PORT THIS FUNCTION BUT DID NOT IMPLEMENTED IT WITH AUDIO YET
-    { /*!
-     @function    averageBPM
-     @abstract    average the BPM of the user heartbeat and returns it
-     */   
-        int totalBPM = 0; 
-        int avgBPM = 0;
 
-        if(bpmCounter == HEART_SAMPLE)
-        {
-            for ( int i = 0 ; i <= HEART_SAMPLE - 1 ; i++)
-            {
-                totalBPM = totalBPM + bpmArray[i];
-            }
-            
-            avgBPM = totalBPM / HEART_SAMPLE;
+    void plotSensors( bool plotHeart , bool plotGSR1 , bool plotGSR2 , bool plotTemp)
+    {   
+        float sensorData[4] = {0.0,0.0,0.0,0.0}; 
 
-            bpmCounter = 0;
-            return avgBPM;
-        }  
+        if( plotHeart) sensorData[0] = updateHeart();
+        if( plotGSR1) sensorData[1] = updateGSR(1);
+        if( plotGSR2) sensorData[2] = updateGSR(2);
+        if( plotTemp) sensorData[3] = updateTemp();
+
+        Serial.printf("%.2f,%.2f,%.2f,%.2f",sensorData[0],sensorData[1],sensorData[2],sensorData[3]);
+        Serial.println();
+        
     }
 
 /************************************************************************/
@@ -470,18 +460,21 @@ public:
      @function    update
      @abstract    wrapper function running all the hardware update routines and the necessary verifications
      */  
-        updateSensors();
-        averageBPM(); //need to be called otherwise the cbpm counter never resets and saturate the memory. If not needed remove all the bpm averaging code
+        updateLEDS();
         updateButtons();
         updateEncoder();
 
-        
         //lcd state verifications
         sectionChange();
         verifyNoTouch();
 
-        updateLCD(); //update lcd display buffers  
-        FastLED.show();
+        if( lcdUpdate.hasPassed(lcdInterval))
+        {   
+            lcdUpdate.restart();
+            updateLCD(); //update lcd display buffers  
+            FastLED.show(); 
+        }
+
     }
 //---------------
     int getEncoderValue()
@@ -516,5 +509,84 @@ public:
      @abstract    return an integer representing the lcd state
      */
         return lcdState;
+    }
+    //---------------
+    void openingMessage()
+    {/*!
+     @function    openingMessage
+     @abstract    update the lcd buffers with the greeting message
+     */
+        sprintf(lcdLine1Buffer, "Hello!");
+        sprintf(lcdLine2Buffer, "I am board #%d",BOARD_ID);
+        lcd.setCursor(0, 0);
+        lcd.print(lcdLine1Buffer);
+        lcd.setCursor(0, 1);
+        lcd.print(lcdLine2Buffer);
+    }  
+
+//---------------
+    void playNote(int channel , int midiNote , int velocity)
+    {   /*
+            (float)mtof.toFrequency(midiNote) <- this needs to be passed as argument to the .frequency() method of
+            any synth that wants to be played from the midifile
+        */
+        switch(channel)
+        {
+            case 1: //heart synth
+
+                waveform3.frequency((float)mtof.toFrequency(midiNote));
+                waveform3.amplitude(0.9); //fetch sensor value to multiply sensor signal to max amplitude
+                //waveform3.amplitude(updateHeart() -0.2); //fetch sensor value to set  amplitude
+                envelopeHeart.noteOn();
+                break;
+            
+            case 2: //gsr1 synth
+
+                sine_fm2.frequency((float)mtof.toFrequency(midiNote));
+                sine_fm2.amplitude(0.9 );
+                // sine_fm2.amplitude(updateGSR(1) -0.2 );
+                envelopeGSR1.noteOn();
+                break;
+
+            case 3: //gsr2 synth
+
+                sine_fm3.frequency((float)mtof.toFrequency(midiNote));
+                sine_fm3.amplitude(0.9);               
+                //sine_fm3.amplitude(updateGSR(2) - 0.2 );
+                envelopeGSR2.noteOn();
+                break;
+
+            case 4: //temp synth
+               
+                sine1.frequency((float)mtof.toFrequency(midiNote));
+                sine1.amplitude(0.9 );
+                //sine1.amplitude(updateTemp() -0.2);
+                envelopeTemp.noteOn();
+                break;
+        }
+    }
+
+//---------------
+    void stopNote(int channel)
+    {
+        switch(channel)
+        {
+            case 1: //heart synth
+
+                envelopeHeart.noteOff();
+                break;
+            
+            case 2: //gsr1 synth
+                envelopeGSR1.noteOff();
+                break;
+
+            case 3: //gsr2 synth
+                envelopeGSR2.noteOff();
+                break;
+
+            case 4: //temp synth
+                envelopeTemp.noteOff();
+                break;
+        }
     }
 };

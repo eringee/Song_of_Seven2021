@@ -12,7 +12,7 @@
 #define NO_TOUCH_DELAY 3000
 
 #include <Chrono.h>
-#include <LightChrono.h>
+
 
 int sectionGlobal[NUM_SECTIONS][NUM_BOARDS] = {
  {622,933,1244,1555,1866,2177,2488},  // going to canada
@@ -25,10 +25,10 @@ Chrono openingMessageTimer;
 int openingMessageTime = 3000;
 
 int currentSection = 0;
-
+int lastSection = -1;
+bool updateLCDBool = true;
 /////////////////////////////AUDIO VARS//////////////////////////
 #include <Audio.h>
-#include <Wire.h>
 #include <SPI.h>
 #include <SD.h>
 #include <SerialFlash.h>

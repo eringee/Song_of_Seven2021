@@ -2,13 +2,15 @@
 float setVolume()
 {
     int vol = analogRead(VOL_POT_PIN);
-    return map(float(vol) , 0, 1023, 0.0, 0.75);
+
+    return (float)vol /1280;
 }
 
 void setupAudioShield()
 {
     pinMode(VOL_POT_PIN,INPUT);
-    AudioMemory(10);
+    AudioMemory(50);  //put in Audio Memory or weird clicks happen
+   
     if(USE_SDCARD)
     {
         SPI.setMOSI(SDCARD_MOSI_PIN);  // Audio shield has MOSI on pin 7
@@ -63,7 +65,11 @@ void checkSectionChange()  //this is where we change sections AND frequencies...
 {
     if( encoderButton.read() == 0 && biosynth.getLCDState() == 1)
     {   //section has been confirmed
+ 
+        lastSection = currentSection;
         currentSection = biosynth.getEncoderValue();
+        updateLCDBool = true;
+
         /// THIS IS WHERE YOU NEED TO UPDATE THE FREQUENCY VALUES
         sine_fm2.frequency(sectionGlobal[currentSection][BOARD_ID]);
         if (currentSection==0){
