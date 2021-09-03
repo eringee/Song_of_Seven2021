@@ -59,7 +59,7 @@ private:
 
     CRGB leds[NUM_LEDS];  //array holding led colors data
 
-    //Here you can modify the RGB Values to determine the colors of the leds 0=HEART 1=GSR1 2=GSR2 3=RESP
+    //Here you can modify the RGB Values to determine the colors of the leds 0=HEART 1=GSR1 2=RESP 3=
     int ledColors [NUM_LEDS][3] = {{252, 28, 3},{252, 186, 3},{10, 48, 240},{140, 10, 240}};
 
     int lcdState = 0;
