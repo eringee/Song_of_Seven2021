@@ -534,33 +534,33 @@ public:
         {
             case 1: //heart synth
 
-                waveform3.frequency((float)mtof.toFrequency(midiNote));
-                waveform3.amplitude(0.9); //fetch sensor value to multiply sensor signal to max amplitude
-                //waveform3.amplitude(updateHeart() -0.2); //fetch sensor value to set  amplitude
+                heartSine.frequency((float)mtof.toFrequency(midiNote)); //fetch midi data to set pitch
+                //heartSine.amplitude(0.9); 
+                heartSine.amplitude(updateHeart()/4); //fetch sensor value to set  amplitude
                 envelopeHeart.noteOn();
                 break;
             
             case 2: //gsr1 synth
 
-                sine_fm2.frequency((float)mtof.toFrequency(midiNote));
-                sine_fm2.amplitude(0.9 );
-                // sine_fm2.amplitude(updateGSR(1) -0.2 );
+                gsr1Sine.frequency((float)mtof.toFrequency(midiNote));
+                //gsr1Sine.amplitude(0.9);
+                gsr1Sine.amplitude(sc1.getSCR()/4);
                 envelopeGSR1.noteOn();
                 break;
 
             case 3: //gsr2 synth
 
-                sine_fm3.frequency((float)mtof.toFrequency(midiNote));
-                sine_fm3.amplitude(0.9);               
-                //sine_fm3.amplitude(updateGSR(2) - 0.2 );
+                gsr2Sine.frequency((float)mtof.toFrequency(midiNote));
+                //gsr2Sine.amplitude(0.9);               
+                gsr2Sine.amplitude(sc2.getSCR()/4);
                 envelopeGSR2.noteOn();
                 break;
 
             case 4: //temp synth
                
-                sine1.frequency((float)mtof.toFrequency(midiNote));
-                sine1.amplitude(0.9 );
-                //sine1.amplitude(updateTemp() -0.2);
+                respSine.frequency((float)mtof.toFrequency(midiNote));
+                //respSine.amplitude(0.9 );
+                respSine.amplitude(updateTemp()/4);
                 envelopeTemp.noteOn();
                 break;
         }

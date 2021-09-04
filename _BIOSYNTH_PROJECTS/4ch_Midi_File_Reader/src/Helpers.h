@@ -186,28 +186,26 @@ void setupAudioShield()
 void setupSounds()  //initial sounds for Section A
 {
   /*
-    In this function you set up the initial states of every synth in the project
+    In this function you can set up the initial states of every synth in the project
     It should be rewritten when the audio pipeline is rewritten
     Make sure to keep the same name convention used in the audio pipieline 
-  */
-
-    // //GSR dependent variables
-     noise1.amplitude(0.01);
-
-    sine_fm2.frequency(440); 
-    sine_fm2.amplitude(0.0);
+    In either case, the midi frequencies and sensor values will write over these right away.
+  
+    heartSine.frequency(440); 
+    heartSine.amplitude(0.2);
     
-    // //HEART dependent variables
-     waveform3.begin(0.01, 0.005, WAVEFORM_SINE);
-    sine_fm4.frequency(622);
-    sine_fm4.amplitude(0.02);
+    gsr1Sine.frequency(622);
+    gsr1Sine.amplitude(0.2);
 
-    // //ATMOSPHERIC SINES
-     waveform2.begin(0.004, 1, WAVEFORM_SINE);
-    sine_fm3.frequency(311);           //atmospheric sines
-    sine1.frequency(424);
-    sine_fm3.amplitude(0.1);
-    sine1.amplitude(0.05);
+    gsr2Sine.frequency(880);
+    gsr2Sine.amplitude(0.2);
+
+    respSine.frequency(220);
+    heartSine.amplitude(0.2);
+    
+   
+    */
+
 }
 
 void openingMessage()
@@ -227,8 +225,33 @@ void setupEnvelopes()
     It should be rewritten when the audio pipeline is rewritten
     Make sure to keep the same name convention used in the audio pipieline 
   */
+   envelopeHeart.attack(5);
+   envelopeHeart.sustain(2);
+   envelopeHeart.decay(2);
+   envelopeHeart.release(5);
+   envelopeHeart.releaseNoteOn(10);
+
+   envelopeGSR1.attack(5);
+   envelopeGSR1.sustain(2);
+   envelopeGSR1.decay(2);
+   envelopeGSR1.release(5);
+   envelopeGSR1.releaseNoteOn(10);
+
+   envelopeGSR2.attack(5);
+   envelopeGSR2.sustain(2);
+   envelopeGSR2.decay(2);
+   envelopeGSR2.release(5);
+   envelopeGSR2.releaseNoteOn(10);
+
+   envelopeTemp.attack(5);
+   envelopeTemp.sustain(2);
+   envelopeTemp.decay(2);
+   envelopeTemp.release(5);
+   envelopeTemp.releaseNoteOn(10);
 
 }
+
+
 
 void checkSectionChange()  //this is where we change sections AND frequencies...
 {
