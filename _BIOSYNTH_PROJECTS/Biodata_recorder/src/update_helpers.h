@@ -22,7 +22,7 @@ void updateData() {
   float sensorData[4] = {0};
   
   bufferTime.push(timestamp);
- // bufferA.push(marker);
+  
 
   for( int i = 0 ; i < 4 ; i++ )
   {    
@@ -33,7 +33,7 @@ void updateData() {
         {   
             heart.update();
             sensorData[i] = heart.getNormalized();
-            bufferA.push(sensorData[i]);               
+             bufferA.push(sensorData[i]);       
             bufferA.push( heart.getBPM());
             bufferA.push(heart.amplitudeChange());
 
@@ -45,8 +45,11 @@ void updateData() {
         {
             sc1.update();
             sensorData[i] = sc1.getSCR();
+
             bufferA.push(sensorData[i]);
             bufferA.push(sc1.getSCL());
+
+            
             setLedBrightness(i , sensorData[i]);
         }
         else
@@ -62,7 +65,9 @@ void updateData() {
           bufferA.push(sensorData[i]);
           bufferA.push(resp.getBPM());
           bufferA.push(resp.amplitudeChange());
-          setLedBrightness(i , sensorData[i]); 
+
+          setLedBrightness(i , sensorData[i]);
+
         }
         else
         {

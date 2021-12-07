@@ -81,13 +81,14 @@ void datalog(float bufferArg[BUFFER_SIZE],unsigned long buffertime[BUFFER_SIZE])
       {
         timestamp = buffertime[timestampIndex];
         timestampIndex++;
+        formatBuffer[formatIndex] =  bufferArg[i];
       } 
       else 
       {
         formatBuffer[formatIndex] =  bufferArg[i];
       }
 
-      if ( formatIndex == numChan - 1) 
+      if ( formatIndex == numChan -1 ) 
       {
         recFile.println(r.formatData(timestamp, formatBuffer));
       }

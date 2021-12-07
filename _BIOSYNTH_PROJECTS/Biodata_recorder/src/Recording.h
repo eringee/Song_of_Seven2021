@@ -52,7 +52,7 @@ class Recording {
     String startTimeTitle = "Start time: ";
     String endTimeTitle = "End Time: ";
     String signalsTitle = "Signals: ";
-    String sampleRateTitle = "Sample Rate: ";
+    String sampleRateTitle = " Sample Rate: ";
 
 
     String date; //date of the recording formated dd/mm/yy
@@ -119,7 +119,7 @@ class Recording {
     void clearHeaderBuffer() {
       //Empty the string buffer to be able to properly write the next header line
 
-      headerLine.remove(1, headerLine.length());
+      headerLine.remove(1, headerLine.length()); //starts at 1 to keep the # in the string
     }
 
     //------------------------------------------------------------------------------------------------
@@ -189,7 +189,7 @@ class Recording {
         signalsLength += getSignal(i).length();
       }
 
-      int spaceLength = 61 - signalsTitle.length() - signalsLength - (numSignals - 1) - sampleRateTitle.length() - String(rate).length();
+      int spaceLength = 75 - signalsTitle.length() - signalsLength - (numSignals - 1) - sampleRateTitle.length() - String(rate).length();
       String spaces;
 
       for ( int i = 0 ; i < spaceLength ; i++ ) {
@@ -305,7 +305,7 @@ class Recording {
     String channelNames() {
       // format the csv columns header
 
-      String label = "timestamp,marker";
+      String label = "timestamp";
       for ( int i = 0 ; i < numSignals ; i++) {
         label.concat(",");
         label.concat(signals[i]);
@@ -320,7 +320,7 @@ class Recording {
     //passing int instead of unsigned long could cause to truncate the timestamp
     //try to pass two argument ( unsigned long timestamp  , int data[3] )
 
-    String formatData(unsigned long timestamp, float data[7]) { // format the sampled data to csv
+    String formatData(unsigned long timestamp, float data[8]) { // format the sampled data to csv
       //Formats the logging of data
 
       // each log of data will be formated like this :

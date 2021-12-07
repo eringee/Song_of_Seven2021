@@ -4,7 +4,7 @@
 #include "Global.h" //include file containing global variables
 
 #define REVERSE_ENCODER false
-#define PLOT_SENSOR true
+#define PLOT_SENSOR false
 
 //Encoder dependencies
 //#define ENCODER_DO_NOT_USE_INTERRUPTS
@@ -75,7 +75,7 @@ void setup() {
   Serial.begin(9600);
 
   delay(3000); // power-up safety delay
-  
+  Serial.println("BIORECORDER");
   SPI.setMOSI(7);  // Audio shield has MOSI on pin 7
   SPI.setSCK(14);  // Audio shield has SCK on pin 14
   

@@ -13,7 +13,10 @@ void setupRecording() {
   // this function runs the necessary code to setup the recording before it starts
 
   //Serial.println("Open File");
-  recFile = SD.open( filename , FILE_WRITE);
+  recFile = SD.open( filename , O_RDWR) ;
+  recFile.println(r.channelNames());
+  recFile.println();
+ 
   fileOpen = true;
 
   r.startRecording();
@@ -34,19 +37,30 @@ void endRecordingSession() {
 
   r.recordingLength(timestamp);
   if ( r.headerPrinted == false) {
-
-    recFile.seek(0);
-    r.clearHeaderBuffer();
-    recFile.println(r.formatHeader1());
-    r.clearHeaderBuffer();
-    recFile.println(r.formatHeader2());
-    r.clearHeaderBuffer();
-    recFile.println(r.formatHeader3());
-    r.clearHeaderBuffer();
-    recFile.println(r.formatHeader4());
-    r.clearHeaderBuffer();
-    recFile.println();
-    recFile.println(r.channelNames());
+    //need to precalculate num of char on each line to avoir overwritting when printing header
+    //recFile.seek(0*64);
+    //r.clearHeaderBuffer();
+    //recFile.println(r.formatHeader1());
+    
+    //recFile.seek((1*64) +1);
+   // r.clearHeaderBuffer();
+    //recFile.println();
+    //recFile.println(r.formatHeader2());
+    
+   // recFile.seek((2*64) +3);
+   // r.clearHeaderBuffer();
+   // recFile.println();
+   // recFile.println(r.formatHeader3());
+    
+   // recFile.seek((3*64) +6);
+   // r.clearHeaderBuffer();
+   // recFile.println();
+   // recFile.println(r.formatHeader4());
+   // r.clearHeaderBuffer();
+    
+   // recFile.seek((4*64) +20); 
+   // recFile.println();
+   // recFile.println(r.channelNames());
 
     r.headerPrinted = true;
   }
