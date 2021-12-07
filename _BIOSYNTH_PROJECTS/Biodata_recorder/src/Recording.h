@@ -327,7 +327,7 @@ class Recording {
       // timestamp HEART HEARTAMP HEARTBPM SCR SCL RESP RESPAMP RESPBPM
       // 987753,0,1023,1023,1023
 
-      sprintf(dataBuff , "%ld %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f;" , timestamp, data[0], data[1], data[2],data[3],data[4], data[5], data[6],data[7]);
+      sprintf(dataBuff , "%ld, %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f;" , timestamp, data[0], data[1], data[2],data[3],data[4], data[5], data[6],data[7]);
       return dataBuff ;
     };
 

@@ -34,7 +34,7 @@ void updateData() {
             heart.update();
             sensorData[i] = heart.getNormalized();
              bufferA.push(sensorData[i]);       
-            bufferA.push( heart.getBPM());
+            bufferA.push( heart.bpmChange());
             bufferA.push(heart.amplitudeChange());
 
             setLedBrightness(i , sensorData[i]);
@@ -63,7 +63,7 @@ void updateData() {
           resp.update();
           sensorData[i] = resp.getNormalized();
           bufferA.push(sensorData[i]);
-          bufferA.push(resp.getBPM());
+          bufferA.push(resp.bpmChange());
           bufferA.push(resp.amplitudeChange());
 
           setLedBrightness(i , sensorData[i]);
