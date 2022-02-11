@@ -13,6 +13,7 @@
 
 #include <Chrono.h>
 
+int pedalMarker = 0;
 
 int sectionGlobal[NUM_SECTIONS][NUM_BOARDS] = {
  {622,933,1244,1555,1866,2177,2488},  // going to canada
@@ -33,32 +34,25 @@ bool updateLCDBool = true;
 #include <SD.h>
 #include <SerialFlash.h>
 
+
 // GUItool: begin automatically generated code
-AudioSynthWaveform       waveform2;      //xy=278,354
-AudioSynthNoiseWhite     noise1;         //xy=307,214
-AudioSynthWaveform       waveform3;      //xy=318,469
-AudioSynthWaveform       waveform1;      //xy=352,98
-AudioSynthWaveformSineModulated sine_fm3;       //xy=435,358
-AudioSynthWaveformSine   sine1;          //xy=439,398
-AudioSynthWaveformSineModulated sine_fm4;       //xy=457,465
-AudioSynthWaveformSineModulated sine_fm2;       //xy=462,209
-AudioSynthWaveformSineModulated sine_fm1;       //xy=493,96
-AudioEffectEnvelope      envelope1;      //xy=634,100
-AudioMixer4              mixer1;         //xy=685,195
-AudioMixer4              mixer2;         //xy=739,388
-AudioOutputI2S           i2s1;           //xy=920,266
+AudioSynthWaveform       waveform2;      //xy=938,673
+AudioSynthWaveform       waveform3;      //xy=978,788
+AudioSynthWaveformSineModulated sine_fm3;       //xy=1095,677
+AudioSynthWaveformSine   sine1;          //xy=1099,717
+AudioSynthWaveformSineModulated sine_fm4;       //xy=1117,784
+AudioSynthWaveformSine   sine_fm2;          //xy=1151,541
+AudioAmplifier           amp1;           //xy=1289,543
+AudioMixer4              mixerMain;         //xy=1421,584
+AudioOutputI2S           AudioOut;           //xy=1580,585
 AudioConnection          patchCord1(waveform2, sine_fm3);
-AudioConnection          patchCord2(noise1, sine_fm2);
-AudioConnection          patchCord3(waveform3, sine_fm4);
-AudioConnection          patchCord4(waveform1, sine_fm1);
-AudioConnection          patchCord5(sine_fm3, 0, mixer2, 1);
-AudioConnection          patchCord6(sine1, 0, mixer2, 2);
-AudioConnection          patchCord7(sine_fm4, 0, mixer2, 3);
-AudioConnection          patchCord8(sine_fm2, 0, mixer1, 1);
-AudioConnection          patchCord9(sine_fm1, envelope1);
-AudioConnection          patchCord10(envelope1, 0, mixer1, 0);
-AudioConnection          patchCord11(mixer1, 0, mixer2, 0);
-AudioConnection          patchCord12(mixer2, 0, i2s1, 0);
-AudioConnection          patchCord13(mixer2, 0, i2s1, 1);
-AudioControlSGTL5000     sgtl5000_1;     //xy=979,355
+AudioConnection          patchCord2(waveform3, sine_fm4);
+AudioConnection          patchCord3(sine_fm3, 0, mixerMain, 1);
+AudioConnection          patchCord4(sine1, 0, mixerMain, 2);
+AudioConnection          patchCord5(sine_fm4, 0, mixerMain, 3);
+AudioConnection          patchCord6(sine_fm2, amp1);
+AudioConnection          patchCord7(amp1, 0, mixerMain, 0);
+AudioConnection          patchCord8(mixerMain, 0, AudioOut, 0);
+AudioConnection          patchCord9(mixerMain, 0, AudioOut, 1);
+AudioControlSGTL5000     sgtl5000_1;     //xy=1024,436
 // GUItool: end automatically generated code

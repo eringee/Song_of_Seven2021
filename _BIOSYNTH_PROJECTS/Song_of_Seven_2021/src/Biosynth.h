@@ -4,7 +4,7 @@ It handles the encoder, the buttons,  the screen and the Leds
 */
 
 #define PLOT_SENSOR  false //Set to true to print sensor value in the serial plotter
-#define FOOT_PEDAL false //set to true if using the foot pedal in the project
+#define FOOT_PEDAL true //set to true if using the foot pedal in the project
 #define REVERSE_ENCODER true
 
 //BIO SYNTH HARDWARE PINS
@@ -61,8 +61,8 @@ private:
 
     CRGB leds[NUM_LEDS];  //array holding led colors data
 
-    //Here you can modify the RGB Values to determine the colors of the leds 0=HEART 1=GSR1 2=RESP 3=
-    int ledColors [NUM_LEDS][3] = {{252, 28, 3},{252, 186, 3},{10, 48, 240},{140, 10, 240}};
+    //Here you can modify the RGB Values to determine the colors of the leds 0=HEART 1=GSR1 2=RESP 3=GSR2
+    int ledColors [NUM_LEDS][3] = {{250, 0, 250},{100, 255, 250},{10, 48, 240},{140, 10, 240}};
 
     int lcdState = 0;
     long currentEncoderValue = 0;
@@ -187,19 +187,13 @@ private:
      @function    buttonSetup
      @abstract    setup the buttons on startup
      */   
-        pinMode(ENCODER_SWITCH , INPUT_PULLUP);
-        encoderButton.attach(ENCODER_SWITCH);
+        encoderButton.attach(ENCODER_SWITCH, INPUT_PULLUP);
         encoderButton.interval(BUTTON_REFRESH_RATE);
         //encoderButton.update();
         //encoderButton.read();
         
-                    pinMode( FOOT_PEDAL_PIN , INPUT_PULLUP);
-            footPedal.attach(FOOT_PEDAL_PIN);
-            footPedal.interval(BUTTON_REFRESH_RATE);
-        if(FOOT_PEDAL)
-        {   
-
-        }
+        footPedal.attach(FOOT_PEDAL_PIN, INPUT_PULLUP);
+        footPedal.interval(BUTTON_REFRESH_RATE);
     }
 //---------------
     void updateButtons() 
@@ -209,12 +203,8 @@ private:
      */
         encoderButton.update();
         //Serial.println(encoderButton.read());
-         footPedal.update();
-            //Serial.println(footPedal.read());
-        if(FOOT_PEDAL)
-        {
-           
-        }
+        footPedal.update();
+        //Serial.println(footPedal.read());
     }
 //---------------        
     void updateEncoder()
@@ -326,9 +316,16 @@ private:
      @abstract    sample the value of the used sensor every loop. To link sensors with audio, add interaction here
      */  
         float sensorData[4] = {0.0,0.0,0.0,0.0}; 
-
+        
+        //read volume of gain knob on device
+        float vol = analogRead(VOL_POT_PIN);
+        vol = (vol/1024)*0.8; //make sure the gain doesn't go louder than 0.8 to avoid clipping
+        
+     
         for( int i = 0 ; i < 4 ; i++ )
             {    
+                mixerMain.gain(i, vol);  //set all four channels of main mixer to follow gain knob
+                
                 switch(i)
                 {
                     case 0:
@@ -336,21 +333,19 @@ private:
                         {   
                             heart.update();
                             sensorData[i] = heart.getNormalized();
-                            setLedBrightness(i , sensorData[i]);
-                            waveform3.amplitude((float)sensorData[i]/2);
-
+                            waveform3.amplitude((float)sensorData[i]/4);
+                            setLedBrightness(i , sensorData[i]-0.1);
                         }
                         break;
 
                     case 1:
                         if(connectedSensors[i])
                         {
-
                             sc1.update();
-                            sensorData[i] = sc1.getRaw();
+                            sensorData[i] = (sc1.getSCR()-0.2);
+                            //sensorData[i] = (0.5*gsrValue) + ((0.5)*sensorData[i]);    //run the EMA
                             Serial.println(sensorData[i]);
-                            sine_fm2.amplitude((float)sensorData[i]/1024 -0.2); //clamp the sensorData down a bit to avoid clipping
-
+                            amp1.gain(sensorData[i]-0.1); //
                             setLedBrightness(i , sensorData[i]);
                         }
                         else
@@ -385,11 +380,11 @@ private:
                 }
             }
 
-        if(PLOT_SENSOR) //used for debugging purpose
+       /* if(PLOT_SENSOR) //used for debugging purpose
         {
         Serial.printf("%.2f,%.2f,%.2f,%.2f",sensorData[0],sensorData[1],sensorData[2],sensorData[3] );
         Serial.println();
-        }    
+        }   */ 
     }
 
 
@@ -424,6 +419,7 @@ public:
         updateSensors();
         updateButtons();
         updateEncoder();
+
 
         //lcd state verifications
         sectionChange();

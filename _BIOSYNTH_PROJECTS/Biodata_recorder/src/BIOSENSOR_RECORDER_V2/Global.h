@@ -22,14 +22,14 @@
 #define NUM_LEDS 4
 #define COLOR_ORDER GRB
 #define CHIPSET WS2812B
-#define BRIGHTNESS 16 
+#define BRIGHTNESS 80 
 
 //------------ADDING LIBRARIES-------------------------------//
 #include <FastLED.h>
 CRGB leds[NUM_LEDS];  //array holding led colors data
 
 //Here you can modify the RGB Values to determine the colors of the leds 0=HEART 1=GSR1 2=RESP 3=GSR2
-int ledColors [NUM_LEDS][3] = {{252, 28, 3},{252, 186, 3},{10, 48, 240},{140, 10, 240}};
+int ledColors [NUM_LEDS][3] = {{120, 28, 3},{130, 200, 150},{80, 255, 255},{120, 50, 240}};
 #include <LiquidCrystalFast.h>
 #include <Chrono.h>
 #include <LightChrono.h>

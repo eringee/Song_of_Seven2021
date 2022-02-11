@@ -1,15 +1,7 @@
-
-float setVolume()
-{
-    int vol = analogRead(VOL_POT_PIN);
-
-    return (float)vol /1280;
-}
-
 void setupAudioShield()
 {
     pinMode(VOL_POT_PIN,INPUT);
-    AudioMemory(50);  //put in Audio Memory or weird clicks happen
+    
    
     if(USE_SDCARD)
     {
@@ -26,17 +18,16 @@ void setupAudioShield()
     } 
 
   sgtl5000_1.enable();
-  sgtl5000_1.volume(setVolume()); //set master volume here
+  sgtl5000_1.volume(0.5); //set master volume here
 }
 
 void setupSounds()  //initial sounds for Section A
 {
 
     //GSR dependent variables
-    noise1.amplitude(0.01);
 
     sine_fm2.frequency(sectionGlobal[0][BOARD_ID]); 
-    sine_fm2.amplitude(0.0);
+    sine_fm2.amplitude(0.5);
     
     //HEART dependent variables
     waveform3.begin(0.01, 0.005, WAVEFORM_SINE);
@@ -49,6 +40,7 @@ void setupSounds()  //initial sounds for Section A
     sine1.frequency(424);
     sine_fm3.amplitude(0.1);
     sine1.amplitude(0.05);
+
 }
 
 void openingMessage()
