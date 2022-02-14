@@ -19,6 +19,8 @@ It handles the encoder, the buttons,  the screen and the Leds
 #define ENCODER_SWITCH 2
 #define FOOT_PEDAL_PIN 3
 
+
+////////////LED STUFF//////////////////////
 #define NUM_LEDS 4
 #define COLOR_ORDER GRB
 #define CHIPSET WS2812B
@@ -26,8 +28,9 @@ It handles the encoder, the buttons,  the screen and the Leds
 
 #define BUTTON_REFRESH_RATE 1
 
-//#define FASTLED_INTERNAL //turn off build messages
+#define FASTLED_INTERNAL //turn off build messages
 #include <FastLED.h>
+
 #define ENCODER_DO_NOT_USE_INTERRUPTS
 #include <Encoder.h>
 
@@ -54,6 +57,11 @@ Respiration resp(RESP_SENSOR_PIN);
 Bounce encoderButton = Bounce();
 Bounce footPedal = Bounce();
 
+static float smoothHeart = 0.5; //default value for smoothing out heart signal for EMA
+static float smoothGSR = 0.5;   //default value for smoothing out sc1 signal for EMA
+float heartSig;
+float GSRsig;
+
 class Biosynth
 {
 private:
@@ -62,6 +70,7 @@ private:
     CRGB leds[NUM_LEDS];  //array holding led colors data
 
     //Here you can modify the RGB Values to determine the colors of the leds 0=HEART 1=GSR1 2=RESP 3=GSR2
+    
     int ledColors [NUM_LEDS][3] = {{250, 0, 250},{100, 255, 250},{10, 48, 240},{140, 10, 240}};
 
     int lcdState = 0;
@@ -80,6 +89,8 @@ private:
     bool confirmBlink = false;
     Chrono confirmBlinkTimer;
     int  confirmBlinkInterval = 500;
+
+    Chrono biosynthSensorTimer;
     
 
 //-----------------LCD------------------//
@@ -242,15 +253,16 @@ private:
      */  
         pinMode(LED_PIN, OUTPUT);
         FastLED.addLeds<CHIPSET, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS).setCorrection( TypicalLEDStrip );
-	    FastLED.setBrightness( BRIGHTNESS );
-    
+	      FastLED.setBrightness( BRIGHTNESS );
 
-        //set the default colors of the led of the used sensor
+        //set the default colors of the led 
         for ( int i = 0 ; i <NUM_LEDS ; i++ )
         {   
             if(connectedSensors[i])
             {
-                leds[i].setRGB( ledColors[i][0],ledColors[i][1],ledColors[i][2]); 
+                //leds[i].setRGB( ledColors[i][0],ledColors[i][1],ledColors[i][2]);
+               // leds.setPixel(i, ledColors[i][0], ledColors[i][1], ledColors[i][2]);
+               // leds.show(); 
             }
             else
             {
@@ -274,111 +286,63 @@ private:
      @function    setupSensors
      @abstract    setup the used sensor on startup
      */   
-        for( int i = 0 ; i < 4 ; i++ )
-        {
-            switch(i)
-            {
-                case 0:
-                    if(connectedSensors[i])
-                    {
-                        pinMode(HEART_SENSOR_PIN,INPUT);
-                        heart.reset();
-                    }
-                        break;
-                case 1:
-                    if(connectedSensors[i])
-                    {
-                        pinMode(GSR1_PIN,INPUT);
-                        sc1.reset();
-                    }
-                    break;    
-                case 2:
-                    if(connectedSensors[i])
-                    {
-                        pinMode(GSR2_PIN,INPUT);
-                        sc2.reset();
-                    }
-                    break;
-                case 3:
-                    if(connectedSensors[i])
-                    {
-                        pinMode(RESP_SENSOR_PIN,INPUT);
-                        resp.reset();
-                    }
-                    break;    
-            }
-        }
+
+     pinMode(HEART_SENSOR_PIN,INPUT);
+     heart.reset();
+
+     pinMode(GSR1_PIN,INPUT);
+     sc1.reset();
+
     }
 //---------------   
     void updateSensors() 
     {/*!
      @function    updateSensors
-     @abstract    sample the value of the used sensor every loop. To link sensors with audio, add interaction here
-     */  
-        float sensorData[4] = {0.0,0.0,0.0,0.0}; 
+     @abstract    sample the value of the used sensors  
+     */ 
+    heart.update();
+    sc1.update();
+    Serial.print(GSRsig);
+    Serial.print("\t");
+    Serial.println(smoothGSR); 
+    }
+    
+     void updateSoundsLights()
+     {/*!
+     @function updateSoundsLights
+     @abstract    to link sensors with audio, add interaction here. Smooth signals.
+     */
+
+     //read volume of gain knob on device
         
-        //read volume of gain knob on device
         float vol = analogRead(VOL_POT_PIN);
         vol = (vol/1024)*0.8; //make sure the gain doesn't go louder than 0.8 to avoid clipping
         
-     
         for( int i = 0 ; i < 4 ; i++ )
             {    
                 mixerMain.gain(i, vol);  //set all four channels of main mixer to follow gain knob
-                
-                switch(i)
-                {
-                    case 0:
-                        if(connectedSensors[i])
-                        {   
-                            heart.update();
-                            sensorData[i] = heart.getNormalized();
-                            waveform3.amplitude((float)sensorData[i]/4);
-                            setLedBrightness(i , sensorData[i]-0.1);
-                        }
-                        break;
+            }    
+        //retrieve signals   
+        heartSig = heart.getNormalized();
+        GSRsig = (sc1.getSCR());
 
-                    case 1:
-                        if(connectedSensors[i])
-                        {
-                            sc1.update();
-                            sensorData[i] = (sc1.getSCR()-0.2);
-                            //sensorData[i] = (0.5*gsrValue) + ((0.5)*sensorData[i]);    //run the EMA
-                            Serial.println(sensorData[i]);
-                            amp1.gain(sensorData[i]-0.1); //
-                            setLedBrightness(i , sensorData[i]);
-                        }
-                        else
-                        {
-                            setLedBrightness(i , 0);
-                        }
-                        break;
-                    case 2:
-                        if(connectedSensors[i])
-                        {
-                            sc2.update();
-                            sensorData[i] = sc2.getSCR();
-                            setLedBrightness(i , sensorData[i]);
-                        }
-                        else
-                        {
-                            setLedBrightness(i , 0);
-                        }
-                        break;
-                    case 3:
-                        if(connectedSensors[i])
-                        {
-                            resp.update();
-                            sensorData[i] = resp.getNormalized();
-                            setLedBrightness(i , sensorData[i]);
-                        }
-                        else
-                        {
-                            setLedBrightness(i , 0);
-                        }
-                        break;    
-                }
-            }
+        //smooth signals
+        smoothGSR += 0.5 * (GSRsig - smoothGSR);
+        
+  
+        smoothHeart += 0.1 * (heartSig - smoothHeart);
+
+  
+
+        //used smoothed signals to transform audio
+        amp1.gain(smoothGSR); //
+        amp2.gain(smoothHeart);
+
+        //set brightness of LEDs with smoothed signals  
+        setLedBrightness(0 , smoothHeart);
+        setLedBrightness(1 , smoothGSR);                    
+        setLedBrightness(2 , 0);
+        setLedBrightness(3 , 0);
 
        /* if(PLOT_SENSOR) //used for debugging purpose
         {
@@ -391,12 +355,8 @@ private:
 /************************************************************************/
 public:
 
-    Biosynth(bool heart , bool gsr1 , bool gsr2 , bool resp)
+    Biosynth()
     {
-        connectedSensors[0] = heart;
-        connectedSensors[1] = gsr1;
-        connectedSensors[2] = gsr2;
-        connectedSensors[3] = resp;
 
     }
 //---------------
@@ -409,6 +369,7 @@ public:
         buttonSetup();
         ledSetup();
         setupSensors();
+        biosynthSensorTimer.start();
     }
 //---------------
     void update()
@@ -416,10 +377,14 @@ public:
      @function    update
      @abstract    wrapper function running all the hardware update routines and the necessary verifications
      */  
-        updateSensors();
+        updateSoundsLights();
         updateButtons();
         updateEncoder();
 
+        if (biosynthSensorTimer.hasPassed(10)) {  //this should only update once in a while
+          updateSensors(); 
+          biosynthSensorTimer.start();
+        }
 
         //lcd state verifications
         sectionChange();

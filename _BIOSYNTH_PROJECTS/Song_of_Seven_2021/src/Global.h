@@ -36,23 +36,25 @@ bool updateLCDBool = true;
 
 
 // GUItool: begin automatically generated code
-AudioSynthWaveform       waveform2;      //xy=938,673
-AudioSynthWaveform       waveform3;      //xy=978,788
-AudioSynthWaveformSineModulated sine_fm3;       //xy=1095,677
-AudioSynthWaveformSine   sine1;          //xy=1099,717
-AudioSynthWaveformSineModulated sine_fm4;       //xy=1117,784
-AudioSynthWaveformSine   sine_fm2;          //xy=1151,541
-AudioAmplifier           amp1;           //xy=1289,543
-AudioMixer4              mixerMain;         //xy=1421,584
-AudioOutputI2S           AudioOut;           //xy=1580,585
-AudioConnection          patchCord1(waveform2, sine_fm3);
-AudioConnection          patchCord2(waveform3, sine_fm4);
+AudioSynthWaveform       waveform3;      //xy=1014,743
+AudioSynthWaveform       waveform2;      //xy=1070,543
+AudioSynthWaveformSineModulated sine_fm3;       //xy=1227,547
+AudioSynthWaveformSine   sine1;          //xy=1231,587
+AudioAmplifier           amp2;           //xy=1246,728
+AudioSynthWaveformSine   sine_fm2;       //xy=1283,411
+AudioSynthWaveformSineModulated sine_fm4;       //xy=1392,650
+AudioAmplifier           amp1;           //xy=1414,361
+AudioMixer4              mixerMain;      //xy=1553,454
+AudioOutputI2S           AudioOut;       //xy=1712,455
+AudioConnection          patchCord1(waveform3, amp2);
+AudioConnection          patchCord2(waveform2, sine_fm3);
 AudioConnection          patchCord3(sine_fm3, 0, mixerMain, 1);
 AudioConnection          patchCord4(sine1, 0, mixerMain, 2);
-AudioConnection          patchCord5(sine_fm4, 0, mixerMain, 3);
+AudioConnection          patchCord5(amp2, sine_fm4);
 AudioConnection          patchCord6(sine_fm2, amp1);
-AudioConnection          patchCord7(amp1, 0, mixerMain, 0);
-AudioConnection          patchCord8(mixerMain, 0, AudioOut, 0);
-AudioConnection          patchCord9(mixerMain, 0, AudioOut, 1);
-AudioControlSGTL5000     sgtl5000_1;     //xy=1024,436
+AudioConnection          patchCord7(sine_fm4, 0, mixerMain, 3);
+AudioConnection          patchCord8(amp1, 0, mixerMain, 0);
+AudioConnection          patchCord9(mixerMain, 0, AudioOut, 0);
+AudioConnection          patchCord10(mixerMain, 0, AudioOut, 1);
+AudioControlSGTL5000     sgtl5000_1;     //xy=1156,306
 // GUItool: end automatically generated code
