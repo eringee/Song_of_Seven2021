@@ -1,4 +1,7 @@
-#define BOARD_ID 7
+#define BOARD_ID 7  //src\Helpers.h:66:66: warning: array subscript is above array bounds [-Warray-bounds]
+                    //sine_fm2.frequency(sectionGlobal[currentSection][BOARD_ID]);
+                    // ARE THE ID FROM 1 TO 7?? IF YES USE ID STARTING FROM 0 (0-6)
+
 #define NUM_SECTIONS 4
 #define NUM_BOARDS 7
 

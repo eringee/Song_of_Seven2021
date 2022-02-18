@@ -2,7 +2,7 @@
 #include "Global.h" //include file containing global variables
 #include "Biosynth.h"
 
-Biosynth biosynth; //Set to true the sensors used with the bioSynth for the project
+Biosynth biosynth{&leds}; //Set to true the sensors used with the bioSynth for the project
 
 #include "Helpers.h"
 // 0 - LEDS

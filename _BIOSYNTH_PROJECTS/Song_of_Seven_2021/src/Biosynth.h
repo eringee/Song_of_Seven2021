@@ -8,7 +8,7 @@ It handles the encoder, the buttons,  the screen and the Leds
 #define REVERSE_ENCODER true
 
 //BIO SYNTH HARDWARE PINS
-#define LED_PIN 0
+#define LED_PIN 31 
 #define HEART_SENSOR_PIN A7
 #define GSR1_PIN A6
 #define GSR2_PIN A2
@@ -28,8 +28,10 @@ It handles the encoder, the buttons,  the screen and the Leds
 
 #define BUTTON_REFRESH_RATE 1
 
-#define FASTLED_INTERNAL //turn off build messages
-#include <FastLED.h>
+//#define FASTLED_INTERNAL //turn off build messages //not used anymore
+#include <WS2812Serial.h>
+
+//#include <FastLED.h> //not used anymore
 
 #define ENCODER_DO_NOT_USE_INTERRUPTS
 #include <Encoder.h>
@@ -48,6 +50,7 @@ LiquidCrystal_I2C lcd(0x27, 16 , 2); // set the LCD address to 0x27 for a 16 cha
 #include <SkinConductance.h>
 #include <Heart.h>
 #define HEART_SAMPLE 5
+
 Heart heart(HEART_SENSOR_PIN);
 SkinConductance sc1(GSR1_PIN);
 SkinConductance sc2(GSR2_PIN);
@@ -62,12 +65,20 @@ static float smoothGSR = 0.5;   //default value for smoothing out sc1 signal for
 float heartSig;
 float GSRsig;
 
+
+byte drawing_memory[NUM_LEDS*3];         //  3 bytes per LED
+DMAMEM byte display_memory[NUM_LEDS*12]; // 12 bytes per LED
+WS2812Serial leds(NUM_LEDS, display_memory, drawing_memory, LED_PIN, WS2812_GRB);
+
+  
 class Biosynth
 {
 private:
-    
 
-    CRGB leds[NUM_LEDS];  //array holding led colors data
+    WS2812Serial* leds_ptr{nullptr};
+
+
+    //CRGB leds[NUM_LEDS];  //array holding led colors data
 
     //Here you can modify the RGB Values to determine the colors of the leds 0=HEART 1=GSR1 2=RESP 3=GSR2
     
@@ -252,8 +263,10 @@ private:
      @abstract    setup the ledstrip on startup
      */  
         pinMode(LED_PIN, OUTPUT);
-        FastLED.addLeds<CHIPSET, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS).setCorrection( TypicalLEDStrip );
-	      FastLED.setBrightness( BRIGHTNESS );
+        leds_ptr -> begin();
+
+        //FastLED.addLeds<CHIPSET, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS).setCorrection( TypicalLEDStrip );
+	    //  FastLED.setBrightness( BRIGHTNESS );
 
         //set the default colors of the led 
         for ( int i = 0 ; i <NUM_LEDS ; i++ )
@@ -266,7 +279,8 @@ private:
             }
             else
             {
-                leds[i].setRGB(0,0,0);   
+                leds_ptr->setPixel(i,0,0,0);
+                //leds[i].setRGB(0,0,0);   
             }     
         }
     }
@@ -278,7 +292,8 @@ private:
      @param  led  index of the led to change the brightness
      @param  brightness  value of the brightness to set (0.0-1.0)
      */
-        leds[led].setRGB(ledColors[led][0]*brightness,ledColors[led][1]*brightness,ledColors[led][2]*brightness);
+        //leds[led].setRGB(ledColors[led][0]*brightness,ledColors[led][1]*brightness,ledColors[led][2]*brightness);
+        leds_ptr->setPixel(led,ledColors[led][0]*brightness,ledColors[led][1]*brightness,ledColors[led][2]*brightness );
     }
 //---------------    
     void setupSensors()
@@ -355,7 +370,7 @@ private:
 /************************************************************************/
 public:
 
-    Biosynth()
+    Biosynth(WS2812Serial* _led_ptr):leds_ptr{_led_ptr}
     {
 
     }
@@ -394,7 +409,8 @@ public:
         {   
             lcdUpdate.restart();
             updateLCD(); //update lcd display buffers  
-            FastLED.show(); 
+            leds_ptr->show();
+            //FastLED.show(); 
         }
 
     }
