@@ -28,10 +28,7 @@ It handles the encoder, the buttons,  the screen and the Leds
 
 #define BUTTON_REFRESH_RATE 1
 
-//#define FASTLED_INTERNAL //turn off build messages //not used anymore
 #include <WS2812Serial.h>
-
-//#include <FastLED.h> //not used anymore
 
 #define ENCODER_DO_NOT_USE_INTERRUPTS
 #include <Encoder.h>
@@ -78,7 +75,6 @@ private:
     WS2812Serial* leds_ptr{nullptr};
 
 
-    //CRGB leds[NUM_LEDS];  //array holding led colors data
 
     //Here you can modify the RGB Values to determine the colors of the leds 0=HEART 1=GSR1 2=RESP 3=GSR2
     
@@ -265,23 +261,13 @@ private:
         pinMode(LED_PIN, OUTPUT);
         leds_ptr -> begin();
 
-        //FastLED.addLeds<CHIPSET, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS).setCorrection( TypicalLEDStrip );
-	    //  FastLED.setBrightness( BRIGHTNESS );
-
+       
         //set the default colors of the led 
         for ( int i = 0 ; i <NUM_LEDS ; i++ )
         {   
-            if(connectedSensors[i])
-            {
-                //leds[i].setRGB( ledColors[i][0],ledColors[i][1],ledColors[i][2]);
-               // leds.setPixel(i, ledColors[i][0], ledColors[i][1], ledColors[i][2]);
-               // leds.show(); 
-            }
-            else
-            {
+            
                 leds_ptr->setPixel(i,0,0,0);
-                //leds[i].setRGB(0,0,0);   
-            }     
+              
         }
     }
 //---------------
@@ -292,7 +278,6 @@ private:
      @param  led  index of the led to change the brightness
      @param  brightness  value of the brightness to set (0.0-1.0)
      */
-        //leds[led].setRGB(ledColors[led][0]*brightness,ledColors[led][1]*brightness,ledColors[led][2]*brightness);
         leds_ptr->setPixel(led,ledColors[led][0]*brightness,ledColors[led][1]*brightness,ledColors[led][2]*brightness );
     }
 //---------------    
@@ -410,7 +395,6 @@ public:
             lcdUpdate.restart();
             updateLCD(); //update lcd display buffers  
             leds_ptr->show();
-            //FastLED.show(); 
         }
 
     }

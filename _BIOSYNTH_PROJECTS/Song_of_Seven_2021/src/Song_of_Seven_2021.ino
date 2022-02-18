@@ -29,6 +29,7 @@ Biosynth biosynth{&leds}; //Set to true the sensors used with the bioSynth for t
 // 21 - (A7) PULSE 
 // 22 - Audio
 // 23 - Audio
+
 void setup() {
 
   Serial.begin(9600);
