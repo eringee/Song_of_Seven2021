@@ -26,7 +26,7 @@ void setupSounds()  //initial sounds for Section A
 
     //GSR dependent variables
 
-    sine_fm2.frequency(sectionGlobal[0][BOARD_ID]); 
+    sine_fm2.frequency(sectionGlobal[0][BOARD_ID-1]); 
     sine_fm2.amplitude(0.5);
     
     //HEART dependent variables
@@ -63,7 +63,7 @@ void checkSectionChange()  //this is where we change sections AND frequencies...
         updateLCDBool = true;
 
         /// THIS IS WHERE YOU NEED TO UPDATE THE FREQUENCY VALUES
-        sine_fm2.frequency(sectionGlobal[currentSection][BOARD_ID]);
+        sine_fm2.frequency(sectionGlobal[currentSection][BOARD_ID-1]);
         if (currentSection==0){
           sine_fm3.frequency(311);   //atmospheric sine1
           sine1.frequency(424);      //atmospheric sine2
