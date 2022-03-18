@@ -1,10 +1,10 @@
-
+//#include <LCD_I2C_Teensy36.h>
 #include "Global.h" //include file containing global variables
 #include "Biosynth.h"
-
-Biosynth biosynth{&leds}; //Set to true the sensors used with the bioSynth for the project
-
+Biosynth biosynth; //Initiate the Biosynth object
 #include "Helpers.h"
+
+//////////////////////////////////////HARDWARE DESIGNATIONS ON PCB////////////////////////////////////////////
 // 0 - LEDS
 // 1 - SERIAL SEND
 // 2 - Encoder Button / User Interface
@@ -30,6 +30,7 @@ Biosynth biosynth{&leds}; //Set to true the sensors used with the bioSynth for t
 // 22 - Audio
 // 23 - Audio
 
+int test = 8;
 void setup() {
 
   Serial.begin(9600);
@@ -37,28 +38,27 @@ void setup() {
   setupAudioShield(); 
   biosynth.setup();
   biosynth.openingMessage();
+
 }
 
 void loop() 
 { 
-  biosynth.update();
   openingMessage();
-
+  biosynth.update();
   
-  if(pedalMarker==0){
+  if(pedalMarker==0){ // pedal usually reads nothing
     footPedal.update();
     if (footPedal.read()==LOW) {
       pedalMarker=1;
-      openingMessageTimer.restart();
+      //openingMessageTimer.restart();
     }
   }
-
   
-  if(pedalMarker==1) {
+  if(pedalMarker==1) {   //stuff to do once when you push the pedal
     setupSounds();
     openingMessage();
     checkSectionChange();
-    biosynth.update();
   }
   
+
 }

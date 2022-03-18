@@ -4,11 +4,11 @@ It handles the encoder, the buttons,  the screen and the Leds
 */
 
 #define PLOT_SENSOR  false //Set to true to print sensor value in the serial plotter
-#define FOOT_PEDAL false //set to true if using the foot pedal in the project
+#define FOOT_PEDAL true //set to true if using the foot pedal in the project
 #define REVERSE_ENCODER true
 
 //BIO SYNTH HARDWARE PINS
-#define LED_PIN 0
+#define LED_PIN 31 
 #define HEART_SENSOR_PIN A7
 #define GSR1_PIN A6
 #define GSR2_PIN A2
@@ -19,6 +19,8 @@ It handles the encoder, the buttons,  the screen and the Leds
 #define ENCODER_SWITCH 2
 #define FOOT_PEDAL_PIN 3
 
+
+////////////LED STUFF//////////////////////
 #define NUM_LEDS 4
 #define COLOR_ORDER GRB
 #define CHIPSET WS2812B
@@ -26,8 +28,8 @@ It handles the encoder, the buttons,  the screen and the Leds
 
 #define BUTTON_REFRESH_RATE 1
 
-//#define FASTLED_INTERNAL //turn off build messages
-#include <FastLED.h>
+#include <WS2812Serial.h>
+
 #define ENCODER_DO_NOT_USE_INTERRUPTS
 #include <Encoder.h>
 
@@ -45,6 +47,7 @@ LiquidCrystal_I2C lcd(0x27, 16 , 2); // set the LCD address to 0x27 for a 16 cha
 #include <SkinConductance.h>
 #include <Heart.h>
 #define HEART_SAMPLE 5
+
 Heart heart(HEART_SENSOR_PIN);
 SkinConductance sc1(GSR1_PIN);
 SkinConductance sc2(GSR2_PIN);
@@ -54,15 +57,28 @@ Respiration resp(RESP_SENSOR_PIN);
 Bounce encoderButton = Bounce();
 Bounce footPedal = Bounce();
 
+static float smoothHeart = 0.5; //default value for smoothing out heart signal for EMA
+static float smoothGSR = 0.5;   //default value for smoothing out sc1 signal for EMA
+float heartSig;
+float GSRsig;
+
+
+byte drawing_memory[NUM_LEDS*3];         //  3 bytes per LED
+DMAMEM byte display_memory[NUM_LEDS*12]; // 12 bytes per LED
+WS2812Serial leds(NUM_LEDS, display_memory, drawing_memory, LED_PIN, WS2812_GRB);
+
+  
 class Biosynth
 {
 private:
+
+    WS2812Serial* leds_ptr{nullptr};
+
+
+
+    //Here you can modify the RGB Values to determine the colors of the leds 0=HEART 1=GSR1 2=RESP 3=GSR2
     
-
-    CRGB leds[NUM_LEDS];  //array holding led colors data
-
-    //Here you can modify the RGB Values to determine the colors of the leds 0=HEART 1=GSR1 2=RESP 3=
-    int ledColors [NUM_LEDS][3] = {{252, 28, 3},{252, 186, 3},{10, 48, 240},{140, 10, 240}};
+    int ledColors [NUM_LEDS][3] = {{250, 0, 250},{100, 255, 250},{10, 48, 240},{140, 10, 240}};
 
     int lcdState = 0;
     long currentEncoderValue = 0;
@@ -80,6 +96,8 @@ private:
     bool confirmBlink = false;
     Chrono confirmBlinkTimer;
     int  confirmBlinkInterval = 500;
+
+    Chrono biosynthSensorTimer;
     
 
 //-----------------LCD------------------//
@@ -187,19 +205,13 @@ private:
      @function    buttonSetup
      @abstract    setup the buttons on startup
      */   
-        pinMode(ENCODER_SWITCH , INPUT_PULLUP);
-        encoderButton.attach(ENCODER_SWITCH);
+        encoderButton.attach(ENCODER_SWITCH, INPUT_PULLUP);
         encoderButton.interval(BUTTON_REFRESH_RATE);
         //encoderButton.update();
         //encoderButton.read();
         
-                    pinMode( FOOT_PEDAL_PIN , INPUT_PULLUP);
-            footPedal.attach(FOOT_PEDAL_PIN);
-            footPedal.interval(BUTTON_REFRESH_RATE);
-        if(FOOT_PEDAL)
-        {   
-
-        }
+        footPedal.attach(FOOT_PEDAL_PIN, INPUT_PULLUP);
+        footPedal.interval(BUTTON_REFRESH_RATE);
     }
 //---------------
     void updateButtons() 
@@ -209,12 +221,8 @@ private:
      */
         encoderButton.update();
         //Serial.println(encoderButton.read());
-         footPedal.update();
-            //Serial.println(footPedal.read());
-        if(FOOT_PEDAL)
-        {
-           
-        }
+        footPedal.update();
+        //Serial.println(footPedal.read());
     }
 //---------------        
     void updateEncoder()
@@ -251,21 +259,15 @@ private:
      @abstract    setup the ledstrip on startup
      */  
         pinMode(LED_PIN, OUTPUT);
-        FastLED.addLeds<CHIPSET, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS).setCorrection( TypicalLEDStrip );
-	    FastLED.setBrightness( BRIGHTNESS );
-    
+        leds_ptr -> begin();
 
-        //set the default colors of the led of the used sensor
+       
+        //set the default colors of the led 
         for ( int i = 0 ; i <NUM_LEDS ; i++ )
         {   
-            if(connectedSensors[i])
-            {
-                leds[i].setRGB( ledColors[i][0],ledColors[i][1],ledColors[i][2]); 
-            }
-            else
-            {
-                leds[i].setRGB(0,0,0);   
-            }     
+            
+                leds_ptr->setPixel(i,0,0,0);
+              
         }
     }
 //---------------
@@ -276,7 +278,7 @@ private:
      @param  led  index of the led to change the brightness
      @param  brightness  value of the brightness to set (0.0-1.0)
      */
-        leds[led].setRGB(ledColors[led][0]*brightness,ledColors[led][1]*brightness,ledColors[led][2]*brightness);
+        leds_ptr->setPixel(led,ledColors[led][0]*brightness,ledColors[led][1]*brightness,ledColors[led][2]*brightness );
     }
 //---------------    
     void setupSensors()
@@ -284,124 +286,77 @@ private:
      @function    setupSensors
      @abstract    setup the used sensor on startup
      */   
-        for( int i = 0 ; i < 4 ; i++ )
-        {
-            switch(i)
-            {
-                case 0:
-                    if(connectedSensors[i])
-                    {
-                        pinMode(HEART_SENSOR_PIN,INPUT);
-                        heart.reset();
-                    }
-                        break;
-                case 1:
-                    if(connectedSensors[i])
-                    {
-                        pinMode(GSR1_PIN,INPUT);
-                        sc1.reset();
-                    }
-                    break;    
-                case 2:
-                    if(connectedSensors[i])
-                    {
-                        pinMode(GSR2_PIN,INPUT);
-                        sc2.reset();
-                    }
-                    break;
-                case 3:
-                    if(connectedSensors[i])
-                    {
-                        pinMode(RESP_SENSOR_PIN,INPUT);
-                        resp.reset();
-                    }
-                    break;    
-            }
-        }
+
+     pinMode(HEART_SENSOR_PIN,INPUT);
+     heart.reset();
+
+     pinMode(GSR1_PIN,INPUT);
+     sc1.reset();
+
     }
 //---------------   
     void updateSensors() 
     {/*!
      @function    updateSensors
-     @abstract    sample the value of the used sensor every loop. To link sensors with audio, add interaction here
-     */  
-        float sensorData[4] = {0.0,0.0,0.0,0.0}; 
+     @abstract    sample the value of the used sensors  
+     */ 
+    heart.update();
+    sc1.update();
+    Serial.print(GSRsig);
+    Serial.print("\t");
+    Serial.println(smoothGSR); 
+    }
+    
+     void updateSoundsLights()
+     {/*!
+     @function updateSoundsLights
+     @abstract    to link sensors with audio, add interaction here. Smooth signals.
+     */
 
+     //read volume of gain knob on device
+        
+        float vol = analogRead(VOL_POT_PIN);
+        vol = (vol/1024)*0.8; //make sure the gain doesn't go louder than 0.8 to avoid clipping
+        
         for( int i = 0 ; i < 4 ; i++ )
             {    
-                switch(i)
-                {
-                    case 0:
-                        if(connectedSensors[i])
-                        {   
-                            heart.update();
-                            sensorData[i] = heart.getNormalized();
-                            setLedBrightness(i , sensorData[i]);
-                            waveform3.amplitude((float)sensorData[i]/2);
+                mixerMain.gain(i, vol);  //set all four channels of main mixer to follow gain knob
+            }    
+        //retrieve signals   
+        heartSig = heart.getNormalized();
+        GSRsig = (sc1.getSCR());
 
-                        }
-                        break;
+        //smooth signals
+        smoothGSR += 0.5 * (GSRsig - smoothGSR);
+        
+  
+        smoothHeart += 0.1 * (heartSig - smoothHeart);
 
-                    case 1:
-                        if(connectedSensors[i])
-                        {
+  
 
-                            sc1.update();
-                            sensorData[i] = sc1.getRaw();
-                            Serial.println(sensorData[i]);
-                            sine_fm2.amplitude((float)sensorData[i]/1024 -0.2); //clamp the sensorData down a bit to avoid clipping
+        //used smoothed signals to transform audio
+        amp1.gain(smoothGSR); //
+        amp2.gain(smoothHeart);
 
-                            setLedBrightness(i , sensorData[i]);
-                        }
-                        else
-                        {
-                            setLedBrightness(i , 0);
-                        }
-                        break;
-                    case 2:
-                        if(connectedSensors[i])
-                        {
-                            sc2.update();
-                            sensorData[i] = sc2.getSCR();
-                            setLedBrightness(i , sensorData[i]);
-                        }
-                        else
-                        {
-                            setLedBrightness(i , 0);
-                        }
-                        break;
-                    case 3:
-                        if(connectedSensors[i])
-                        {
-                            resp.update();
-                            sensorData[i] = resp.getNormalized();
-                            setLedBrightness(i , sensorData[i]);
-                        }
-                        else
-                        {
-                            setLedBrightness(i , 0);
-                        }
-                        break;    
-                }
-            }
+        //set brightness of LEDs with smoothed signals  
+        setLedBrightness(0 , smoothHeart);
+        setLedBrightness(1 , smoothGSR);                    
+        setLedBrightness(2 , 0);
+        setLedBrightness(3 , 0);
 
-        if(PLOT_SENSOR) //used for debugging purpose
+       /* if(PLOT_SENSOR) //used for debugging purpose
         {
         Serial.printf("%.2f,%.2f,%.2f,%.2f",sensorData[0],sensorData[1],sensorData[2],sensorData[3] );
         Serial.println();
-        }    
+        }   */ 
     }
 
 
 /************************************************************************/
 public:
 
-    Biosynth(bool heart , bool gsr1 , bool gsr2 , bool resp)
+    Biosynth(WS2812Serial* _led_ptr):leds_ptr{_led_ptr}
     {
-        connectedSensors[0] = heart;
-        connectedSensors[1] = gsr1;
-        connectedSensors[2] = gsr2;
-        connectedSensors[3] = resp;
 
     }
 //---------------
@@ -414,6 +369,7 @@ public:
         buttonSetup();
         ledSetup();
         setupSensors();
+        biosynthSensorTimer.start();
     }
 //---------------
     void update()
@@ -421,9 +377,14 @@ public:
      @function    update
      @abstract    wrapper function running all the hardware update routines and the necessary verifications
      */  
-        updateSensors();
+        updateSoundsLights();
         updateButtons();
         updateEncoder();
+
+        if (biosynthSensorTimer.hasPassed(10)) {  //this should only update once in a while
+          updateSensors(); 
+          biosynthSensorTimer.start();
+        }
 
         //lcd state verifications
         sectionChange();
@@ -433,7 +394,7 @@ public:
         {   
             lcdUpdate.restart();
             updateLCD(); //update lcd display buffers  
-            FastLED.show(); 
+            leds_ptr->show();
         }
 
     }

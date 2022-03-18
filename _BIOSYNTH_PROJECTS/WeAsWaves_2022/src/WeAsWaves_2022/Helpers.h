@@ -1,8 +1,7 @@
 void setupAudioShield()
 {
-    pinMode(VOL_POT_PIN,INPUT);
-    
-   
+    pinMode(VOL_POT_PIN,INPUT); //establish pin for volume adjustments
+      
     if(USE_SDCARD)
     {
         SPI.setMOSI(SDCARD_MOSI_PIN);  // Audio shield has MOSI on pin 7
@@ -18,29 +17,16 @@ void setupAudioShield()
     } 
 
   sgtl5000_1.enable();
-  sgtl5000_1.volume(0.5); //set master volume here
+  sgtl5000_1.volume(0.8); //set master volume (do not exceed 0.8)
 }
 
-void setupSounds()  //initial sounds for Section A
+void setupSounds()  //initial sounds or Setting A
 {
-
-    //GSR dependent variables
-
-    sine_fm2.frequency(sectionGlobal[0][BOARD_ID-1]); 
-    sine_fm2.amplitude(0.5);
-    
-    //HEART dependent variables
-    waveform3.begin(0.01, 0.005, WAVEFORM_SINE);
-    sine_fm4.frequency(622);
-    sine_fm4.amplitude(0.02);
-
-    //ATMOSPHERIC SINES
-    waveform2.begin(0.004, 1, WAVEFORM_SINE);
-    sine_fm3.frequency(311);           //atmospheric sines
-    sine1.frequency(424);
-    sine_fm3.amplitude(0.1);
-    sine1.amplitude(0.05);
-
+//create the dominant tone
+  fundamentalWave.begin(0.3, sectionGlobal[currentSection][BOARD_ID], WAVEFORM_SINE); //basic tone frequency defined for each board
+  breathingWave.begin(0.5, sectionGlobal[currentSection][BOARD_ID]*1.75, WAVEFORM_SINE); // basic tone frequence x 1.5
+  timbreMod.amplitude(0.1);
+  timbreWidthMod.amplitude(0.2);
 }
 
 void openingMessage()
@@ -63,7 +49,8 @@ void checkSectionChange()  //this is where we change sections AND frequencies...
         updateLCDBool = true;
 
         /// THIS IS WHERE YOU NEED TO UPDATE THE FREQUENCY VALUES
-        sine_fm2.frequency(sectionGlobal[currentSection][BOARD_ID-1]);
+        /*sine_fm2.frequency(sectionGlobal[currentSection][BOARD_ID]);
+        
         if (currentSection==0){
           sine_fm3.frequency(311);   //atmospheric sine1
           sine1.frequency(424);      //atmospheric sine2
@@ -84,7 +71,7 @@ void checkSectionChange()  //this is where we change sections AND frequencies...
           sine1.frequency(985);      //atmospheric sine2
           sine_fm3.amplitude(0.1);  
           sine1.amplitude(0.1);
-        }
+        }*/
         biosynth.setLCDState(2);
     }
 }
