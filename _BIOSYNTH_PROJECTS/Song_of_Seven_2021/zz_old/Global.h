@@ -1,20 +1,28 @@
-#define BOARD_ID 7  //src\Helpers.h:66:66: warning: array subscript is above array bounds [-Warray-bounds]
-                    //sine_fm2.frequency(sectionGlobal[currentSection][BOARD_ID]);
-                    // ARE THE ID FROM 1 TO 7?? IF YES USE ID STARTING FROM 0 (0-6)
+#pragma once
+#include"RingBuf.h"
+#include <Audio.h>
+#include <SPI.h>
+#include <SD.h>
+#include <SerialFlash.h>
+#include <Chrono.h>
 
+#define BOARD_ID 7
 #define NUM_SECTIONS 4
 #define NUM_BOARDS 7
 
+
 // Use these with the Teensy Audio Shield
-#define USE_SDCARD false
+#define USE_SDCARD true
 #define SDCARD_CS_PIN    10
 #define SDCARD_MOSI_PIN  7
 #define SDCARD_SCK_PIN   14
 #define VOL_POT_PIN A1
 
+FsFile session;
+
 #define NO_TOUCH_DELAY 3000
 
-#include <Chrono.h>
+
 
 int pedalMarker = 0;
 
@@ -28,14 +36,11 @@ int sectionGlobal[NUM_SECTIONS][NUM_BOARDS] = {
 Chrono openingMessageTimer;
 int openingMessageTime = 3000;
 
-int currentSection = 0;
-int lastSection = -1;
+int current_section = 0;
+int last_section = -1;
 bool updateLCDBool = true;
 /////////////////////////////AUDIO VARS//////////////////////////
-#include <Audio.h>
-#include <SPI.h>
-#include <SD.h>
-#include <SerialFlash.h>
+
 
 
 // GUItool: begin automatically generated code
