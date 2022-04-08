@@ -7,7 +7,7 @@
  */
 #pragma once
 #include <Bounce2.h>
-#include <pins.h>
+#include "pins.h"
 
 namespace button{
 

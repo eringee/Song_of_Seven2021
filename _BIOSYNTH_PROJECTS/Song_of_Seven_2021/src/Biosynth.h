@@ -8,10 +8,13 @@
  */
 #pragma once
 
-#include <configuration.h>
-#include <pins.h>
+//TODO : replace <> with "" for written files
+//       make arduino compatible
+
+#include "configuration.h"
+#include "pins.h"
 #include <Chrono.h>
-#include <Logger.h>
+#include "Logger.h"
 
 class Biosynth
 {    

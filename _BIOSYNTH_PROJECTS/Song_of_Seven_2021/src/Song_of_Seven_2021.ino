@@ -19,23 +19,22 @@
  *        The logger class manages the logging of the sessions
  * 
  *        Project structure : 
- *        src/
- *           |hardware/  
- *           |        |-biosensor.cpp 
- *           |        |-biosensor.h
- *           |        |-buttons.cpp
- *           |        |-buttons.h
- *           |        |-encoder.cpp
- *           |        |-encoder.h
- *           |        |-lcd.cpp
- *           |        |-lcd.h
- *           |        |-led.cpp
- *           |        |-led.h
+ *        src/ 
  *           |-audio_manager.cpp
  *           |-audio_manager.h
+ *           |-biosensor.cpp 
+ *           |-biosensor.h
+ *           |-buttons.cpp
+ *           |-buttons.h
  *           |-Biosynth.cpp
  *           |-Biosynth.h
  *           |-configuration.h
+ *           |-enc.cpp
+ *           |-enc.h
+ *           |-lcd.cpp
+ *           |-lcd.h
+ *           |-led.cpp
+ *           |-led.h
  *           |-Logger.cpp
  *           |-Logger.h
  *           |-pins.h
@@ -56,10 +55,10 @@
  * @version 1.1
  * @date 2022-04-02
  */
-#include<Arduino.h>
+#include <Arduino.h>
 #include <ArduinoLog.h>
-#include <configuration.h>
-#include <Biosynth.h>
+#include "configuration.h"
+#include "Biosynth.h"
 
 Biosynth biosynth{};
 

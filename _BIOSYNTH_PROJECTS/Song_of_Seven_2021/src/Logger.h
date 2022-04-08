@@ -14,7 +14,7 @@
 #include <SD.h>
 #include <RingBuf.h>
 
-#include <hardware/biosensors.h>
+#include "biosensors.h"
 
 class FsFile;
 

@@ -1,6 +1,6 @@
-#include <hardware/encoder.h>
-#include <pins.h>
-#include <configuration.h>
+#include "enc.h"
+#include "pins.h"
+#include "configuration.h"
 #include <ArduinoLog.h>
 
 namespace encoder{

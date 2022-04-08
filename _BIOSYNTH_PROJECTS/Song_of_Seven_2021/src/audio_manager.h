@@ -10,7 +10,7 @@
  * 
  */
 
-#include <configuration.h>
+#include "configuration.h"
 
 struct sample;
 

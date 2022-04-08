@@ -5,15 +5,15 @@
  * @version 1.1
  * @date 2022-04-02
  */
-#include <Biosynth.h>
+#include "Biosynth.h"
 #include <ArduinoLog.h>
 
-#include <hardware/lcd.h>
-#include <hardware/biosensors.h>
-#include <hardware/buttons.h>
-#include <hardware/encoder.h>
-#include <hardware/led.h>
-#include <audio_manager.h>
+#include "lcd.h"
+#include "biosensors.h"
+#include "buttons.h"
+#include "enc.h"
+#include "led.h"
+#include "audio_manager.h"
 
 
 void Biosynth::initialize(){
