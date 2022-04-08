@@ -42,4 +42,9 @@ namespace audio_manager{
      */
     void update(const sample& signals);
 
+    /**
+     * @brief ADD DESCRIPTION FOR THE ADVANCE FUNCTION HERE
+     */
+    void advance();
+
 }//namespace audio_manager

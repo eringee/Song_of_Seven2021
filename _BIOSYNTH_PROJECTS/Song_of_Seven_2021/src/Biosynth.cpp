@@ -37,6 +37,11 @@ void Biosynth::initialize(){
 
 void Biosynth::update(){
 
+    if(biosynthSensorTimer.hasPassed(10)) {
+        biosensors::update(); 
+        biosynthSensorTimer.restart();
+    }
+
     sample signals{ biosensors::sample_sensors()};
     
     #if PLOT_SENSOR
@@ -52,38 +57,30 @@ void Biosynth::update(){
     current_encoder_value = encoder::update();
     button::update();
 
-    if (biosynthSensorTimer.hasPassed(10)) {
-        biosensors::update(); 
-        biosynthSensorTimer.restart();
-    }
+
+    if( button::foot_pedal.pressed() && lcd_state == 2){
+     Log.warningln("Foot pedal pressed");
+     audio_manager::advance();
+    };
 
     if( button::encoder.pressed() && lcd_state == 2){
      Log.warningln("Ending session");
      session_log.stop_logging();
     };
     
-
-    //vv wrap this in a fucntion vv
-    if( button::encoder.pressed() && lcd_state == 1){
-        Log.infoln("Section change confirmed");
-        last_section = current_section;
-        current_section = current_encoder_value;
-        audio_manager::change_scene(current_section);
-        currentSectionMessage();
-    }
+    maybe_confirm_section_change();
 
     if(lcdUpdate.hasPassed(40)){
-        openingMessage();
-        sectionChange();
-        verifyNoTouch();
+        opening_message();
+        section_change();
+        verify_no_touch();
         led::update(signals);
         lcdUpdate.restart();
     }
-
 }
 
 
-void Biosynth::openingMessage()
+void Biosynth::opening_message()
 {
     static bool do_once{false};
     static Chrono timer;
@@ -96,14 +93,24 @@ void Biosynth::openingMessage()
         do_once = true;
 
     }else if(timer.hasPassed(configuration::opening_message_time) && do_once){
-        currentSectionMessage();
+        current_section_message();
         timer.restart();
         timer.stop();
     }
 }
 
+void Biosynth::maybe_confirm_section_change(){
+    
+    if( button::encoder.pressed() && lcd_state == 1){
+        Log.infoln("Section change confirmed");
+        last_section = current_section;
+        current_section = current_encoder_value;
+        audio_manager::change_scene(current_section);
+        current_section_message();
+    }
+}
 
-void Biosynth::currentSectionMessage()
+void Biosynth::current_section_message()
 {
     sprintf(screen::buffer_line_1, "  Section  %s    ",sections[current_section]);
     sprintf(screen::buffer_line_2, "                ");
@@ -112,17 +119,17 @@ void Biosynth::currentSectionMessage()
 }
 
 
-void Biosynth::sectionChange()
+void Biosynth::section_change()
 {
     if(current_encoder_value != current_section )
     {      
-        sectionConfirmMessage(current_encoder_value);
+        section_confirm_message(current_encoder_value);
         confirmTimer.start();    
     }
 }
 
 
-void Biosynth::sectionConfirmMessage(const int encoder_value)
+void Biosynth::section_confirm_message(const int encoder_value)
 {
     sprintf(screen::buffer_line_1, "  Section : %s", sections[encoder_value]);
     sprintf(screen::buffer_line_2, "   Confirm ?   ");
@@ -131,12 +138,12 @@ void Biosynth::sectionConfirmMessage(const int encoder_value)
 }   
 
 
-void Biosynth::verifyNoTouch()
+void Biosynth::verify_no_touch()
 {
     if(confirmTimer.hasPassed(configuration::confirmation_delay) && lcd_state == 1)
     {   
         encoder::set_value(current_section);
-        currentSectionMessage();
+        current_section_message();
         confirmTimer.restart();
         confirmTimer.stop();
     }

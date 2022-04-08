@@ -93,7 +93,7 @@ void loop()
 
   // if(pedalMarker==1) {
   //   setupSounds();
-  //   openingMessage();
+  //   opening_message();
   //   checkSectionChange();
   //   biosynth.update();
   // }

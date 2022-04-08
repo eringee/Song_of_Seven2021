@@ -51,32 +51,36 @@ public:
 
 private:
 
+    /** @brief check to see if the user confirmed a section change 
+     */
+    void maybe_confirm_section_change();
+
     /**
      * @brief Verify if the encoder has not been touched while trying to change piece section.
               If the time set in the configuration has passed it displays the current section on the lcd
      */
-    void verifyNoTouch();
+    void verify_no_touch();
 
     /**
      * @brief verify if the user is selecting another piece section
      */
-    void sectionChange();
+    void section_change();
 
     /**
      * @brief display a message to the lcd asking the user if he want to change the currently playing piece section to the passed one
      * @param section section to change to 
      */
-    void sectionConfirmMessage(const int section);
+    void section_confirm_message(const int section);
 
     /**
      * @brief display the current section of the piece to the lcd screen 
      */
-    void currentSectionMessage();
+    void current_section_message();
 
     /**
      * @brief display the welcome message to the lcd screen for the specified time in the configuration
      */
-    void openingMessage();
+    void opening_message();
 
 #if PLOT_SENSOR
     /**

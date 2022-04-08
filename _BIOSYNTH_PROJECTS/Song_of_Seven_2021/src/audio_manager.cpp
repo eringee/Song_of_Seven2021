@@ -121,6 +121,8 @@ void change_scene(const int& scene){
 
 }
 
+
+
 //!!!!DEFINE SOUND LINK WITH BIODATA HERE!!!!
 void update(const sample& signals){
   
@@ -131,6 +133,11 @@ void update(const sample& signals){
   amp2.gain(signals.heart); 
   //add audio feature to modify with respiration here using signals.respiration
 
+}
+
+
+void advance(){
+  //ADD THE ACTIONS TRIGERRED BY THE FOOT PEDAL HERE!!!!
 }
 
 
