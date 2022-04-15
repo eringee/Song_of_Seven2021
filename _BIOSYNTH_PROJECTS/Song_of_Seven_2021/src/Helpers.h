@@ -19,6 +19,7 @@ void setupAudioShield()
 
   sgtl5000_1.enable();
   sgtl5000_1.volume(0.5); //set master volume here
+  sgtl5000_1.lineOutLevel(13); //set master volume (do not exceed 0.8)
 }
 
 void setupSounds()  //initial sounds for Section A

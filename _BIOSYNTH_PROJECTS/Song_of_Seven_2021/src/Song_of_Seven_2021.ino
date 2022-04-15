@@ -5,7 +5,8 @@
 Biosynth biosynth{&leds}; //Set to true the sensors used with the bioSynth for the project
 
 #include "Helpers.h"
-// 0 - LEDS
+
+// 0 - SERIAL RECEIVE
 // 1 - SERIAL SEND
 // 2 - Encoder Button / User Interface
 // 3 - FootPedal Button / Activation Pin
@@ -29,6 +30,8 @@ Biosynth biosynth{&leds}; //Set to true the sensors used with the bioSynth for t
 // 21 - (A7) PULSE 
 // 22 - Audio
 // 23 - Audio
+// 31 - (Back of Teensy)LEDS
+
 void setup() {
 
   Serial.begin(9600);

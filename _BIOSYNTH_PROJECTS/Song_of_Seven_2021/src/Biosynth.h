@@ -8,7 +8,7 @@ It handles the encoder, the buttons,  the screen and the Leds
 #define REVERSE_ENCODER true
 
 //BIO SYNTH HARDWARE PINS
-#define LED_PIN 31 
+#define LED_PIN 31  //this pin on bottom of Teensy writes data from serial to control neopixel LEDS
 #define HEART_SENSOR_PIN A7
 #define GSR1_PIN A6
 #define GSR2_PIN A2
@@ -49,7 +49,7 @@ LiquidCrystal_I2C lcd(0x27, 16 , 2); // set the LCD address to 0x27 for a 16 cha
 #include <Respiration.h>
 #include <SkinConductance.h>
 #include <Heart.h>
-#define HEART_SAMPLE 5
+#define HEART_SAMPLE 5  //not sure I use this???
 
 Heart heart(HEART_SENSOR_PIN);
 SkinConductance sc1(GSR1_PIN);
@@ -128,7 +128,6 @@ private:
 
         if(currentSection != lastSection && updateLCDBool == true)
         {
-
             switch(lcdState)
             {
 
@@ -147,9 +146,6 @@ private:
                     lcd.print(lcdLine2Buffer);
             }
         }
-
-
-
     }
 
 //---------------
@@ -317,9 +313,10 @@ private:
      */ 
     heart.update();
     sc1.update();
-    Serial.print(GSRsig);
-    Serial.print("\t");
-    Serial.println(smoothGSR); 
+    //if you are going to use Serial to check values, do it here
+    //Serial.print(GSRsig);
+    //Serial.print("\t");
+    //Serial.println(smoothGSR); 
     }
     
      void updateSoundsLights()
@@ -343,11 +340,7 @@ private:
 
         //smooth signals
         smoothGSR += 0.5 * (GSRsig - smoothGSR);
-        
-  
         smoothHeart += 0.1 * (heartSig - smoothHeart);
-
-  
 
         //used smoothed signals to transform audio
         amp1.gain(smoothGSR); //
