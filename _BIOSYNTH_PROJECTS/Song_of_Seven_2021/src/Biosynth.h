@@ -90,10 +90,32 @@ private:
     void plot_sampled_data(sample signals);
 #endif
 
-
+    /**
+     * @brief advance the piece to the next section when called
+     */
     void advance_section();
+
+    /**
+     * @brief start data logging if user presses the encoder button
+     */
     void maybe_start_logging();
+
+    /**
+     * @brief stops data logging if user presses the encoder button and a recording is started
+     */
     void maybe_stop_logging();
+
+    /**
+     * @brief display a message on screen to tell user logging as started
+     * 
+     * @param do_once pass false to display the message on screen and reset the timer. pass true just to opdate the timer
+     */
     void start_logging_message(bool do_once);
+
+    /** 
+     * @brief display a message on screen to tell user logging as stopped
+     * 
+     * @param do_once pass false to display the message on screen and reset the timer. pass true just to opdate the timer
+     */
     void stop_logging_message(bool do_once);
 };

@@ -51,8 +51,18 @@ class logger{
    */
   void log_data(sample signals); 
 
+  /**
+   * @brief starts datalogging
+   */
   void start_logging();
+
+  /**
+   * @brief stops data logging
+   */
   void stop_logging();
 
+  /**
+   * @brief return true if device is currently logging data
+   */
   bool is_logging();
 };

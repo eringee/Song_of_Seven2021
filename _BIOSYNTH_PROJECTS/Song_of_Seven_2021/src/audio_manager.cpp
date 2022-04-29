@@ -136,9 +136,4 @@ void update(const sample& signals){
 }
 
 
-void advance(){
-  //ADD THE ACTIONS TRIGERRED BY THE FOOT PEDAL HERE!!!!
-}
-
-
 }//namespace audio_manager
