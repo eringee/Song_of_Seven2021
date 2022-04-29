@@ -53,4 +53,6 @@ class logger{
 
   void start_logging();
   void stop_logging();
+
+  bool is_logging();
 };

@@ -8,6 +8,7 @@
 #include "Logger.h"
 #include "pins.h"
 #include <RingBuf.h>
+#include "lcd.h"
 #include <ArduinoLog.h>
 
 void logger::initialize(){
@@ -17,9 +18,17 @@ void logger::initialize(){
         
   if (!SD.sdfs.begin(SdSpiConfig(pins::sd::cs, SHARED_SPI, SD_SCK_MHZ(24))))
   { 
+    
+    //wrap this in function or find a way to display this messsage from biosynth class 
+    sprintf(screen::buffer_line_1, "   NO SD CARD   ");
+    sprintf(screen::buffer_line_2, "                ");
+    screen::update();  
+
     while (1)// stop here, but print a message repetitively 
     {
+
       Log.errorln("Unable to access the SD card");
+
       delay(500);
     }
   }
@@ -67,7 +76,7 @@ void logger::create_file(){
 
 void logger::log_data(sample signals){
 
-  static uint64_t last_cur_pos{0};
+  //static uint64_t last_cur_pos{0};
   static bool finalize{false};
 
   //recording = SD.sdfs.open("session.txt", O_WRITE); //make this dynamic with file name
@@ -96,10 +105,17 @@ void logger::log_data(sample signals){
   
 }
 
+
+
+
 void logger::start_logging(){
   logging = true;
 }
 
 void logger::stop_logging(){
   logging = false;
+}
+
+bool logger::is_logging(){
+  return logging;
 }

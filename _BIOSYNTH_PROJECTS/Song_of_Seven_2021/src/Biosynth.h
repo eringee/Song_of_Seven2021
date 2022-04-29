@@ -90,4 +90,10 @@ private:
     void plot_sampled_data(sample signals);
 #endif
 
+
+    void advance_section();
+    void maybe_start_logging();
+    void maybe_stop_logging();
+    void start_logging_message(bool do_once);
+    void stop_logging_message(bool do_once);
 };

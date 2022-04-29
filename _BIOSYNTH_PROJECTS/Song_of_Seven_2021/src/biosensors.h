@@ -11,6 +11,8 @@
 #include <Heart.h>
 
 //struc used to hold sampled data. It makes it easier to pass the data to various functions
+//acees struct members using name of variable .heart or .gsr or .respiration
+
 struct sample{
     float heart;
     float gsr;

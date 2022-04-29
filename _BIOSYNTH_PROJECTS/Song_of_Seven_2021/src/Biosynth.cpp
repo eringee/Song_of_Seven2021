@@ -26,8 +26,6 @@ void Biosynth::initialize(){
 
     #if LOG
         session_log.initialize();
-        session_log.create_file();
-        session_log.start_logging();
     #endif
     
     audio_manager::audio_shield_initialization();
@@ -37,7 +35,7 @@ void Biosynth::initialize(){
 
 void Biosynth::update(){
 
-    if(biosynthSensorTimer.hasPassed(10)) {
+    if(biosynthSensorTimer.hasPassed(configuration::biosensors_sample_rate)) {
         biosensors::update(); 
         biosynthSensorTimer.restart();
     }
@@ -57,28 +55,57 @@ void Biosynth::update(){
     current_encoder_value = encoder::update();
     button::update();
 
+    #if LOG
+        maybe_start_logging();
+        maybe_stop_logging();
+    #endif
 
-    if( button::foot_pedal.pressed() && lcd_state == 2){
-     Log.warningln("Foot pedal pressed");
-     audio_manager::advance();
-    };
+    #if ADVANCE_WITH_ENCODER
+        maybe_confirm_section_change();
+    #else
+        if( button::foot_pedal.pressed() && lcd_state == 2){
+        advance_section();
+        Log.warningln("Foot pedal pressed. Advanced section");
+        };
+    #endif
 
-    if( button::encoder.pressed() && lcd_state == 2){
-     Log.warningln("Ending session");
-     session_log.stop_logging();
-    };
-    
-    maybe_confirm_section_change();
 
     if(lcdUpdate.hasPassed(40)){
         opening_message();
-        section_change();
-        verify_no_touch();
+
+        #if LOG
+            start_logging_message(true);
+            stop_logging_message(true);
+        #endif
+    
+        #if ADVANCE_WITH_ENCODER
+            section_change();
+            verify_no_touch();
+        #endif
+    
         led::update(signals);
         lcdUpdate.restart();
     }
 }
 
+void Biosynth::maybe_start_logging(){
+    
+    if( button::encoder.pressed() && lcd_state == 2 && !session_log.is_logging()){
+        Log.warningln("Starting session");
+        session_log.create_file();
+        session_log.start_logging();
+        start_logging_message(false);
+    };
+}
+
+void Biosynth::maybe_stop_logging(){
+    
+    if( button::encoder.pressed() && lcd_state == 2  && session_log.is_logging()){
+        Log.warningln("Ending session");
+        session_log.stop_logging();
+        stop_logging_message(false);
+    };
+}
 
 void Biosynth::opening_message()
 {
@@ -118,7 +145,6 @@ void Biosynth::current_section_message()
     screen::update();  
 }
 
-
 void Biosynth::section_change()
 {
     if(current_encoder_value != current_section )
@@ -128,6 +154,42 @@ void Biosynth::section_change()
     }
 }
 
+void Biosynth::start_logging_message(bool do_once)
+{   
+    static Chrono timer;
+    if(!do_once){
+        timer.restart();
+        sprintf(screen::buffer_line_1, "Logging Started");
+        sprintf(screen::buffer_line_2, "               ");
+        lcd_state = 3;
+        screen::update();
+    }else if( timer.hasPassed(3000)&&do_once){
+        current_section_message();
+        timer.restart();
+        timer.stop();
+
+    }
+  
+}
+
+void Biosynth::stop_logging_message(bool do_once)
+{   
+    static Chrono timer;
+    
+    if(!do_once){
+        timer.restart();
+        sprintf(screen::buffer_line_1, "Logging Stopped");
+        sprintf(screen::buffer_line_2, "               ");
+        lcd_state = 4;
+        screen::update();
+    
+    }else if( timer.hasPassed(3000)&&do_once){
+        current_section_message();
+        timer.restart();
+        timer.stop();
+
+    } 
+}
 
 void Biosynth::section_confirm_message(const int encoder_value)
 {
@@ -136,7 +198,6 @@ void Biosynth::section_confirm_message(const int encoder_value)
     lcd_state = 1;
     screen::update();  
 }   
-
 
 void Biosynth::verify_no_touch()
 {
@@ -149,6 +210,12 @@ void Biosynth::verify_no_touch()
     }
 }
 
+void Biosynth::advance_section(){
+    current_section++;
+    current_section = current_section%configuration::number_of_sections;
+    audio_manager::change_scene(current_section);
+    current_section_message();
+};
 
 #if PLOT_SENSOR
     void Biosynth::plot_sampled_data(sample signals){

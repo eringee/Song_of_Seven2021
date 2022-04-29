@@ -10,7 +10,7 @@
 #pragma once
 
 namespace pins{
-
+    
     namespace sd{
         const int cs{10};
         const int mosi{7};
