@@ -16,17 +16,43 @@ void setupAudioShield()
         }
     } 
 
-  sgtl5000_1.enable();
-  sgtl5000_1.volume(0.8); //set master volume (do not exceed 0.8)
+  TeensyAudio.enable();
+  TeensyAudio.volume(0.9); //set master volume here
+  TeensyAudio.lineOutLevel(13); //set lineout to max
 }
-
+                                                                                
 void setupSounds()  //initial sounds or Setting A
 {
-//create the dominant tone
-  fundamentalWave.begin(0.3, sectionGlobal[currentSection][BOARD_ID], WAVEFORM_SINE); //basic tone frequency defined for each board
-  breathingWave.begin(0.5, sectionGlobal[currentSection][BOARD_ID]*1.75, WAVEFORM_SINE); // basic tone frequence x 1.5
-  timbreMod.amplitude(0.1);
-  timbreWidthMod.amplitude(0.2);
+  
+ //RESP dependent variables
+  respTone = (sectionGlobal[0][BOARD_ID]);
+
+  respWave1.begin(0.1 , respTone, WAVEFORM_TRIANGLE);
+  respWave2.begin(0.05, respTone, WAVEFORM_SAWTOOTH);  
+
+  // set bandpass around the respTone frequencies
+  respFilter.frequency(respTone); 
+//  respFilter.resonance(1.0); 
+
+  respnoise.amplitude(0.1);
+  respnoiseLFO.begin(0.3, 15, WAVEFORM_SINE); // LFO applied to respNoise
+
+  clickEnvelope.attack(10);
+  clickEnvelope.decay(10);
+  clickEnvelope.sustain(10);
+  clickEnvelope.release(50);
+
+  //envelope1delay = 60;
+
+  heartLFO.begin(0.05, 5, WAVEFORM_SINE);
+
+  clickGlitchMixer.gain(1, 9.8);  // parameter to control the global volume of the clicks.
+
+  bitcrusher1.bits(3);  // creates the glitch-click effect
+  bitcrusher1.sampleRate(44000);  // doesn't seem to affect the sound either way
+
+  //GSRfilter.resonance(1.0); // the resonator emphasises the bandpass of these clicks
+
 }
 
 void openingMessage()
@@ -48,30 +74,25 @@ void checkSectionChange()  //this is where we change sections AND frequencies...
         currentSection = biosynth.getEncoderValue();
         updateLCDBool = true;
 
-        /// THIS IS WHERE YOU NEED TO UPDATE THE FREQUENCY VALUES
-        /*sine_fm2.frequency(sectionGlobal[currentSection][BOARD_ID]);
+        /// THIS IS WHERE YOU UPDATE THE SECTION SETTINGS
         
         if (currentSection==0){
-          sine_fm3.frequency(311);   //atmospheric sine1
-          sine1.frequency(424);      //atmospheric sine2
+        respWave1.begin(0.5, respTone, WAVEFORM_SINE);
+        respWave2.begin(0.2, respTone, WAVEFORM_SINE);   
         }
         else if (currentSection==1){
-          sine_fm3.frequency(311);   //atmospheric sine1
-          sine1.frequency(369);      //atmospheric sine2
+          respWave1.begin(0.5, respTone, WAVEFORM_BANDLIMIT_SAWTOOTH);
+          respWave2.begin(0.2, respTone, WAVEFORM_BANDLIMIT_SAWTOOTH);   
         }
         else if (currentSection==2){
-          sine_fm3.frequency(261.63);   //atmospheric sine1
-          sine1.frequency(329.63);      //atmospheric sine2
-          sine_fm3.amplitude(0.1);  
-          sine1.amplitude(0.1);
+          respWave1.begin(0.5, respTone, WAVEFORM_BANDLIMIT_SQUARE);
+          respWave2.begin(0.2, respTone, WAVEFORM_BANDLIMIT_SQUARE);   
         }
         else if (currentSection==3){
-          waveform2.frequency(1);
-          sine_fm3.frequency(659);   //atmospheric sine1
-          sine1.frequency(985);      //atmospheric sine2
-          sine_fm3.amplitude(0.1);  
-          sine1.amplitude(0.1);
-        }*/
+          respWave1.begin(0.5, respTone, WAVEFORM_BANDLIMIT_SAWTOOTH_REVERSE);
+           respWave2.begin(0.2, respTone, WAVEFORM_BANDLIMIT_SAWTOOTH_REVERSE);   
+        }
+        
         biosynth.setLCDState(2);
     }
 }
