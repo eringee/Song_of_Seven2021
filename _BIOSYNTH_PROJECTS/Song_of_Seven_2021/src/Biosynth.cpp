@@ -88,24 +88,27 @@ void Biosynth::update(){
     }
 }
 
-void Biosynth::maybe_start_logging(){
-    
-    if( button::encoder.pressed() && lcd_state == 2 && !session_log.is_logging()){
-        Log.warningln("Starting session");
-        session_log.create_file();
-        session_log.start_logging();
-        start_logging_message(false);
-    };
-}
+#if LOG
+    void Biosynth::maybe_start_logging(){
+        
+        if( button::encoder.pressed() && lcd_state == 2 && !session_log.is_logging()){
+            Log.warningln("Starting session");
+            session_log.create_file();
+            session_log.start_logging();
+            start_logging_message(false);
+        };
+    }
 
-void Biosynth::maybe_stop_logging(){
-    
-    if( button::encoder.pressed() && lcd_state == 2  && session_log.is_logging()){
-        Log.warningln("Ending session");
-        session_log.stop_logging();
-        stop_logging_message(false);
-    };
-}
+    void Biosynth::maybe_stop_logging(){
+        
+        if( button::encoder.pressed() && lcd_state == 2  && session_log.is_logging()){
+            Log.warningln("Ending session");
+            session_log.stop_logging();
+            stop_logging_message(false);
+        };
+    }
+
+#endif
 
 void Biosynth::opening_message()
 {

@@ -8,7 +8,7 @@
  */
 #pragma once
 
-#define LOG true                //Set to true if you want the sessions to be logged in the sd card
+#define LOG false                //Set to true if you want the sessions to be logged in the sd card
 #define PLOT_SENSOR  false      //Set to true to print sensor value in the serial plotter
 #define FOOT_PEDAL true         //Set to true if using the foot pedal in the project
 #define REVERSE_ENCODER false   //Set to true if the encoder rotation needs to be reversed
