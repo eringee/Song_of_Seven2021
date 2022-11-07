@@ -1,7 +1,7 @@
-#define BOARD_ID 1  //change this to suit which board you are working with
+#define BOARD_ID 7  // !!!!!REMEMBER: BOARD ID MINUS 1 !!!!!
 
-#define NUM_SECTIONS 4 //how many sections in the work?
-#define NUM_BOARDS 7  //how many different boards are you working with?
+#define NUM_SECTIONS 5 // always add 1?
+#define NUM_BOARDS 11  // actually number of boards +1?
 
 // Use these with the Teensy Audio Shield
 #define USE_SDCARD false
@@ -13,17 +13,38 @@
 #define NO_TOUCH_DELAY 3000
 
 #include <Chrono.h>
+#include <mtof.h>
 
 int pedalMarker = 0;
 
-int sectionGlobal[NUM_SECTIONS][NUM_BOARDS] = {
- {100,100,1244,1555,1866,2177,2488},  // going to canada
- {174,348,1244,1555,1566,1740,2488},  // cat died
- {392,416,448,587,659,1046,1174},     // fluffy bunny
- {1148,1312,1476,1640,1804,1968,2132} // board games
+float sectionGlobal[NUM_SECTIONS][NUM_BOARDS] = {
+{mtof.toFrequency(51), 
+ mtof.toFrequency(54), 
+ mtof.toFrequency(56), 
+ mtof.toFrequency(58), 
+ mtof.toFrequency(61), 
+ mtof.toFrequency(63), 
+ mtof.toFrequency(66), 
+ mtof.toFrequency(68), 
+ mtof.toFrequency(70), 
+ mtof.toFrequency(73)},  // pentatonic scale - add 12 for fun
+ 
+ {mtof.toFrequency(72),
+ mtof.toFrequency(86),
+ mtof.toFrequency(76), 
+ mtof.toFrequency(89), 
+ mtof.toFrequency(79), 
+ mtof.toFrequency(93), 
+ mtof.toFrequency(83), 
+ mtof.toFrequency(96), 
+ mtof.toFrequency(86), 
+ mtof.toFrequency(100)},  // octave separated major scale
+ 
+ {392,416,448,587,659,1046,1174, 1300, 1400, 1700},     // section 3
+ {1148,1312,1476,1640,1804,1968,2132, 2500, 2600, 2700} // section 4
 };
 
-float fundamentalWaveGain = 0.3; // the gain of the fundamental signal
+float respTone;
 
 Chrono openingMessageTimer;  //timer for how long the opening message stays on the LCD screen
 int openingMessageTime = 3000;
@@ -31,6 +52,8 @@ int openingMessageTime = 3000;
 int currentSection = 0;
 int lastSection = -1;
 bool updateLCDBool = true;
+//int envelope1delay = 0;
+
 /////////////////////////////AUDIO VARS//////////////////////////
 #include <Audio.h>
 #include <SPI.h>
@@ -38,25 +61,38 @@ bool updateLCDBool = true;
 #include <SerialFlash.h>
 
 // GUItool: begin automatically generated code
-AudioSynthWaveform       fundamentalWave;      //xy=956,552
-AudioAmplifier           fundWaveAmp;           //xy=1140,550
-AudioSynthWaveformDc     timbreMod;            //xy=1144,474
-AudioSynthWaveform       breathingWave; //xy=1223,747
-AudioSynthWaveformDc     timbreWidthMod;           //xy=1306,610
-AudioEffectWaveFolder    waveMultiply1;         //xy=1333,520
-AudioAmplifier           breathingWaveAmp; //xy=1457,726
-AudioEffectMultiply      waveMultiply2;           //xy=1488,580
-AudioMixer4              mixerMain;         //xy=1662,693
-AudioOutputI2S           AudioOut;           //xy=1822,487
-AudioConnection          patchCord1(fundamentalWave, fundWaveAmp);
-AudioConnection          patchCord2(fundWaveAmp, 0, waveMultiply1, 1);
-AudioConnection          patchCord3(timbreMod, 0, waveMultiply1, 0);
-AudioConnection          patchCord4(breathingWave, breathingWaveAmp);
-AudioConnection          patchCord5(timbreWidthMod, 0, waveMultiply2, 1);
-AudioConnection          patchCord6(waveMultiply1, 0, waveMultiply2, 0);
-AudioConnection          patchCord7(breathingWaveAmp, 0, mixerMain, 1);
-AudioConnection          patchCord8(waveMultiply2, 0, mixerMain, 0);
-AudioConnection          patchCord9(mixerMain, 0, AudioOut, 0);
-AudioConnection          patchCord10(mixerMain, 0, AudioOut, 1);
-AudioControlSGTL5000     sgtl5000_1;     //xy=1024,436
+AudioSynthWaveform       heartLFO;      //xy=64,125 aka waveform5
+AudioSynthNoiseWhite     respnoise;         //xy=140,494
+AudioSynthWaveform       respnoiseLFO;      //xy=140,582  aka waveform4
+AudioEffectBitcrusher    bitcrusher1;    //xy=161,191
+AudioEffectEnvelope      clickEnvelope;      //xy=272,123
+AudioSynthWaveform       respWave1;      //xy=335,391 aka waveform2
+AudioEffectMultiply      multiply1;      //xy=335,518
+AudioSynthWaveform       respWave2;      //xy=336,435 aka waveform3
+AudioAmplifier           heartEnvAmp;           //xy=402,167
+AudioMixer4              respMixer;         //xy=527,424  aka mixer2
+AudioMixer4              clickGlitchMixer;         //xy=531,164     
+AudioFilterStateVariable respFilter;        //xy=688,482  aka filter2
+AudioFilterStateVariable GSRfilter;        //xy=692,174  aka filter1
+AudioAmplifier           respAmp2;           //xy=735,414
+AudioMixer4              mainMixer;         //xy=822,306  aka mixer1
+AudioOutputI2S           AudioOut;       //xy=996,307
+AudioConnection          patchCord1(heartLFO, bitcrusher1);
+AudioConnection          patchCord2(respnoise, 0, multiply1, 0); // aka respnoise
+AudioConnection          patchCord3(respnoiseLFO, 0, multiply1, 1);
+AudioConnection          patchCord4(bitcrusher1, clickEnvelope);
+AudioConnection          patchCord5(clickEnvelope, heartEnvAmp);
+AudioConnection          patchCord6(respWave1, 0, respMixer, 0);
+AudioConnection          patchCord7(multiply1, 0, respMixer, 2);
+AudioConnection          patchCord8(respWave2, 0, respMixer, 1);
+AudioConnection          patchCord9(heartEnvAmp, 0, clickGlitchMixer, 1);
+AudioConnection          patchCord10(respMixer, 0, respFilter, 0);
+AudioConnection          patchCord11(respMixer, 0, mainMixer, 1);
+AudioConnection          patchCord12(clickGlitchMixer, 0, GSRfilter, 0);
+AudioConnection          patchCord13(respFilter, 1, respAmp2, 0);
+AudioConnection          patchCord14(GSRfilter, 1, mainMixer, 0);
+AudioConnection          patchCord15(respAmp2, 0, mainMixer, 3);
+AudioConnection          patchCord16(mainMixer, 0, AudioOut, 0);
+AudioConnection          patchCord17(mainMixer, 0, AudioOut, 1);
+AudioControlSGTL5000     TeensyAudio;     //xy=87,39
 // GUItool: end automatically generated code

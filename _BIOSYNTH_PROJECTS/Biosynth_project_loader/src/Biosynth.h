@@ -8,26 +8,26 @@
  */
 #pragma once
 
-//TODO : replace <> with "" for written files
-//       make arduino compatible
-
 #include "configuration.h"
+#include "Project_list.h"
 #include "pins.h"
 #include <Chrono.h>
-#include "Logger.h"
+#if LOG
+    #include "Logger.h"
+#endif
 
 class Biosynth
 {    
     Chrono  confirmTimer{false}; //timer used to reset lcd state if section change not confirmed 
     Chrono  lcdUpdate; //timer to slow down lcd refresh rate
-    Chrono biosynthSensorTimer; //timer to slow down biosensor update rate
- 
-    const char sections[configuration::number_of_sections][2] = {"A","B","C","D"}; // section title display on screen
-    
+    Project *project{nullptr};
+    ProjectList selected_project;
     int current_section{0};
     int last_section{-1};
     int lcd_state = 0;
     int current_encoder_value = 0;
+
+    sample data;
 
     #if LOG
         logger session_log; //logger object only create if specified
@@ -118,4 +118,34 @@ private:
      * @param do_once pass false to display the message on screen and reset the timer. pass true just to opdate the timer
      */
     void stop_logging_message(bool do_once);
+
+    /** @brief load the selected project object at boot 
+     */
+    void loadProject();
+
+    /** @brief finalize the biosynth setup with the project information
+     */
+    void finalize();
+
+    /**
+     * @brief display the loaded project on the screen
+     * @param displayTime amount of time to display project name in ms
+     */
+    void selectedProjectMessage(const int &displayTime);
+
+    /**
+     * @brief lets you selects the project to load on boot
+     * @param timeout time for project selection in ms
+     * @return ProjectList 
+     */
+    ProjectList selectProject(const int &timeout);
+    
+    /**
+     * @brief return the current value of the potentiometer
+     * @return float 
+     */
+    float updatePotentiometer();
+
+
 };
+

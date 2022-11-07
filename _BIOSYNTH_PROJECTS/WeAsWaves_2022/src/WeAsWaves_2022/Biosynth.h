@@ -1,33 +1,23 @@
 /*
   This file contain all the code to make the user Biosynth work
-  It handles the encoder, the buttons,  the screen and the Leds
+  It handles the encoder, the buttons, the screen, the Leds, the sensors, and the audio mapping
 */
 
 #define PLOT_SENSOR  false //Set to true to print sensor value in the serial plotter
 #define FOOT_PEDAL false //set to true if using the foot pedal in the project
 #define REVERSE_ENCODER true
 
-//BIO SYNTH SENSOR PINS
-#define LED_PIN 0
-#define HEART_SENSOR_PIN A7
-#define GSR1_PIN A6
-#define RESP_SENSOR_PIN A3
-#define GSR2_PIN A2
+//LCD SCREEN STUFF///////////////
+#include <LiquidCrystal_I2C.h>
+LiquidCrystal_I2C lcd(0x27, 16 , 2); // set the LCD address to 0x27 for a 16 chars and 2 line display
 
+//ENCODER AND FOOTPEDAL STUFF/////////////
 #define ENCODER_PHASE_A 5
 #define ENCODER_PHASE_B 6
 #define ENCODER_SWITCH 2
 #define FOOT_PEDAL_PIN 3
-
-#define NUM_LEDS 3
-#define COLOR_ORDER GRB
-#define CHIPSET WS2812B
-#define BRIGHTNESS 80
-
 #define BUTTON_REFRESH_RATE 1
 
-//#define FASTLED_INTERNAL //turn off build messages
-#include <FastLED.h>
 #define ENCODER_DO_NOT_USE_INTERRUPTS
 #include <Encoder.h>
 
@@ -37,44 +27,90 @@ Encoder myEnc(ENCODER_PHASE_B, ENCODER_PHASE_A);
 Encoder myEnc(ENCODER_PHASE_A, ENCODER_PHASE_B);
 #endif
 
-#include <LiquidCrystal_I2C.h>
-LiquidCrystal_I2C lcd(0x27, 16 , 2); // set the LCD address to 0x27 for a 16 chars and 2 line display
+#include <Bounce2.h>
+Bounce encoderButton = Bounce();
+Bounce footPedal = Bounce();
 
+////////////LED STUFF//////////////////
+#define NUM_LEDS 4
+#define COLOR_ORDER GRB
+#define CHIPSET WS2812B
+#define BRIGHTNESS 24
+
+#include <WS2812Serial.h>
+byte drawing_memory[NUM_LEDS*3];         //  3 bytes per LED
+DMAMEM byte display_memory[NUM_LEDS*12]; // 12 bytes per LED
+#define LED_PIN 31 // pin on bottom of Teensy writes data from serial. Attached to pin 0 via hardwire.
+WS2812Serial leds(NUM_LEDS, display_memory, drawing_memory, LED_PIN, WS2812_GRB);
+
+///////////BIODATA LIBRARY STUFF////////
 #include <Respiration.h>
 #include <SkinConductance.h>
 #include <Heart.h>
-#define HEART_SAMPLE 5  // ?????
 
-Chrono biosynthSensorTimer;  //timer for waiting in between biosynth updates.
+//BIO SYNTH SENSOR PINS
+
+#define HEART_SENSOR_PIN A7
+#define GSR1_PIN A6
+#define RESP_SENSOR_PIN A3
+#define GSR2_PIN A2
 
 Heart heart(HEART_SENSOR_PIN);
 SkinConductance sc1(GSR1_PIN);
 Respiration resp(RESP_SENSOR_PIN);
 SkinConductance sc2(GSR2_PIN);
 
-#include <Bounce2.h>
-Bounce encoderButton = Bounce();
-Bounce footPedal = Bounce();
+///Variables for smoothing out biosignals
+float smoothHeart = 0.5; //default value for smoothing heart signal for EMA
+float smoothHeartAmp = 0.5; //default value for smoothing heart signal for EMA
+float smoothHeartBPM = 0.5; //default value for smoothing heart signal for EMA
+
+float smoothGSR = 0.1;   //default value for smoothing sc1 signal for EMA
+
+float smoothResp = 0.5;  //default value for smoothing resp signal
+float smoothResp2 = 0.5;  //default value for smoothing resp signal
+float smoothResp3 = 0.5;  //default value for smoothing resp signal
+float smoothRespAmp = 0.5;  //default value for smoothing resp signal
+float smoothRespBPM = 0.5;  //default value for smoothing resp signal
+
+float finalResp = 0.1;
+
+//variables for storing last sensor reading
+float heartSig;
+float heartAmp;
+float heartBPM;  
+float GSRsig;
+float GSRlowpass;
+float respSig;
+float respAmp;
+float respBPM;
+float smoothGSRreduced;
+
+int GSRfilt; // value for storing filter data relative to GSR
+
+///EXTRA AUDIO LIBRARY VARIABLES//////////////
+
+float respBPMfun;
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 class Biosynth
 {
   private:
-
-    char sections[NUM_SECTIONS][2] = {"A", "B", "C", "D"};  //Use numbers or letters to describe sections
-    //bool connectedSensors[3] = {};  //this should only be 3, right?
+    Chrono biosynthSensorTimer; // interval timer for how often to sample biosignals
     
-    CRGB leds[NUM_LEDS];  //array holding led colors data
+    WS2812Serial* leds_ptr{nullptr};
 
-    //Here you can modify the RGB Values to determine the colors of the leds 0=HEART 1=GSR1 2=RESP 3= unused
-    //int ledColors [NUM_LEDS][3] = {{250, 0, 250}, {100, 255, 250}, {10, 48, 240}, {0, 0, 0}};
-    int ledColors [NUM_LEDS][3] = {{250, 0, 250}, {100, 255, 250}, {10, 48, 240}};
-    
+    //Here you can modify the RGB Values to determine the colors of the leds 0=HEART 1=GSR1 2=RESP 3= GSR2
+    int ledColors [NUM_LEDS][3] = {{250, 0, 250}, {100, 255, 250}, {10, 48, 240}, {0, 0, 0}};
+  
     //Variables related to the LCD screen, normally you shouldn't need to touch these
     int lcdState = 0;
     long currentEncoderValue = 0;
-
+    
     Chrono  lcdUpdate;
     int lcdInterval = 40;
+    char sections[NUM_SECTIONS][2] = {"A", "B", "C", "D"};  //Use numbers or letters to describe sections
     
     //buffers use one more char than the screen can display for a null terminator
     char lcdLine1Buffer[17];
@@ -177,7 +213,8 @@ class Biosynth
         @function    currentSectionMessage
         @abstract    update the lcd buffers to display the current song section
       */
-      sprintf(lcdLine1Buffer, "   Setting  %s    ", sections[currentSection]);
+      //sprintf(lcdLine1Buffer, "   Setting  %s    ", sections[currentSection]);
+      sprintf(lcdLine1Buffer, "  We as Waves");
       sprintf(lcdLine2Buffer, "                ");
       updateLCDBool = false;
     }
@@ -241,25 +278,25 @@ class Biosynth
         @abstract    setup the ledstrip on startup
       */
       pinMode(LED_PIN, OUTPUT);
-      FastLED.addLeds<CHIPSET, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS).setCorrection( TypicalLEDStrip );
-      FastLED.setBrightness( BRIGHTNESS );
-
+      leds_ptr -> begin();
+      
       //set the default colors of the led of the used sensor
       for ( int i = 0 ; i < NUM_LEDS ; i++ ){
-          leds[i].setRGB( ledColors[i][0], ledColors[i][1], ledColors[i][2]);
+          leds_ptr->setPixel(i,0,0,0);
       }
     }
     
     //---------------
-    void setLedBrightness(int led , float brightness)
+    void setLedBrightness(int led, float brightness)
     { /*!
         @function    setLedBrightness
-        @abstract    set the brightness of the given LED
+        @abstract    set the brightness of an individual LED
         @param  led  index of the led to change the brightness
         @param  brightness  value of the brightness to set (0.0-1.0)
       */
-      leds[led].setRGB(ledColors[led][0]*brightness, ledColors[led][1]*brightness, ledColors[led][2]*brightness);
+      leds_ptr->setPixel(led,ledColors[led][0]*brightness,ledColors[led][1]*brightness,ledColors[led][2]*brightness );
     }
+    
     //---------------
     void setupSensors()
     { /*!
@@ -277,59 +314,112 @@ class Biosynth
               resp.reset();
     }
     //---------------
-    void updateSoundsLights()
-    { /*!
-        @function    update and smooth sound and light ouput
-        @abstract    To link sensors with audio, add interaction here. Smooths out the inputted sensor data every loop.
 
-      */
-      //read volume of gain knob on device
-      float vol = analogRead(VOL_POT_PIN);
-      vol = (vol / 1024) * 0.8; //make sure the gain doesn't go louder than 0.8 to avoid clipping
-
-      // Update volumes.
-      for ( int i = 0 ; i < 4 ; i++ )
-        mixerMain.gain(i, vol); //set all four channels of main mixer to follow gain knob
-
-      //smooth out heartValue
-      float heartValue = heart.getNormalized();
-
-      //slight pulse in gain according to heartbeat    
-      float heartPulse = fundamentalWaveGain + ((float)heartValue / 5);
-      fundWaveAmp.gain(heartPulse);
-      //set brightness of LED
-      setLedBrightness(0 , heartValue - 0.1);
-
-      // SCL
-      float sc1Value = max(sc1.getSCR() - 0.2, 0);
-      setLedBrightness(1 , sc1Value);
-
-      // Respiration.
-
-      //smooth out respValue
-      float respValue = resp.getNormalized();
-      breathingWaveAmp.gain(0.1);
-      setLedBrightness(2, respValue);
-
-      // Default.
-      setLedBrightness(3, 0);
-}
-
-//------------------
-void updateSensors()
-{ /*!
+  void updateSensors()
+  { /*!
     @function    updateSensors
     @abstract    sample the value of the used sensor according to biosynthUpdateTimer.
   */
-  heart.update();
-  sc1.update();
-  resp.update();
+    heart.update();
+    sc1.update();
+    resp.update();
+
+    //Retrieve sensor values
+    heartSig = heart.getNormalized();
+    heartAmp = heart.amplitudeChange();
+    heartBPM = heart.bpmChange();
+      
+    GSRsig = sc1.getSCR();
+      
+    respSig = resp.getNormalized();
+    respAmp = resp.amplitudeChange();
+    respBPM = resp.bpmChange();
+    
+    ///////Run Serial print commands here for testing/////
+    Serial.println(sc1.getRaw() );
+  }
+  
+  //------------------
+
+  void updateVolume()
+  { /*!
+     @function    updateVolume
+     @abstract    update main volume of the device through volume potentiometer
+    */    
+    float vol = analogRead(VOL_POT_PIN);
+    vol = (vol / 1024) * 0.95; //make sure the gain doesn't go louder than 0.95 to avoid clipping
+   
+    for ( int i = 0 ; i <= 3 ; i++ ) {  //set all four channels of main mixer to follow gain knob
+      mainMixer.gain(i, vol);    
+      if (i == 0) mainMixer.gain(i, vol*smoothGSRreduced*1.2); //clamp down heartbeat volume a bit when GSR is low 
+      if (i == 3) mainMixer.gain(i, vol/8);  //clamp down on these more distorted sounds from respiration
+    }
+  }
+      
+  void updateSoundsLights()
+  { /*!
+        @function    update and smooth sound and light ouput
+        @abstract    To link sensors with audio, add interaction here. 
+                     Smooths out the sensor data every loop.
+    */
+      
+    ////////////////////////smooth signals       
+    smoothHeart += 0.005 * (heartSig - smoothHeart);
+    
+    smoothGSR += 0.8 * (GSRsig - smoothGSR); // run EMA filter
+    smoothGSRreduced = max((smoothGSR-0.1), 0.0);  //subtract a bit from GSR value but don't pass 0  
+ 
+    smoothResp += 0.001 * (respSig - smoothResp);
+    smoothResp2 += 0.0001 * (respSig - smoothResp2);
+    smoothResp3 += 0.00005 * (respSig - smoothResp3);      
+    finalResp = max((smoothResp-0.25), 0);
+      
+    //////AUDIO TRANSFORMATIONS////////////////////////////////////////////////
+
+    //RESPIRATION///////////////////////////////
+  
+    //use breaths per minute to detune fundamental - if breathing is regular it will not be affected
+    respBPMfun = (respBPM*10)-0.5; 
+    respWave2.frequency(respBPMfun+respTone); //detuned wave mixed with fundamental
+      
+    respnoiseLFO.frequency(respAmp*100); //gently modulate respNoise through the amplitude of the breath
+
+    
+    respAmp2.gain(smoothResp3*0.75); //secondary resptone comes in through lowpass filter    
+    respFilter.frequency(respTone*(respAmp)); // moving bandpass around the secondary respTone    
+  
+    //set the gain of respiration tones in accordance with respiration signal
+    for (int x=0; x <=3; x++) {
+      respMixer.gain(x, max((finalResp-0.4), 0)); //linked to resp signal and a little quieter
+      if(x==2) respMixer.gain(x, smoothResp2*0.05); //linked to a lowpassed resp signal and even quieter
+    }
+
+    //////////HEART////////////////////////
+    if (heart.beatDetected()) clickEnvelope.noteOn(); //activate the env but never turn it off: it creates useful clicks     
+    heartLFO.frequency(heartBPM*8);  //the frequency of the heartsignal LFO
+    heartEnvAmp.gain(0.1+(smoothHeart/2)); // clicks follow the envelope of heart signal 
+
+    ////GSR//////////////////////////////////           
+    // map GSR signal to a bandpass filter frequency for filtering heartclicks
+    GSRfilt = GSRsig*100; //convert Gsrsig into a value from 1-100
+    int y = map(GSRfilt, 1, 100, 750, 10000);
+    GSRfilter.frequency(y);
+        
+    // set brighness of LEDs with smoothed signals
+    setLedBrightness(0, smoothHeart*0.7); //making this signal a bit dimmer because red is naturally powerful
+    setLedBrightness(1, smoothGSRreduced);
+    setLedBrightness(2, finalResp*1.2);  // making this signal brighter because blue is naturally weaker
+    setLedBrightness(3, 0);
 }
 
+
+/************************************************************************/
 /************************************************************************/
 public:
-
-
+    Biosynth(WS2812Serial* _led_ptr):leds_ptr{_led_ptr}  //call serial library
+    {
+    }
+//-----------------------
 void setup()
 { /*!
     @function    setup
@@ -347,24 +437,29 @@ void update()
     @function    update
     @abstract    wrapper function running all the hardware update routines and the necessary verifications
   */
+
+  updateSoundsLights();
   updateButtons();
   updateEncoder();
-  updateSoundsLights();
-
-  if (biosynthSensorTimer.hasPassed(1)) {  //this should only update once in a while
+  updateVolume();
+  
+  if (biosynthSensorTimer.hasPassed(40)) {  //force a reasonable delay between readings
     updateSensors(); 
     biosynthSensorTimer.start();
   }
 
   //lcd state verifications
-  sectionChange();
-  verifyNoTouch();
+
+  //!!!!!!!!!I turned these off for the We as Waves ISEA performance.  
+  //!!!!!!!!Turn them back on later!
+     //sectionChange();
+     //verifyNoTouch();
 
   if ( lcdUpdate.hasPassed(lcdInterval))
   {
     lcdUpdate.restart();
     updateLCD(); //update lcd display buffers
-    FastLED.show();
+    leds_ptr->show(); // update LED buffers
   }
 
 }
@@ -408,11 +503,12 @@ void openingMessage()
     @function    openingMessage
     @abstract    update the lcd buffers with the greeting message
   */
-  sprintf(lcdLine1Buffer, "  Wave Testing.");
-  sprintf(lcdLine2Buffer, "This is board #%d", BOARD_ID);
+  sprintf(lcdLine1Buffer, "  Welcome.");
+  sprintf(lcdLine2Buffer, "I am board #%d", BOARD_ID+1);
   lcd.setCursor(0, 0);
   lcd.print(lcdLine1Buffer);
   lcd.setCursor(0, 1);
   lcd.print(lcdLine2Buffer);
 }
+
 };

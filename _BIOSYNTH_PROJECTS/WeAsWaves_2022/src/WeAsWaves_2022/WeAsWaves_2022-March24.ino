@@ -1,11 +1,12 @@
 //#include <LCD_I2C_Teensy36.h>
 #include "Global.h" //include file containing global variables
 #include "Biosynth.h"
-Biosynth biosynth; //Initiate the Biosynth object
+Biosynth biosynth{&leds}; // initiate the biosynth object
+
 #include "Helpers.h"
 
 //////////////////////////////////////HARDWARE DESIGNATIONS ON PCB////////////////////////////////////////////
-// 0 - LEDS
+// 0 - SERIAL RECEIVE
 // 1 - SERIAL SEND
 // 2 - Encoder Button / User Interface
 // 3 - FootPedal Button / Activation Pin
@@ -29,19 +30,22 @@ Biosynth biosynth; //Initiate the Biosynth object
 // 21 - (A7) PULSE 
 // 22 - Audio
 // 23 - Audio
+// 31 - (back of Teensy) LEDS
+
 void setup() {
 
   Serial.begin(9600);
-  AudioMemory(10);
+  AudioMemory(80);
   setupAudioShield(); 
   biosynth.setup();
   biosynth.openingMessage();
+
 }
 
 void loop() 
 { 
-  openingMessage();
   biosynth.update();
+  openingMessage();
   
   if(pedalMarker==0){ // pedal usually reads nothing
     footPedal.update();
@@ -55,7 +59,9 @@ void loop()
     setupSounds();
     openingMessage();
     checkSectionChange();
+    biosynth.update();
   }
   
+
 
 }
