@@ -15,11 +15,12 @@
 #include <Arduino.h>
 #include <Audio.h>
 
+
 static AudioConnection *patch_cords[20];
 
 
 class Project{
-
+    
     const char* name{"project"};
     static const int number_of_boards{7};
     static const int number_of_sections{4};
@@ -32,6 +33,7 @@ class Project{
     SkinConductance *sc2;
 
     sample processed_for_leds{};
+    char section_message[17];
 
     public:
 

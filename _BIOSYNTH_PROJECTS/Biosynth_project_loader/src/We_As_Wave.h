@@ -31,6 +31,7 @@ class WeAsWaves :public Project{
     SkinConductance *sc2;
 
     sample processed_for_leds{};
+    char section_message[17];
 
     //ADD audio objects here. No need to add the sgt5000 object
     AudioSynthWaveform       heartLFO;      //xy=64,125 aka waveform5
@@ -278,6 +279,8 @@ void changeSection(const int currentSection) override //this is where we change 
           respWave1.begin(0.5, respTone, WAVEFORM_BANDLIMIT_SAWTOOTH_REVERSE);
            respWave2.begin(0.2, respTone, WAVEFORM_BANDLIMIT_SAWTOOTH_REVERSE);   
         }
+        
+
 }
 
 const char* getName() override { //Do not modify, just copy paste to new project
@@ -289,7 +292,8 @@ const int getNumberOfSection() override { //Do not modify, just copy paste to ne
 }
 
 const char* getSectionTitle(const int section_index) override { //Do not modify, just copy paste to new project
-    return sections_title[section_index];
+    sprintf(section_message, "Affect Flow  %s",sections_title[section_index]);
+    return section_message;
 }
 
 sample getLedProcessed() override{ //Do not modify, just copy paste to new project

@@ -102,8 +102,8 @@ void Biosynth::update(){
             section_change();
             verify_no_touch();
         #endif
-        sample test = project->getLedProcessed();
-        Serial.println(test.gsr);
+        //sample test = project->getLedProcessed();
+        //Serial.println(test.gsr);
         led::update(project->getLedProcessed());
     }
 }
@@ -157,23 +157,33 @@ void Biosynth::maybe_confirm_section_change(){
         current_section = current_encoder_value;
         project->changeSection(current_encoder_value);
         current_section_message();
+        confirmTimer.restart();
+        confirmTimer.stop();
     }
 }
 
-void Biosynth::current_section_message()
+
+void Biosynth::verify_no_touch()
 {
-    sprintf(screen::buffer_line_1, "  Section  %s    ",project->getSectionTitle(current_encoder_value));
-    sprintf(screen::buffer_line_2, "                ");
-    lcd_state = 2;
-    screen::update();  
+
+    if(confirmTimer.hasPassed(configuration::confirmation_delay) && lcd_state == 1)
+    {   
+        encoder::set_value(current_section);
+        current_section_message();
+        confirmTimer.restart();
+        confirmTimer.stop();
+    }
 }
 
 void Biosynth::section_change()
-{
+{  
+    
     if(current_encoder_value != current_section )
-    {      
+    {     
         section_confirm_message(current_encoder_value);
-        confirmTimer.start();    
+        if(!confirmTimer.isRunning()){
+            confirmTimer.start();  
+        }  
     }
 }
 
@@ -216,22 +226,22 @@ void Biosynth::stop_logging_message(bool do_once)
 
 void Biosynth::section_confirm_message(const int encoder_value)
 {
-    sprintf(screen::buffer_line_1, "  Section : %s", project->getSectionTitle(current_encoder_value));
+    //if(selected_project == WE_AS_WAVE) return;
+
+    sprintf(screen::buffer_line_1, "%s", project->getSectionTitle(current_encoder_value));
     sprintf(screen::buffer_line_2, "   Confirm ?   ");
     lcd_state = 1;
     screen::update();  
 }   
 
-void Biosynth::verify_no_touch()
+void Biosynth::current_section_message()
 {
-    if(confirmTimer.hasPassed(configuration::confirmation_delay) && lcd_state == 1)
-    {   
-        encoder::set_value(current_section);
-        current_section_message();
-        confirmTimer.restart();
-        confirmTimer.stop();
-    }
+    sprintf(screen::buffer_line_1, "%s",project->getSectionTitle(current_section));
+    sprintf(screen::buffer_line_2, "                ");
+    lcd_state = 2;
+    screen::update();  
 }
+
 
 void Biosynth::advance_section(){
     current_section++;
