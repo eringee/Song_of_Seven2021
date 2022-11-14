@@ -23,8 +23,15 @@ void Biosynth::initialize(){
     screen::initialize();
     encoder::initialize();
     button::initialize();
+    biosensors::initialize();
+    audio_manager::audio_shield_initialization();  
+    led::initialize();
     loadProject();
-    finalize();
+    #if LOG
+        session_log.initialize();
+    #endif
+
+    screen::clear();
 }
 
 void Biosynth::loadProject(){
@@ -44,18 +51,6 @@ void Biosynth::loadProject(){
     Log.infoln("Project loaded: %s",project->getName());
     project ->setup();
     selectedProjectMessage(3000);  //get stuck when trying to update lcd
-}
-
-void Biosynth::finalize(){  
-    audio_manager::audio_shield_initialization();
-    led::initialize();
-    biosensors::initialize();
-
-    #if LOG
-        session_log.initialize();
-    #endif
-    screen::clear();
-
 }
 
 
@@ -226,8 +221,6 @@ void Biosynth::stop_logging_message(bool do_once)
 
 void Biosynth::section_confirm_message(const int encoder_value)
 {
-    //if(selected_project == WE_AS_WAVE) return;
-
     sprintf(screen::buffer_line_1, "%s", project->getSectionTitle(current_encoder_value));
     sprintf(screen::buffer_line_2, "   Confirm ?   ");
     lcd_state = 1;
@@ -253,6 +246,7 @@ void Biosynth::advance_section(){
 float Biosynth::updatePotentiometer(){
         float vol = analogRead(pins::audio_shield::volume);
         vol = (vol/1024)*0.8; //make sure the gain doesn't go louder than 0.8 to avoid clipping
+        //Log.traceln(vol);
         return vol;
 }
 

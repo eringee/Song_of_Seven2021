@@ -94,6 +94,11 @@ class SongOfSeven :public Project{
         sine_fm3.amplitude(0.1);
         sine1.amplitude(0.05);
 
+        //mute the mixers before updating to avoid big volume change
+        for( int i = 0 ; i < 4 ; i++ )
+        {    
+            mixerMain.gain(i, 0);  //set all four channels of main mixer to follow gain knob
+        }
     }
 
     public:
@@ -141,6 +146,7 @@ class SongOfSeven :public Project{
 
 //Project update volume loop. Modify here if project needs special volume clamping
 void updateVolume(float vol) override{
+
     for( int i = 0 ; i < 4 ; i++ )
     {    
         mixerMain.gain(i, vol);  //set all four channels of main mixer to follow gain knob
