@@ -16,8 +16,8 @@
 
 namespace configuration{
     
-    const int board_id{0};
-    const float volume{0.6}; //Initial volume of the board
+    const int board_id{6};
+    const float volume{0.4}; //Initial volume of the board
 
     const int boot_delay{2000}; //Amount of time to wait before initialization
     const int confirmation_delay{3000}; //Time allowed to confirm section change
