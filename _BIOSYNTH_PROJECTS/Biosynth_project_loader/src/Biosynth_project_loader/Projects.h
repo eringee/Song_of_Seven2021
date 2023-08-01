@@ -15,7 +15,7 @@
 #include <Arduino.h>
 #include <Audio.h>
 
-static AudioConnection *patch_cords[20];
+static AudioConnection *patch_cords[50];
 
 
 class Project{

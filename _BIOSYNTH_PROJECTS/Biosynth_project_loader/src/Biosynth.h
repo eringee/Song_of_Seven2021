@@ -29,7 +29,6 @@ class Biosynth
 
     sample data;
 
-
     #if LOG
         logger session_log; //logger object only create if specified
     #endif

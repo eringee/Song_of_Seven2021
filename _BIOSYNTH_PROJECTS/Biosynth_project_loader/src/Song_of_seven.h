@@ -34,7 +34,6 @@ class SongOfSeven :public Project{
     SkinConductance *sc2;
 
     sample processed_for_leds{};
-    char section_message[17];
 
     //ADD audio objects here. No need to add the sgt5000 object
     AudioSynthWaveform       waveform3;      //xy=1014,743
@@ -174,8 +173,6 @@ void changeSection(const int currentSection) override
           sine_fm3.amplitude(0.1);  
           sine1.amplitude(0.1);
         }
-        
-        
 }
 
 const char* getName() override { //Do not modify, just copy paste to new project
@@ -186,9 +183,8 @@ const int getNumberOfSection() override { //Do not modify, just copy paste to ne
     return number_of_sections;
 }
 
-const char* getSectionTitle(const int section_index) override { 
-    sprintf(section_message, "  Section  %s    ",sections_title[section_index]);
-    return  section_message;
+const char* getSectionTitle(const int section_index) override { //Do not modify, just copy paste to new project
+    return sections_title[section_index];
 }
 
 sample getLedProcessed() override{ //Do not modify, just copy paste to new project
