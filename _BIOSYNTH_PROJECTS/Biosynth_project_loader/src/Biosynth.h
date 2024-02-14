@@ -6,7 +6,11 @@
  * @version 1.1
  * @date 2022-04-02 
  */
+#ifndef BIOSYNTH_H
+#define BIOSYNTH_H
 #pragma once
+
+#include <Arduino.h>
 
 #include "configuration.h"
 #include "Project_list.h"
@@ -16,19 +20,31 @@
     #include "Logger.h"
 #endif
 
+
+
 class Biosynth
 {    
     Chrono  confirmTimer{false}; //timer used to reset lcd state if section change not confirmed 
     Chrono  lcdUpdate; //timer to slow down lcd refresh rate
     Project *project{nullptr};
     ProjectList selected_project;
+
     int current_section{0};
     int last_section{-1};
     int lcd_state = 0;
     int current_encoder_value = 0;
 
     sample data;
+    bool master = true;
+    bool linked = false;
 
+    const static int numChars = 64;
+    char commBuffer[numChars];
+    char terminationChar = '\n';
+    bool newData = false;
+    const char* pingCommand = "SYN";
+    const char* synackCommand = "SYNACK";
+    const char* confirmCommand = "ACK";
 
     #if LOG
         logger session_log; //logger object only create if specified
@@ -50,7 +66,20 @@ public:
      */
     void update();
 
+    void send_over_serial(sample signals,Print *output, int rate_ms);
+
 private:
+    void recvWithEndMarker(); 
+    void send_ack();
+    void send_syn();
+    void send_synack();
+    bool wait_for_syn(const int timeout);
+    bool wait_for_ack(const int timeout);
+    bool wait_for_synack(const int timeout);
+    void ping_master();
+    void wait_for_slave();
+bool wait_for_command(const int timeout, const char* command);
+    void set_role();
 
     /** @brief check to see if the user confirmed a section change 
      */
@@ -146,3 +175,4 @@ private:
 
 };
 
+#endif

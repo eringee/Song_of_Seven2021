@@ -6,25 +6,209 @@
  * @date 2022-04-02
  */
 #include "Biosynth.h"
+
 #include <ArduinoLog.h>
-#include "Project_list.h"
-#include "lcd.h"
+#include <Chrono.h>
+
+#include "audio_manager.h"
 #include "biosensors.h"
 #include "buttons.h"
 #include "enc.h"
+#include "lcd.h"
 #include "led.h"
-#include "audio_manager.h"
+#include "Project_list.h"
+
+void Biosynth::send_syn(){
+            Serial1.clear();
+     
+            if (Serial1.availableForWrite()) {
+                Serial1.println(pingCommand);
+
+            }
+        Log.infoln("SYN sent");
+}
+
+void Biosynth::send_synack(){
+ Serial1.clear();
+     
+            if (Serial1.availableForWrite()) {
+                Serial1.println(synackCommand);
+
+            }
+             Log.infoln("SYNACK sent");
+}
+
+void Biosynth::send_ack(){
+    Serial1.clear();
+    if (Serial1.availableForWrite()) {
+        
+        Serial1.println(confirmCommand);
+    }
+    Log.infoln("ACK sent");
+}
+
+
+bool Biosynth::wait_for_synack(const int timeout){
+    Log.traceln("wait_for_synack");
+    int current = millis();
+    int elapsed = 0;
+    Serial1.clear();
+    while(elapsed < timeout){
+        if(Serial1.available()>= sizeof(synackCommand)){
+                         char buff[sizeof(synackCommand)];
+                         Serial1.readBytes(buff,sizeof(synackCommand));
+                         Log.infoln("%s",buff);
+                         if (strcmp(buff,synackCommand) == 0){
+                            return true;
+                         }
+                    }
+        elapsed = millis() - current;
+    }
+    Log.warningln("waiting for syncack timed out");
+    return false;
+}
+
+
+void Biosynth::recvWithEndMarker() {
+    static byte ndx = 0;
+    char endMarker = '\n';
+    char rc;
+    
+    while (Serial1.available() > 0 && newData == false) {
+        rc = Serial1.read();
+        Serial.println(rc);
+        if (rc != endMarker) {
+            // store char if not termination
+            commBuffer[ndx] = rc;
+            ndx++;
+            if (ndx >= numChars) {
+                ndx = numChars - 1;
+            }
+        }
+        else {
+            Serial.println("Here");
+            commBuffer[ndx] = '\0'; // terminate the string
+            ndx = 0;
+            newData = true;
+        }
+    }
+}
+
+bool Biosynth::wait_for_ack(const int timeout){
+    int current = millis();
+    int elapsed = 0;
+    Serial1.clear();
+    while(elapsed < timeout){
+        if(Serial1.available()){
+                        Log.traceln("here");
+                         char buff[sizeof(confirmCommand)];
+                         Serial1.readBytes(buff,sizeof(confirmCommand));
+                         Log.infoln("%s",buff);
+                         if (strcmp(buff,confirmCommand) == 0){
+                            return true;
+                         }
+                    }
+        elapsed = millis() - current;
+    }
+    Log.warningln("waiting for ack timedout");
+    return false;
+}
+
+bool::Biosynth::wait_for_syn(const int timeout){
+     int current = millis();
+     int elapsed = 0;
+    while(elapsed < timeout){
+        recvWithEndMarker();
+        if(newData){
+            Serial.println("Here2");
+             Log.infoln("%s",commBuffer);
+             if(strstr(commBuffer,pingCommand) != NULL){
+                Log.infoln("Pinged by slave");
+                return true;  
+            }
+        }
+
+        elapsed = millis() - current;
+    }
+    return false;
+    Log.warningln("waiting for syn timed out");
+}
+
+bool Biosynth::wait_for_command(const int timeout, const char* command){
+     int current = millis();
+     int elapsed = 0;
+    while(elapsed < timeout){
+        recvWithEndMarker();
+        if(newData){
+            Serial.println("Here3");
+             Log.infoln("%s",commBuffer);
+             if(strstr(commBuffer,command) != NULL){
+                Log.infoln("command received");
+                commBuffer[0] = '\0';
+                newData = false;
+                return true;  
+            }
+        }
+
+        elapsed = millis() - current;
+    }
+    return false;
+    Log.warningln("waiting for command timed out");
+}
+
+void Biosynth::ping_master(){
+    int timeout = 3000;
+    bool syn,synack,ack = false;
+    while (!linked) {
+        send_syn();
+        if (wait_for_command(timeout,synackCommand)) {
+                synack = true;
+                send_ack();
+                linked = true;
+            }
+        }
+    Log.infoln("Link susccessfull");
+}
 
 
 
-void Biosynth::initialize(){
 
+void Biosynth::wait_for_slave(){
+    int timeout = 3000;
+     bool syn,synack,ack = false;
+    //Print to lcd waiting for salve
+    Log.infoln("Waiting for slave to ping...");
+    
+    while (!linked) {
+
+        if (wait_for_command(timeout, pingCommand)) {
+            syn=true;
+            send_synack();
+            if (wait_for_command(timeout,confirmCommand)) {
+                linked = true;
+            }
+        }
+    }
+    Log.infoln("Link susccessfull");
+}
+
+void Biosynth::initialize() {
     Log.infoln("Erin Gee's Biosynth");
+    Serial1.setTimeout(3000);
+    Serial1.begin(115200 );
+    set_role();
+
+    if (master) {
+        wait_for_slave();
+    } else {
+        ping_master();
+    }
+
     screen::initialize();
     encoder::initialize();
     button::initialize();
     biosensors::initialize();
-    audio_manager::audio_shield_initialization();  
+    audio_manager::audio_shield_initialization();
     led::initialize();
     loadProject();
     #if LOG
@@ -34,10 +218,10 @@ void Biosynth::initialize(){
     screen::clear();
 }
 
-void Biosynth::loadProject(){
+void Biosynth::loadProject() {
     selected_project = selectProject(5000);
     
-    switch (selected_project) //add new projects to this switch case (just copy paste the case and change the title and class name)
+    switch (selected_project)  //add new projects to this switch case (just copy paste the case and change the title and class name)
     {
     case SONG_OF_SEVEN:
         project = new SongOfSeven(&biosensors::heart,&biosensors::sc1,&biosensors::resp,&biosensors::sc2);
@@ -57,16 +241,22 @@ void Biosynth::loadProject(){
 void Biosynth::update(){
 
     biosensors::update(); 
+    data = biosensors::sample_sensors();
+
     project->updateVolume(updatePotentiometer());
     project->update();
     
 
     #if PLOT_SENSOR
-        plot_sampled_data(signals);
+        plot_sampled_data(data);
     #endif
-    
+
+    #if SEND_OVER_SERIAL
+    //maybe wrap this into chrono
+        send_over_serial(data,&Serial,16);
+    #endif
     #if LOG
-        session_log.log_data(signals);
+        session_log.log_data(data);
     #endif
 
     current_encoder_value = encoder::update(project->getNumberOfSection());
@@ -281,10 +471,35 @@ void Biosynth::selectedProjectMessage(const int &displayTime){
     }
 }
 
+
+void Biosynth::send_over_serial(sample signals,Print *output, int rate_ms){
+        static Chrono wait(true);
+
+        if(wait.hasPassed(rate_ms,true)){
+            output->printf("ID %d,H %.2f,G %.2f,R %.2f\n",configuration::board_id,signals.heart.sig,signals.gsr,signals.resp.sig);
+        }
+        
+    }
+
 #if PLOT_SENSOR
     void Biosynth::plot_sampled_data(sample signals){
 
-        Serial.printf("%.2f,%.2f,%.2f",signals.heart,signals.gsr,signals.respiration);
+        Serial.printf("%.2f,%.2f,%.2f",signals.heart.sig,signals.gsr,signals.resp.sig);
         Serial.println();
     }
 #endif
+
+
+void Biosynth::set_role(){
+
+    if (configuration::board_id % 2 == 1 ) master = false;
+
+    if(master){
+        Log.infoln("Biosynth acting as a Master");
+    }else{
+        Log.infoln("Biosynth acting as a Slave");
+    }
+
+}
+
+

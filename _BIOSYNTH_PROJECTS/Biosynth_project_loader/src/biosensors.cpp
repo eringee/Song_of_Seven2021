@@ -31,7 +31,7 @@ namespace biosensors{
 
     void update(){
         static Chrono timer;
-        if(timer.hasPassed(configuration::biosensors_sample_rate,true)) {
+        if(timer.hasPassed(configuration::biosensors_sample_rate_ms,true)) {
             heart.update();
             sc1.update();
             resp.update();

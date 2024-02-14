@@ -11,6 +11,8 @@
 
 namespace pins{
     
+    //Pins 0 and 1 are used for Serial communication over Serial1
+
     namespace sd{
         const int cs{10};
         const int mosi{7};
@@ -30,7 +32,7 @@ namespace pins{
     }//namespace sensors
 
     namespace hardware{
-        const int led {31};
+        const int led {31}; //using Serial2
         const int encoder_A {5};
         const int encoder_B {6};
         const int encoder_button {2};
