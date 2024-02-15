@@ -42,9 +42,21 @@ class Biosynth
     char commBuffer[numChars];
     char terminationChar = '\n';
     bool newData = false;
-    const char* pingCommand = "SYN";
-    const char* synackCommand = "SYNACK";
-    const char* confirmCommand = "ACK";
+
+    struct commands
+    {
+        const char* syn = "SYN";
+        const char* synack = "SYNACK";
+        const char* ack = "ACK";
+    } command;
+    
+    // enum commands : const char* {
+    //     syn = "SYN",
+
+    // }
+    // const char* pingCommand = "SYN";
+    // const char* synackCommand = "SYNACK";
+    // const char* confirmCommand = "ACK";
 
     #if LOG
         logger session_log; //logger object only create if specified
@@ -66,19 +78,14 @@ public:
      */
     void update();
 
-    void send_over_serial(sample signals,Print *output, int rate_ms);
+    void send_over_serial(sample signals, Print *output, int rate_ms);
 
 private:
-    void recvWithEndMarker(); 
-    void send_ack();
-    void send_syn();
-    void send_synack();
-    bool wait_for_syn(const int timeout);
-    bool wait_for_ack(const int timeout);
-    bool wait_for_synack(const int timeout);
+    void recvWithEndMarker();
     void ping_master();
     void wait_for_slave();
-bool wait_for_command(const int timeout, const char* command);
+    void send_command(const char* command);
+    bool wait_for_command(const int timeout, const char* command);
     void set_role();
 
     /** @brief check to see if the user confirmed a section change 
