@@ -15,8 +15,6 @@
 #include "led.h"
 #include "audio_manager.h"
 
-
-
 void Biosynth::initialize(){
 
     Log.infoln("Erin Gee's Biosynth");
@@ -28,7 +26,7 @@ void Biosynth::initialize(){
 }
 
 void Biosynth::loadProject(){
-    selected_project = selectProject(5000);
+    selected_project = selectProject(3000);
     
     switch (selected_project) //add new projects to this switch case (just copy paste the case and change the title and class name)
     {
@@ -42,8 +40,9 @@ void Biosynth::loadProject(){
     }
 
     Log.infoln("Project loaded: %s",project->getName());
+    selectedProjectMessage(1000);  
     project ->setup();
-    selectedProjectMessage(3000);  //get stuck when trying to update lcd
+    
 }
 
 void Biosynth::finalize(){  
@@ -141,12 +140,14 @@ void Biosynth::opening_message()
         sprintf(screen::buffer_line_2, "I am board #%d",configuration::board_id+1);
         screen::update();
         do_once = true;
-
+//  -- ELIMINATING SECTIONS MESSAGE FOR AFFECT FLOW///////////////////////////////////////////////////////////////////////////////
     }else if(timer.hasPassed(configuration::opening_message_time) && do_once){
-        current_section_message();
+        current_section_message();  
         timer.restart();
         timer.stop();
     }
+
+
 }
 
 void Biosynth::maybe_confirm_section_change(){
@@ -162,7 +163,10 @@ void Biosynth::maybe_confirm_section_change(){
 
 void Biosynth::current_section_message()
 {
-    sprintf(screen::buffer_line_1, "  Section  %s    ",project->getSectionTitle(current_encoder_value));
+    
+    //sprintf(screen::buffer_line_1, "  Section  %s    ",project->getSectionTitle(current_encoder_value));
+    
+    sprintf(screen::buffer_line_1, "  Affect Flow");
     sprintf(screen::buffer_line_2, "                ");
     lcd_state = 2;
     screen::update();  
@@ -257,10 +261,10 @@ ProjectList Biosynth::selectProject(const int &timeout){ //need to be modified i
 
     if (project == 1){ //project selected when button not pressed on boot
      
-        return SONG_OF_SEVEN;
+        return WE_AS_WAVE;
     }
     else{ //project selected when button not pressed on boot
-        return WE_AS_WAVE;
+        return SONG_OF_SEVEN;
     }
 }
 

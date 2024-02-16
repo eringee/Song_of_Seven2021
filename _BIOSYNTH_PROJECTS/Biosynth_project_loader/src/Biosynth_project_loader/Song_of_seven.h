@@ -135,7 +135,7 @@ class SongOfSeven :public Project{
         //vvvTO UPDATE LED COLORS CHANGE THE right and side of these. Make it equal to 0 if you're not using the LEDSvvv
         processed_for_leds.heart.sig = smooth_heart;
         processed_for_leds.gsr = smooth_gsr;
-        processed_for_leds.resp.sig = smooth_respiration;    
+        processed_for_leds.resp.sig = 0;    
    
    
     };
