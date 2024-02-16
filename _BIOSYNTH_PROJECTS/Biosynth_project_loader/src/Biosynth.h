@@ -123,10 +123,6 @@ private:
      */
     void loadProject();
 
-    /** @brief finalize the biosynth setup with the project information
-     */
-    void finalize();
-
     /**
      * @brief display the loaded project on the screen
      * @param displayTime amount of time to display project name in ms

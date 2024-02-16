@@ -21,8 +21,15 @@ void Biosynth::initialize(){
     screen::initialize();
     encoder::initialize();
     button::initialize();
+    biosensors::initialize();
+    audio_manager::audio_shield_initialization();  
+    led::initialize();
     loadProject();
-    finalize();
+    #if LOG
+        session_log.initialize();
+    #endif
+
+    screen::clear();
 }
 
 void Biosynth::loadProject(){
@@ -43,18 +50,6 @@ void Biosynth::loadProject(){
     selectedProjectMessage(1000);  
     project ->setup();
     
-}
-
-void Biosynth::finalize(){  
-    audio_manager::audio_shield_initialization();
-    led::initialize();
-    biosensors::initialize();
-
-    #if LOG
-        session_log.initialize();
-    #endif
-    screen::clear();
-
 }
 
 
@@ -247,6 +242,7 @@ void Biosynth::advance_section(){
 float Biosynth::updatePotentiometer(){
         float vol = analogRead(pins::audio_shield::volume);
         vol = (vol/1024)*0.8; //make sure the gain doesn't go louder than 0.8 to avoid clipping
+        //Log.traceln(vol);
         return vol;
 }
 

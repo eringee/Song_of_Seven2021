@@ -51,9 +51,11 @@ class SongOfSeven :public Project{
 
     int section_frequency[number_of_sections][number_of_boards] {
         {622,933,1244,1555,1866,2177,2488},  // going to canada
+         //{659, 987, 1318, 1661, 1975, 2349, 2637},
         {174,348,1244,1555,1566,1740,2488},  // cat died
         {392,416,448,587,659,1046,1174},     // fluffy bunny
         {1148,1312,1476,1640,1804,1968,2132} // board games
+     
     };
 
 
