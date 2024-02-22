@@ -18,16 +18,27 @@ struct sample{
     struct heart{
         float sig;
         float amp;
-        int bpm;
+        float bpm;
     }heart;
     
-    float gsr;
-    float gsr2;
+
+    struct gsr{
+        float sig;
+        float scl;
+        float scr;
+    } gsr;
+
+    struct gsr2{
+        float sig;
+        float scl;
+        float scr;
+    }gsr2;
 
     struct resp{
         float sig;
+        float bpm;
         float amp;
-        int bpmchange;
+
     }resp;
 
 };

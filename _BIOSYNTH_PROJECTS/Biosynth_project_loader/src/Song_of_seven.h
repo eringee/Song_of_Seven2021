@@ -121,15 +121,15 @@ class SongOfSeven :public Project{
         static float smooth_respiration = 0.5;  //default value for smoothing out resp signal for EMA
     
         //retrieve signals   
-        sample signals{};
-        signals.heart.sig = heart->getNormalized();
-        signals.gsr = sc1->getSCR(); 
-        signals.resp.sig = resp->getNormalized();
+        // sample signals{};
+        // signals.heart.sig = heart->getNormalized();
+        // signals.gsr.scr = sc1->getSCR(); 
+        // signals.resp.sig = resp->getNormalized();
        
         //smooth signals
-        smooth_heart += 0.1 * (signals.heart.sig - smooth_heart);
-        smooth_gsr += 0.5 * (signals.gsr - smooth_gsr);
-        smooth_respiration += 0.5 * (signals.gsr - smooth_respiration); // I JUST COPIED THE GSR SMOOTH FUNCTION  PLEASE MODIFY
+        smooth_heart += 0.1 * (heart->getNormalized() - smooth_heart);
+        smooth_gsr += 0.5 * (sc1->getSCR() - smooth_gsr);
+        smooth_respiration += 0.5 * (resp->getNormalized() - smooth_respiration); // I JUST COPIED THE GSR SMOOTH FUNCTION  PLEASE MODIFY
 
 
         amp1.gain(smooth_respiration); //
@@ -138,7 +138,7 @@ class SongOfSeven :public Project{
 
         //vvvTO UPDATE LED COLORS CHANGE THE right and side of these. Make it equal to 0 if you're not using the LEDSvvv
         processed_for_leds.heart.sig = smooth_heart;
-        processed_for_leds.gsr = smooth_gsr;
+        processed_for_leds.gsr.scr = smooth_gsr;
         processed_for_leds.resp.sig = 0;    
    
    
@@ -158,7 +158,7 @@ void changeSection(const int currentSection) override
 {
     
         /// THIS IS WHERE YOU NEED TO UPDATE THE FREQUENCY VALUES
-        sine_fm2.frequency(section_frequency[currentSection][configuration::board_id-1]);
+        sine_fm2.frequency(section_frequency[currentSection][configuration::board_id]); //removed -1 (Etienne)
         if (currentSection==0){
           sine_fm3.frequency(311);   //atmospheric sine1
           sine1.frequency(424);      //atmospheric sine2

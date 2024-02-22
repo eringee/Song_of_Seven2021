@@ -21,7 +21,7 @@ void setup() {
   
   //To silent the logging replace LOG_LEVEL_INFO with LOG_LEVEL_SILENT
   //I recommend leaving at least LOG_LEVEL_WARNING to print errors at least
-  Log.begin(LOG_LEVEL_TRACE,&Serial); 
+  Log.begin(LOG_LEVEL_SILENT,&Serial); 
   
   biosynth.initialize();
   Log.warningln("End of setup");
@@ -29,7 +29,7 @@ void setup() {
 
 void loop() 
 { 
-  //biosynth.update();
+  biosynth.update();
   
   //vvv what are these two block suposed to do? vvv
   // Is the foot pedal reseting the synth now?

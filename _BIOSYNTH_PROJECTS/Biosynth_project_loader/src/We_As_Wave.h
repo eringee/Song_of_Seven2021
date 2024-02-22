@@ -243,7 +243,7 @@ class WeAsWaves :public Project{
         GSRfilter.frequency(y);
         
         processed_for_leds.heart.sig = smoothHeart*0.7;
-        processed_for_leds.gsr = smoothGSR;
+        processed_for_leds.gsr.scr = smoothGSR;
         processed_for_leds.resp.sig = finalResp*1.2;
 
     };
@@ -252,9 +252,14 @@ class WeAsWaves :public Project{
     void updateVolume(float vol) override{
         for( int i = 0 ; i < 4 ; i++ )
         {    
-            mainMixer.gain(i, vol);  //set all four channels of main mixer to follow gain knob
-            if (i == 0) mainMixer.gain(i, vol*smoothGSRreduced*1.2); //clamp down heartbeat volume a bit when GSR is low 
-            if (i == 3) mainMixer.gain(i, vol/8);  //clamp down on these more distorted sounds from respiration
+            
+            if (i == 0){
+                mainMixer.gain(i, vol*smoothGSRreduced*1.2); //clamp down heartbeat volume a bit when GSR is low 
+            } else if(i == 3) {
+             mainMixer.gain(i, vol/8);  //clamp down on these more distorted sounds from respiration
+            } else {
+             mainMixer.gain(i, vol);  //set all four channels of main mixer to follow gain knob
+            }
         } 
     }
 

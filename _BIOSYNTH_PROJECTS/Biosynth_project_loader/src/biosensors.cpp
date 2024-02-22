@@ -30,13 +30,12 @@ namespace biosensors{
 
 
     void update(){
-        static Chrono timer;
-        if(timer.hasPassed(configuration::biosensors_sample_rate_ms,true)) {
+       
             heart.update();
             sc1.update();
             resp.update();
             sc2.update();
-        }  
+        
     }
 
 
@@ -48,17 +47,29 @@ namespace biosensors{
         //retrieve signals   
         sample signals{};
         signals.heart.sig = heart.getNormalized();
-        signals.gsr = sc1.getSCR();
+        signals.heart.amp = heart.amplitudeChange();
+        signals.heart.bpm = heart.getBPM();
+
+        signals.gsr.sig = sc1.getRaw();
+        signals.gsr.scl = sc1.getSCL();
+        signals.gsr.scr = sc1.getSCR();
+
         signals.resp.sig =resp.getNormalized();
+        signals.resp.bpm =resp.getBPM();
+        signals.resp.amp =resp.amplitudeChange();
+        
+        signals.gsr2.sig = sc2.getRaw();
+        signals.gsr2.scl = sc2.getSCL();
+        signals.gsr2.scr = sc2.getSCR();
+        
+        // //smooth signals
+         smooth_heart += 0.1 * (signals.heart.sig - smooth_heart);
+        // smooth_gsr += 0.5 * (signals.gsr - smooth_gsr);
+         smooth_respiration += 0.5 * (signals.resp.sig - smooth_respiration); // I JUST COPIED THE GSR SMOOTH FUNCTION  PLEASE MODIFY
 
-        //smooth signals
-        smooth_heart += 0.1 * (signals.heart.sig - smooth_heart);
-        smooth_gsr += 0.5 * (signals.gsr - smooth_gsr);
-        smooth_respiration += 0.5 * (signals.gsr - smooth_respiration); // I JUST COPIED THE GSR SMOOTH FUNCTION  PLEASE MODIFY
-
-        signals.heart.sig = smooth_heart;
-        signals.gsr = smooth_gsr;
-        signals.resp.sig = smooth_respiration;
+         signals.heart.sig = smooth_heart;
+        // signals.gsr = smooth_gsr;
+         signals.resp.sig = smooth_respiration;
 
         return signals;
     }

@@ -85,7 +85,7 @@ void logger::log_data(sample signals){
     finalize = true;
     recording.print(signals.heart.sig);
     recording.write(',');
-    recording.print(signals.gsr);
+    recording.print(signals.gsr.scr);
     recording.write(',');
     recording.println(signals.resp.sig);
   }

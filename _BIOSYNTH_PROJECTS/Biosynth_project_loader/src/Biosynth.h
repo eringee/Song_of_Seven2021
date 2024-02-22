@@ -78,8 +78,8 @@ public:
      */
     void update();
 
-    void send_over_serial(sample signals, Print *output, int rate_ms);
-
+    void send_over_serial(const sample *signals, Print *output, int rate_ms);
+    void send_over_serial( Print *output);
 private:
     void recvWithEndMarker();
     void ping_master();

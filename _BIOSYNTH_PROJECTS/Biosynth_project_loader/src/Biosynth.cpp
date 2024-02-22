@@ -117,11 +117,11 @@ void Biosynth::initialize() {
 
   screen::clear();
 
-  if (master) {
-    wait_for_slave();
-  } else {
-    ping_master();
-  }
+  // if (master) {
+  //   wait_for_slave();
+  // } else {
+  //   ping_master();
+  // }
 }
 
 void Biosynth::loadProject() {
@@ -145,19 +145,31 @@ void Biosynth::loadProject() {
 }
 
 void Biosynth::update() {
-  biosensors::update();
-  data = biosensors::sample_sensors();
-
+   static Chrono timer;
+    //if(timer.hasPassed(configuration::biosensors_sample_rate_ms,true)) {
+      biosensors::update();
+      
+   //}
+  //data = biosensors::sample_sensors();
+  
   project->updateVolume(updatePotentiometer());
   project->update();
 
 #if PLOT_SENSOR
-  plot_sampled_data(data);
+  //plot_sampled_data(data);
 #endif
 
 #if SEND_OVER_SERIAL
   // maybe wrap this into chrono
-  send_over_serial(data, &Serial, 16);
+  if(linked && !master) {
+
+    //send_over_serial(data, &Serial1, 16);
+    
+  } else if(!linked) {
+    //send_over_serial(&data, &Serial, 16);
+    //send_over_serial(&Serial);
+  }
+  
 #endif
 #if LOG
   session_log.log_data(data);
@@ -358,19 +370,41 @@ void Biosynth::selectedProjectMessage(const int &displayTime) {
   }
 }
 
-void Biosynth::send_over_serial(sample signals, Print *output, int rate_ms) {
-  static Chrono wait(true);
 
-  if (wait.hasPassed(rate_ms, true)) {
-    output->printf("ID %d,H %.2f,G %.2f,R %.2f\n", configuration::board_id,
-                   signals.heart.sig, signals.gsr, signals.resp.sig);
-  }
+void Biosynth::send_over_serial(Print *output) {
+
+    output->printf("%d,%.2f,%.2f,%.2f\n", configuration::board_id,
+                   biosensors::heart.getNormalized(),
+                   biosensors::sc2.getSCR(),
+                   biosensors::resp.getNormalized());
+
+}
+
+
+void Biosynth::send_over_serial(const sample *signals, Print *output, int rate_ms) {
+  static Chrono wait(true);
+ 
+  //if (wait.hasPassed(rate_ms, true)) {
+    output->printf("%d,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f\n", configuration::board_id,
+                   signals->heart.sig,
+                   signals->heart.amp,
+                   signals->heart.bpm, 
+                   signals->gsr.sig,
+                   signals->gsr.scl,
+                   signals->gsr.scr, 
+                   signals->resp.sig,
+                   signals->resp.amp,
+                   signals->resp.bpm,
+                   signals->gsr2.sig,
+                   signals->gsr2.scl,
+                   signals->gsr2.scr);
+  //}
 }
 
 #if PLOT_SENSOR
 void Biosynth::plot_sampled_data(sample signals) {
-  Serial.printf("%.2f,%.2f,%.2f", signals.heart.sig, signals.gsr,
-                signals.resp.sig);
+  Serial.printf("%.2f,%.2f,%.2f,%.2f", signals.heart.sig, signals.gsr,
+                signals.resp.sig,signals.gsr2);
   Serial.println();
 }
 #endif
