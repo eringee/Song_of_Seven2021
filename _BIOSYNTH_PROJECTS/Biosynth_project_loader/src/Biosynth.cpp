@@ -18,92 +18,9 @@
 #include "lcd.h"
 #include "led.h"
 
-void Biosynth::send_command(const char *command) {
-  Serial1.clear();
-
-  if (Serial1.availableForWrite()) {
-    Serial1.println(command);
-  }
-  Log.infoln("%s sent", command);
-}
-
-void Biosynth::recvWithEndMarker() {
-  static byte ndx = 0;
-  char endMarker = '\n';
-
-  while (Serial1.available() > 0 && newData == false) {
-    char rc = Serial1.read();
-    // Serial.println(rc);
-    if (rc != endMarker) {
-      // store char if not termination
-      commBuffer[ndx] = rc;
-      ndx++;
-      if (ndx >= numChars) {
-        ndx = numChars - 1;
-      }
-    } else {
-      commBuffer[ndx] = '\0';  // terminate the string
-      ndx = 0;
-      newData = true;
-    }
-  }
-}
-
-bool Biosynth::wait_for_command(const int timeout, const char *command) {
-  int current = millis();
-  int elapsed = 0;
-  while (elapsed < timeout) {
-    recvWithEndMarker();
-    if (newData) {
-      Log.infoln("%s", commBuffer);
-      if (strstr(commBuffer, command) != NULL) {
-        Log.infoln("command received");
-        commBuffer[0] = '\0';
-        newData = false;
-        return true;
-      }
-    }
-
-    elapsed = millis() - current;
-  }
-  Log.warningln("waiting for command %s timed out", command);
-  return false;
-}
-
-void Biosynth::ping_master() {
-  int timeout = 3000;
-  while (!linked) {
-    send_command(command.syn);
-    if (wait_for_command(timeout, command.synack)) {
-      send_command(command.ack);
-      linked = true;
-    }
-  }
-  Log.infoln("Link susccessfull");
-}
-
-void Biosynth::wait_for_slave() {
-  int timeout = 3000;
-  // Print to lcd waiting for salve
-  Log.infoln("Waiting for slave to ping...");
-
-  while (!linked) {
-    if (wait_for_command(timeout, command.syn)) {
-      send_command(command.synack);
-      if (wait_for_command(timeout, command.ack)) {
-        linked = true;
-      }
-    }
-  }
-  Log.infoln("Link susccessfull");
-}
 
 void Biosynth::initialize() {
   Log.infoln("Erin Gee's Biosynth");
-  
-  // Serial1.setTimeout(3000);
-  // Serial1.begin(115200);
-  //set_role();
 
   screen::initialize();
   encoder::initialize();
@@ -120,15 +37,10 @@ void Biosynth::initialize() {
 #endif
 
 
-
  project->setup();
  audio_manager::mute(false);
  screen::clear();
-  // if (master) {
-  //   wait_for_slave();
-  // } else {
-  //   ping_master();
-  // }
+
 }
 
 void Biosynth::loadProject() {
@@ -155,29 +67,15 @@ void Biosynth::update() {
    static Chrono timer;
     if(timer.hasPassed(configuration::biosensors_sample_rate_ms,true)) {
       biosensors::update();
-      
+      #if SEND_OVER_SERIAL
+        send_over_serial(&Serial);
+      #endif      
    }
-  //data = biosensors::sample_sensors();
   
   audio_manager::setVolume(updatePotentiometer());
   project->update();
 
-#if PLOT_SENSOR
-  //plot_sampled_data(data);
-#endif
 
-#if SEND_OVER_SERIAL
-  // maybe wrap this into chrono
-  if(linked && !master) {
-
-    //send_over_serial(data, &Serial1, 16);
-    
-  } else if(!linked) {
-    //send_over_serial(&data, &Serial, 16);
-    //send_over_serial(&Serial);
-  }
-  
-#endif
 #if LOG
   session_log.log_data(data);
 #endif
@@ -210,8 +108,7 @@ void Biosynth::update() {
     section_change();
     verify_no_touch();
 #endif
-    // sample test = project->getLedProcessed();
-    // Serial.println(test.gsr);
+
     led::update(project->getLedProcessed());
   }
 }
@@ -388,26 +285,6 @@ void Biosynth::send_over_serial(Print *output) {
 }
 
 
-void Biosynth::send_over_serial(const sample *signals, Print *output, int rate_ms) {
-  static Chrono wait(true);
- 
-  //if (wait.hasPassed(rate_ms, true)) {
-    output->printf("%d,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f\n", configuration::board_id,
-                   signals->heart.sig,
-                   signals->heart.amp,
-                   signals->heart.bpm, 
-                   signals->gsr.sig,
-                   signals->gsr.scl,
-                   signals->gsr.scr, 
-                   signals->resp.sig,
-                   signals->resp.amp,
-                   signals->resp.bpm,
-                   signals->gsr2.sig,
-                   signals->gsr2.scl,
-                   signals->gsr2.scr);
-  //}
-}
-
 #if PLOT_SENSOR
 void Biosynth::plot_sampled_data(sample signals) {
   Serial.printf("%.2f,%.2f,%.2f,%.2f", signals.heart.sig, signals.gsr,
@@ -416,12 +293,4 @@ void Biosynth::plot_sampled_data(sample signals) {
 }
 #endif
 
-void Biosynth::set_role() {
-  if (configuration::board_id % 2 == 1) master = false;
 
-  if (master) {
-    Log.infoln("Biosynth acting as a Master");
-  } else {
-    Log.infoln("Biosynth acting as a Slave");
-  }
-}

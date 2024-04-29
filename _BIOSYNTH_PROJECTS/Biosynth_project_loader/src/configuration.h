@@ -17,11 +17,9 @@
 
 namespace configuration{
     
-    #if defined(MASTER)
-        const int board_id{0};
-    #elif defined(SLAVE)
-        const int board_id{1};
-    #endif
+
+    const int board_id{0};
+ 
     const float volume{0.6}; //Initial volume of the board
 
     const int boot_delay{500}; //Amount of time to wait before initialization
