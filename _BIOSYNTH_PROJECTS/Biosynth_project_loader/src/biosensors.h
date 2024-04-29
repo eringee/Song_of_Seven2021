@@ -18,16 +18,27 @@ struct sample{
     struct heart{
         float sig;
         float amp;
-        int bpm;
+        float bpm;
     }heart;
     
-    float gsr;
-    float gsr2;
+
+    struct gsr{
+        float sig;
+        float scl;
+        float scr;
+    } gsr;
+
+    struct gsr2{
+        float sig;
+        float scl;
+        float scr;
+    }gsr2;
 
     struct resp{
         float sig;
+        float bpm;
         float amp;
-        int bpmchange;
+
     }resp;
 
 };
@@ -51,6 +62,6 @@ namespace biosensors{
     /** @brief  sample, smooth and returns the biosensors data
      *  @return sample containing the 3 sensors data
      */
-    sample sample_sensors();
+
 
 }//namespace biosensors
