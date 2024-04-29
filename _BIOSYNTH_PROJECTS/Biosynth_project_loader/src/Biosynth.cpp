@@ -63,6 +63,7 @@ void Biosynth::loadProject() {
   selectedProjectMessage(1000);  // get stuck when trying to update lcd
 }
 
+
 void Biosynth::update() {
    static Chrono timer;
     if(timer.hasPassed(configuration::biosensors_sample_rate_ms,true)) {

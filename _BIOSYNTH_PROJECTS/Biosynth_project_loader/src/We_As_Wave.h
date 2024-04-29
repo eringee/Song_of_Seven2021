@@ -20,7 +20,7 @@ class WeAsWaves :public Project{
     
     private:
 
-    const char* name{"  We as Waves"};
+    const char* name{"  AFFECT FLOW"};
     static const int number_of_boards{10};
     static const int number_of_sections{4};
     int current_section{0};
@@ -31,8 +31,51 @@ class WeAsWaves :public Project{
     SkinConductance *sc2;
 
     sample processed_for_leds{};
-    char section_message[17];
 
+/*// GUItool: begin automatically generated code..This code is here for reference.
+AudioSynthWaveform       heartLFO;       //xy=60,109
+AudioSynthNoiseWhite     respnoise;      //xy=160,489
+AudioSynthWaveform       respnoiseLFO;   //xy=160,577
+AudioEffectBitcrusher    bitcrusher1;    //xy=181,186
+AudioEffectEnvelope      clickEnvelope;  //xy=273,120
+AudioSynthWaveform       heartTone;      //xy=275,264
+AudioSynthWaveform       respWave1;      //xy=355,386
+AudioEffectMultiply      multiply1;      //xy=355,513
+AudioSynthWaveform       respWave2;      //xy=356,430
+AudioAmplifier           heartEnvAmp;    //xy=448,204
+AudioEffectEnvelope      heartEnvAmp2;      //xy=506,279
+AudioMixer4              respMixer;      //xy=547,419
+AudioMixer4              clickGlitchMixer; //xy=583,90
+AudioFilterStateVariable GSRfilter1; //xy=688,248
+AudioFilterStateVariable respFilter;     //xy=708,477
+AudioFilterStateVariable GSRfilter;      //xy=752,179
+AudioAmplifier           respAmp2;       //xy=784,396
+AudioMixer4              mainMixer;      //xy=874,317
+AudioOutputI2S           AudioOut;       //xy=1031,323
+AudioConnection          patchCord1(heartLFO, bitcrusher1);
+AudioConnection          patchCord2(respnoise, 0, multiply1, 0);
+AudioConnection          patchCord3(respnoiseLFO, 0, multiply1, 1);
+AudioConnection          patchCord4(bitcrusher1, clickEnvelope);
+AudioConnection          patchCord5(clickEnvelope, heartEnvAmp);
+AudioConnection          patchCord6(heartTone, heartEnvAmp2);
+AudioConnection          patchCord7(respWave1, 0, respMixer, 0);
+AudioConnection          patchCord8(multiply1, 0, respMixer, 2);
+AudioConnection          patchCord9(respWave2, 0, respMixer, 1);
+AudioConnection          patchCord10(heartEnvAmp, 0, clickGlitchMixer, 1);
+AudioConnection          patchCord11(heartEnvAmp2, 0, GSRfilter1, 0);
+AudioConnection          patchCord12(respMixer, 0, respFilter, 0);
+AudioConnection          patchCord13(respMixer, 0, mainMixer, 1);
+AudioConnection          patchCord14(clickGlitchMixer, 0, GSRfilter, 0);
+AudioConnection          patchCord15(GSRfilter1, 1, mainMixer, 2);
+AudioConnection          patchCord16(respFilter, 1, respAmp2, 0);
+AudioConnection          patchCord17(GSRfilter, 1, mainMixer, 0);
+AudioConnection          patchCord18(respAmp2, 0, mainMixer, 3);
+AudioConnection          patchCord19(mainMixer, 0, AudioOut, 0);
+AudioConnection          patchCord20(mainMixer, 0, AudioOut, 1);
+// GUItool: end automatically generated code
+
+
+////////////////////////////ORIGINAL AUDIO CODE/////////////////////////////////////
     //ADD audio objects here. No need to add the sgt5000 object
     AudioSynthWaveform       heartLFO;      //xy=64,125 aka waveform5
     AudioSynthNoiseWhite     respnoise;         //xy=140,494
@@ -50,11 +93,45 @@ class WeAsWaves :public Project{
     AudioAmplifier           respAmp2;           //xy=735,414
     AudioMixer4              mainMixer;         //xy=822,306  aka mixer1
     AudioOutputI2S           AudioOut;       //xy=996,307
+*/
+///EXPERIMENTAL CODE/////////////////////////////////////////
+
+AudioSynthWaveform       heartLFO;       //xy=60,109
+AudioSynthNoiseWhite     respnoise;      //xy=160,489
+AudioSynthWaveform       respnoiseLFO;   //xy=160,577
+AudioEffectBitcrusher    bitcrusher1;    //xy=181,186
+AudioEffectEnvelope      clickEnvelope;  //xy=273,120
+AudioSynthWaveform       heartTone;      //xy=275,264
+AudioSynthWaveform       respWave1;      //xy=355,386
+AudioEffectMultiply      multiply1;      //xy=355,513
+AudioSynthWaveform       respWave2;      //xy=356,430
+AudioAmplifier           heartEnvAmp;    //xy=448,204
+AudioAmplifier           heartEnvAmp2;      //xy=506,279
+AudioMixer4              respMixer;      //xy=547,419
+AudioMixer4              clickGlitchMixer; //xy=583,90
+AudioFilterStateVariable GSRfilter1; //xy=688,248
+AudioFilterStateVariable respFilter;     //xy=708,477
+AudioFilterStateVariable GSRfilter;      //xy=752,179
+AudioAmplifier           respAmp2;       //xy=784,396
+AudioMixer4              mainMixer;      //xy=874,317
+AudioOutputI2S           AudioOut;       //xy=1031,323
+
 
     //vvvADD ALL THE VARIABLE YOUR PROJECT DEPENDS ON UNDER HEREvvvv
 
     const char sections_title[number_of_sections][2] = {"A", "B", "C", "D"};
     double sectionGlobal[number_of_sections][number_of_boards] = {
+        {mtof.toFrequency(67), 
+        mtof.toFrequency(71), 
+        mtof.toFrequency(72), 
+        mtof.toFrequency(74), 
+        mtof.toFrequency(76), 
+        mtof.toFrequency(77), 
+        mtof.toFrequency(81), 
+        mtof.toFrequency(83), 
+        mtof.toFrequency(86), 
+        mtof.toFrequency(88)},  // Gmaj13
+
         {mtof.toFrequency(51), 
         mtof.toFrequency(54), 
         mtof.toFrequency(56), 
@@ -66,16 +143,7 @@ class WeAsWaves :public Project{
         mtof.toFrequency(70), 
         mtof.toFrequency(73)},  // pentatonic scale - add 12 for fun
     
-        {mtof.toFrequency(72),
-        mtof.toFrequency(86),
-        mtof.toFrequency(76), 
-        mtof.toFrequency(89), 
-        mtof.toFrequency(79), 
-        mtof.toFrequency(93), 
-        mtof.toFrequency(83), 
-        mtof.toFrequency(96), 
-        mtof.toFrequency(86), 
-        mtof.toFrequency(100)},  // octave separated major scale
+
     
         {392,416,448,587,659,1046,1174, 1300, 1400, 1700},     // section 3
         {1148,1312,1476,1640,1804,1968,2132, 2500, 2600, 2700} // section 4
@@ -116,10 +184,10 @@ class WeAsWaves :public Project{
     void createPatchCords(){
         /* This is mandatory for dynamic project loading. Redo all the patchcord connections provided by the 
             Teensy audio tool this way. You can modify the maximum number of patchcord in projects.h if you need 
-            more than 20
+            more 
         */
         int pci= 0;
-
+/*
         patch_cords[pci++] = new AudioConnection(heartLFO, bitcrusher1);
         patch_cords[pci++] = new AudioConnection(respnoise, 0, multiply1, 0); // aka respnoise
         patch_cords[pci++] = new AudioConnection(respnoiseLFO, 0, multiply1, 1);
@@ -137,13 +205,36 @@ class WeAsWaves :public Project{
         patch_cords[pci++] = new AudioConnection(respAmp2, 0, mainMixer, 3);
         patch_cords[pci++] = new AudioConnection(mainMixer, 0, AudioOut, 0);
         patch_cords[pci++] = new AudioConnection(mainMixer, 0, AudioOut, 1);
+
+        */
+
+        patch_cords[pci++] = new AudioConnection(heartLFO, bitcrusher1);
+        patch_cords[pci++] = new AudioConnection(respnoise, 0, multiply1, 0);
+        patch_cords[pci++] = new AudioConnection(respnoiseLFO, 0, multiply1, 1);
+        patch_cords[pci++] = new AudioConnection(bitcrusher1, clickEnvelope);
+        patch_cords[pci++] = new AudioConnection(clickEnvelope, heartEnvAmp);
+        patch_cords[pci++] = new AudioConnection(heartTone, heartEnvAmp2);
+        patch_cords[pci++] = new AudioConnection(respWave1, 0, respMixer, 0);
+        patch_cords[pci++] = new AudioConnection(multiply1, 0, respMixer, 2);
+        patch_cords[pci++] = new AudioConnection(respWave2, 0, respMixer, 1);
+        patch_cords[pci++] = new AudioConnection(heartEnvAmp, 0, clickGlitchMixer, 1);
+        patch_cords[pci++] = new AudioConnection(heartEnvAmp2, 0, GSRfilter1, 0);
+        patch_cords[pci++] = new AudioConnection(respMixer, 0, respFilter, 0);
+        patch_cords[pci++] = new AudioConnection(respMixer, 0, mainMixer, 1);
+        patch_cords[pci++] = new AudioConnection(clickGlitchMixer, 0, GSRfilter, 0);
+        patch_cords[pci++] = new AudioConnection(GSRfilter1, 0, mainMixer, 2);
+        patch_cords[pci++] = new AudioConnection(respFilter, 1, respAmp2, 0);
+        patch_cords[pci++] = new AudioConnection(GSRfilter, 1, mainMixer, 0);
+        patch_cords[pci++] = new AudioConnection(respAmp2, 0, mainMixer, 3);
+        patch_cords[pci++] = new AudioConnection(mainMixer, 0, AudioOut, 0);
+        patch_cords[pci++] = new AudioConnection(mainMixer, 0, AudioOut, 1);
     }
 
     void setupSounds(){ //SETUP THE INITIAL SOUNDS IN THE PROJECT HERE
-        
+
         //RESP dependent variables
         respTone = (sectionGlobal[0][configuration::board_id]);
-        respWave1.begin(0.1 , respTone, WAVEFORM_TRIANGLE);
+        respWave1.begin(0.1 , respTone, WAVEFORM_SINE);
         respWave2.begin(0.05, respTone, WAVEFORM_SAWTOOTH);  
 
         // set bandpass around the respTone frequencies
@@ -158,18 +249,12 @@ class WeAsWaves :public Project{
         clickEnvelope.sustain(10);
         clickEnvelope.release(50);
 
-        //envelope1delay = 60;
-
         heartLFO.begin(0.05, 5, WAVEFORM_SINE);
 
         clickGlitchMixer.gain(1, 9.8);  // parameter to control the global volume of the clicks.
 
         bitcrusher1.bits(3);  // creates the glitch-click effect
         bitcrusher1.sampleRate(44000);  // doesn't seem to affect the sound either way
-
-        //GSRfilter.resonance(1.0); // the resonator emphasises the bandpass of these clicks
-
-
     }
 
     public:
@@ -204,7 +289,7 @@ class WeAsWaves :public Project{
         smoothGSR += 0.8 * (GSRsig - smoothGSR); // run EMA filter
         smoothGSRreduced = max((smoothGSR-0.1), 0.0);  //subtract a bit from GSR value but don't pass 0  
     
-        smoothResp += 0.001 * (respSig - smoothResp);
+        smoothResp += 0.0005  * (respSig - smoothResp);
         smoothResp2 += 0.0001 * (respSig - smoothResp2);
         smoothResp3 += 0.00005 * (respSig - smoothResp3);      
         finalResp = max((smoothResp-0.25), 0);
@@ -214,7 +299,7 @@ class WeAsWaves :public Project{
         //RESPIRATION///////////////////////////////
     
         //use breaths per minute to detune fundamental - if breathing is regular it will not be affected
-        respBPMfun = (respBPM*10)-0.5; 
+        respBPMfun = (respBPM*(3*configuration::board_id+1))-0.5; 
         respWave2.frequency(respBPMfun+respTone); //detuned wave mixed with fundamental
         
         respnoiseLFO.frequency(respAmp*100); //gently modulate respNoise through the amplitude of the breath
@@ -225,7 +310,7 @@ class WeAsWaves :public Project{
     
         //set the gain of respiration tones in accordance with respiration signal
         for (int x=0; x <=3; x++) {
-        respMixer.gain(x, max((finalResp-0.4), 0)); //linked to resp signal and a little quieter
+        respMixer.gain(x, max((finalResp-0.3), 0)); //linked to resp signal and a little quieter
         if(x==2) respMixer.gain(x, smoothResp2*0.05); //linked to a lowpassed resp signal and even quieter
         }
 
@@ -235,12 +320,17 @@ class WeAsWaves :public Project{
         heartLFO.frequency(heartBPM*8);  //the frequency of the heartsignal LFO
         heartEnvAmp.gain(0.1+(smoothHeart/2)); // clicks follow the envelope of heart signal 
 
+        heartTone.begin(0.005, respTone*2, WAVEFORM_SQUARE);
+        heartEnvAmp2.gain(0.1+(smoothHeart/2.5)); // clicks follow the envelope of heart signal 
+
         ////GSR//////////////////////////////////           
         // map GSR signal to a bandpass filter frequency for filtering heartclicks
         GSRfilt = GSRsig*100; //convert Gsrsig into a value from 1-100
         int y = map(GSRfilt, 1, 100, 750, 10000);
+        int y2 = map(GSRfilt, 1, 100, 0, 8000);
         
         GSRfilter.frequency(y);
+        GSRfilter1.frequency(y2);
         
         processed_for_leds.heart.sig = smoothHeart*0.7;
         processed_for_leds.gsr.scr = smoothGSR;
@@ -284,8 +374,6 @@ void changeSection(const int currentSection) override //this is where we change 
           respWave1.begin(0.5, respTone, WAVEFORM_BANDLIMIT_SAWTOOTH_REVERSE);
            respWave2.begin(0.2, respTone, WAVEFORM_BANDLIMIT_SAWTOOTH_REVERSE);   
         }
-        
-
 }
 
 const char* getName() override { //Do not modify, just copy paste to new project
@@ -297,8 +385,7 @@ const int getNumberOfSection() override { //Do not modify, just copy paste to ne
 }
 
 const char* getSectionTitle(const int section_index) override { //Do not modify, just copy paste to new project
-    sprintf(section_message, "Affect Flow  %s",sections_title[section_index]);
-    return section_message;
+    return sections_title[section_index];
 }
 
 sample getLedProcessed() override{ //Do not modify, just copy paste to new project

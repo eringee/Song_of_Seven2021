@@ -35,28 +35,6 @@ class Biosynth
     int current_encoder_value = 0;
 
     sample data;
-    bool master = true;
-    bool linked = false;
-
-    const static int numChars = 64;
-    char commBuffer[numChars];
-    char terminationChar = '\n';
-    bool newData = false;
-
-    struct commands
-    {
-        const char* syn = "SYN";
-        const char* synack = "SYNACK";
-        const char* ack = "ACK";
-    } command;
-    
-    // enum commands : const char* {
-    //     syn = "SYN",
-
-    // }
-    // const char* pingCommand = "SYN";
-    // const char* synackCommand = "SYNACK";
-    // const char* confirmCommand = "ACK";
 
     #if LOG
         logger session_log; //logger object only create if specified
