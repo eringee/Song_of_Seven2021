@@ -146,10 +146,10 @@ void Biosynth::loadProject() {
 
 void Biosynth::update() {
    static Chrono timer;
-    //if(timer.hasPassed(configuration::biosensors_sample_rate_ms,true)) {
+    if(timer.hasPassed(configuration::biosensors_sample_rate_ms,true)) {
       biosensors::update();
       
-   //}
+   }
   //data = biosensors::sample_sensors();
   
   project->updateVolume(updatePotentiometer());
@@ -167,7 +167,7 @@ void Biosynth::update() {
     
   } else if(!linked) {
     //send_over_serial(&data, &Serial, 16);
-    //send_over_serial(&Serial);
+    send_over_serial(&Serial);
   }
   
 #endif

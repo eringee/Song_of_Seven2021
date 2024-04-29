@@ -21,7 +21,7 @@ void setup() {
   
   //To silent the logging replace LOG_LEVEL_INFO with LOG_LEVEL_SILENT
   //I recommend leaving at least LOG_LEVEL_WARNING to print errors at least
-  Log.begin(LOG_LEVEL_SILENT,&Serial); 
+  Log.begin(LOG_LEVEL_WARNING,&Serial); 
   
   biosynth.initialize();
   Log.warningln("End of setup");
