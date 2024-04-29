@@ -16,12 +16,12 @@ Biosynth biosynth{};
 
 void setup() {
 
-  Serial.begin(115200);
+  Serial.begin(9600);
   delay(configuration::boot_delay);
   
   //To silent the logging replace LOG_LEVEL_INFO with LOG_LEVEL_SILENT
   //I recommend leaving at least LOG_LEVEL_WARNING to print errors at least
-  Log.begin(LOG_LEVEL_WARNING,&Serial); 
+  Log.begin(LOG_LEVEL_INFO,&Serial); 
   
   biosynth.initialize();
   Log.warningln("End of setup");

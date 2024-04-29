@@ -24,7 +24,7 @@ namespace configuration{
     #endif
     const float volume{0.6}; //Initial volume of the board
 
-    const int boot_delay{2000}; //Amount of time to wait before initialization
+    const int boot_delay{500}; //Amount of time to wait before initialization
     const int confirmation_delay{3000}; //Time allowed to confirm section change
     const int opening_message_time{3000}; //Amount of time the welcome message will be displayed
 

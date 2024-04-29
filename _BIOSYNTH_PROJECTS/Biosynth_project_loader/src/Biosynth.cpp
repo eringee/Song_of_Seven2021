@@ -100,23 +100,30 @@ void Biosynth::wait_for_slave() {
 
 void Biosynth::initialize() {
   Log.infoln("Erin Gee's Biosynth");
-  Serial1.setTimeout(3000);
-  Serial1.begin(115200);
-  set_role();
+  
+  // Serial1.setTimeout(3000);
+  // Serial1.begin(115200);
+  //set_role();
 
   screen::initialize();
   encoder::initialize();
   button::initialize();
-  biosensors::initialize();
-  audio_manager::audio_shield_initialization();
-  led::initialize();
   loadProject();
+  audio_manager::audio_shield_initialization();
+  audio_manager::mute(true);
+  led::initialize();
+  biosensors::initialize();
+
+  
 #if LOG
   session_log.initialize();
 #endif
 
-  screen::clear();
 
+
+ project->setup();
+ audio_manager::mute(false);
+ screen::clear();
   // if (master) {
   //   wait_for_slave();
   // } else {
@@ -125,7 +132,7 @@ void Biosynth::initialize() {
 }
 
 void Biosynth::loadProject() {
-  selected_project = selectProject(5000);
+  selected_project = selectProject(2000);
 
   switch (selected_project) {  // add new projects to this switch case (just copy paste the case and change the title and class name)
     case SONG_OF_SEVEN:
@@ -140,8 +147,8 @@ void Biosynth::loadProject() {
   }
 
   Log.infoln("Project loaded: %s", project->getName());
-  project->setup();
-  selectedProjectMessage(3000);  // get stuck when trying to update lcd
+  
+  selectedProjectMessage(1000);  // get stuck when trying to update lcd
 }
 
 void Biosynth::update() {
@@ -152,7 +159,7 @@ void Biosynth::update() {
    }
   //data = biosensors::sample_sensors();
   
-  project->updateVolume(updatePotentiometer());
+  audio_manager::setVolume(updatePotentiometer());
   project->update();
 
 #if PLOT_SENSOR
@@ -167,7 +174,7 @@ void Biosynth::update() {
     
   } else if(!linked) {
     //send_over_serial(&data, &Serial, 16);
-    send_over_serial(&Serial);
+    //send_over_serial(&Serial);
   }
   
 #endif
