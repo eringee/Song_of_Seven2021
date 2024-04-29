@@ -62,6 +62,6 @@ namespace biosensors{
     /** @brief  sample, smooth and returns the biosensors data
      *  @return sample containing the 3 sensors data
      */
-    sample sample_sensors();
+
 
 }//namespace biosensors
