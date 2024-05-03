@@ -1,7 +1,7 @@
 #include "enc.h"
 #include "pins.h"
 #include "configuration.h"
-#include <ArduinoLog.h>
+
 
 namespace encoder{
 
@@ -13,7 +13,7 @@ namespace encoder{
 
     void initialize(){
         set_value(0);
-        Log.infoln("Encoder initialized");
+        Serial.println("Encoder initialized");
     }
 
 
@@ -47,7 +47,7 @@ namespace encoder{
 
         //test for time for debouncing purpose. Could be removed if using encoder with the interrups
         if(current_encoder_value != newPosition && (current_read_time-last_read_time) >= 500){
-            Log.traceln("Encoder position is : %d" , newPosition);
+            // Serial.printf("Encoder position is : %d\n" , newPosition);
             current_encoder_value = newPosition;
             last_read_time = millis();
         }

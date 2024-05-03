@@ -1,7 +1,6 @@
 #include "led.h"
 #include "configuration.h"
 #include "pins.h"
-#include <ArduinoLog.h>
 #include "biosensors.h"
 
 namespace led{
@@ -27,7 +26,7 @@ namespace led{
         }
         leds.show();
 
-        Log.infoln("Leds initialized");
+        Serial.println("Leds initialized");
     }
 
     void update(sample signals){

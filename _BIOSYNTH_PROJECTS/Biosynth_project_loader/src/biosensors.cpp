@@ -2,7 +2,7 @@
 #include <Chrono.h>
 #include "configuration.h"
 #include "pins.h"
-#include <ArduinoLog.h>
+
 
 
 namespace biosensors{
@@ -25,7 +25,7 @@ namespace biosensors{
      pinMode(pins::sensors::respiration,INPUT);
      resp.reset();
 
-     Log.infoln("Biosensors initialized");
+     Serial.println("Biosensors initialized");
     }
 
 

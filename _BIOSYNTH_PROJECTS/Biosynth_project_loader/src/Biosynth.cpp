@@ -7,7 +7,7 @@
  */
 #include "Biosynth.h"
 
-#include <ArduinoLog.h>
+
 #include <Chrono.h>
 
 #include "Project_list.h"
@@ -20,7 +20,7 @@
 
 
 void Biosynth::initialize() {
-  Log.infoln("Erin Gee's Biosynth");
+  Serial.println("Erin Gee's Biosynth");
 
   screen::initialize();
   encoder::initialize();
@@ -58,7 +58,7 @@ void Biosynth::loadProject() {
       break;
   }
 
-  Log.infoln("Project loaded: %s", project->getName());
+  Serial.printf("Project loaded: %s\n", project->getName());
   
   selectedProjectMessage(1000);  // get stuck when trying to update lcd
 }
@@ -94,7 +94,7 @@ void Biosynth::update() {
 #else
   if (button::foot_pedal.pressed() && lcd_state == 2) {
     advance_section();
-    Log.warningln("Foot pedal pressed. Advanced section");
+    Serial.println("Foot pedal pressed. Advanced section");
   }
 #endif
 
@@ -118,7 +118,7 @@ void Biosynth::update() {
 void Biosynth::maybe_start_logging() {
   if (button::encoder.pressed() && lcd_state == 2 &&
       !session_log.is_logging()) {
-    Log.warningln("Starting session");
+    Serial.println("Starting session");
     session_log.create_file();
     session_log.start_logging();
     start_logging_message(false);
@@ -127,7 +127,7 @@ void Biosynth::maybe_start_logging() {
 
 void Biosynth::maybe_stop_logging() {
   if (button::encoder.pressed() && lcd_state == 2 && session_log.is_logging()) {
-    Log.warningln("Ending session");
+    Serial.println("Ending session");
     session_log.stop_logging();
     stop_logging_message(false);
   }
@@ -153,7 +153,7 @@ void Biosynth::opening_message() {
 
 void Biosynth::maybe_confirm_section_change() {
   if (button::encoder.pressed() && lcd_state == 1) {
-    Log.infoln("Section change confirmed");
+    Serial.println("Section change confirmed");
     last_section = current_section;
     current_section = current_encoder_value;
     project->changeSection(current_encoder_value);
@@ -241,7 +241,6 @@ float Biosynth::updatePotentiometer() {
   float vol = analogRead(pins::audio_shield::volume);
   vol = (vol / 1024) *
         0.8;  // make sure the gain doesn't go louder than 0.8 to avoid clipping
-  // Log.traceln(vol);
   return vol;
 }
 

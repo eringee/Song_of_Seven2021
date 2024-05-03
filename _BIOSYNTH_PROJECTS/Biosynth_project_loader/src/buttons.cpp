@@ -1,5 +1,4 @@
 #include "buttons.h"
-#include <ArduinoLog.h>
 
 namespace button{
 
@@ -13,7 +12,7 @@ namespace button{
         foot_pedal.attach(pins::hardware::foot_pedal, INPUT_PULLUP);
         foot_pedal.interval(refresh_rate);
 
-        Log.infoln("Buttons are initialized");
+        Serial.println("Buttons are initialized");
     } 
 
     void update(){

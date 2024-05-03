@@ -1,5 +1,4 @@
 #include "audio_manager.h"
-#include <ArduinoLog.h>
 #include <Audio.h>
 #include "pins.h"
 #include "biosensors.h"
@@ -16,7 +15,7 @@ void audio_shield_initialization(){
   sgtl5000_1.volume(0.8);//configuration::volume); //set master volume here
   sgtl5000_1.lineOutLevel(13);
   
-  Log.infoln("Audio shield is initialized");
+  Serial.println("Audio shield is initialized");
 }
 
 

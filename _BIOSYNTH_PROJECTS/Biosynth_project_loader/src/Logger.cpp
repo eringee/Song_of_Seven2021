@@ -9,7 +9,7 @@
 #include "pins.h"
 #include <RingBuf.h>
 #include "lcd.h"
-#include <ArduinoLog.h>
+
 
 void logger::initialize(){
 
@@ -27,12 +27,12 @@ void logger::initialize(){
     while (1)// stop here, but print a message repetitively 
     {
 
-      Log.errorln("Unable to access the SD card");
+      Serial.println("Unable to access the SD card");
 
       delay(500);
     }
   }
-    Log.infoln("sd card initialized");
+    Serial.println("sd card initialized");
 }
 
 //add filename as argument
@@ -44,28 +44,28 @@ void logger::create_file(){
   sprintf(buff, "%s_%d.%s",filename,count,extension);
 
   while(SD.sdfs.exists(buff)){
-    Log.traceln("File already exist");
+    Serial.println("File already exist");
     count++;
     sprintf(buff, "%s_%d.%s",filename,count,extension);
-    Log.traceln("Trying new filename %s", buff);
+    Serial.printf("Trying new filename %s\n", buff);
   }
 
   recording = SD.sdfs.open(buff, O_WRITE | O_CREAT);
 
   
   unsigned int len = recording.fileSize();
-  Log.infoln("%s created", buff); //make this print dynamic
+  Serial.printf("%s created\n", buff); //make this print dynamic
 
   if (len > 0) {
     // reduce the file to zero if it already had data
-    Log.warningln("File is being truncated because it already contained data");
+    Serial.println("File is being truncated because it already contained data");
     recording.truncate();
   }
 
   if (recording.preAllocate(file_size*1024*1024)) {
-    Log.infoln("Allocating %d megabytes for %s",file_size,buff); //make this print dynamic
+    Serial.printf("Allocating %d megabytes for %s\n",file_size,buff); //make this print dynamic
   } else {
-    Log.errorln("unable to preallocate memory for this file");
+    Serial.println("unable to preallocate memory for this file");
     recording.close();
     return;
   }
@@ -97,7 +97,7 @@ void logger::log_data(sample signals){
     recording.truncate();
     recording.rewind();
     recording.close();
-    Log.infoln("File finalized");
+    Serial.println("File finalized");
     finalize = false;
   }
 
