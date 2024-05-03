@@ -10,6 +10,7 @@ namespace button{
         encoder.interval(refresh_rate);
  
         foot_pedal.attach(pins::hardware::foot_pedal, INPUT_PULLUP);
+        foot_pedal.setPressedState(LOW);
         foot_pedal.interval(refresh_rate);
 
         Serial.println("Buttons are initialized");
