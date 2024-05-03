@@ -26,6 +26,7 @@ class Biosynth
 {    
     Chrono  confirmTimer{false}; //timer used to reset lcd state if section change not confirmed 
     Chrono  lcdUpdate; //timer to slow down lcd refresh rate
+    Chrono openingtimer;
     Project *project{nullptr};
     ProjectList selected_project;
 

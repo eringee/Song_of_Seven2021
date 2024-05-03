@@ -119,7 +119,7 @@ AudioOutputI2S           AudioOut;       //xy=1031,323
 
     //vvvADD ALL THE VARIABLE YOUR PROJECT DEPENDS ON UNDER HEREvvvv
 
-    const char sections_title[number_of_sections][2] = {"A", "B", "C", "D"};
+    const char sections_title[number_of_sections][17] = {"       A       ", "       B       ", "       C       ", "       D       "};
     double sectionGlobal[number_of_sections][number_of_boards] = {
         {mtof.toFrequency(67), 
         mtof.toFrequency(71), 
@@ -357,7 +357,7 @@ AudioOutputI2S           AudioOut;       //xy=1031,323
 
 void changeSection(const int currentSection) override //this is where we change sections AND frequencies...
 {
-    
+ Serial.println(currentSection);   
  if (currentSection==0){
         respWave1.begin(0.5, respTone, WAVEFORM_SINE);
         respWave2.begin(0.2, respTone, WAVEFORM_SINE);   

@@ -24,7 +24,7 @@ class Project{
     static const int number_of_boards{7};
     static const int number_of_sections{4};
     int current_section{0};
-    const char sections_title[number_of_sections][2] = {"A", "B", "C", "D"};
+    const char sections_title[number_of_sections][16] = {"      A       ", "       B       ", "       C       ", "       D       "};
 
     Heart *heart;
     SkinConductance *sc1;

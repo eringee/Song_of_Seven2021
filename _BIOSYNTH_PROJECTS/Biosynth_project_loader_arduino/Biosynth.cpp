@@ -136,7 +136,7 @@ void Biosynth::maybe_stop_logging() {
 
 void Biosynth::opening_message() {
   static bool do_once{false};
-  static Chrono timer;
+  
 
   if (!do_once) {
     sprintf(screen::buffer_line_1, "Hello!");
@@ -144,10 +144,10 @@ void Biosynth::opening_message() {
     screen::update();
     do_once = true;
 
-  } else if (timer.hasPassed(configuration::opening_message_time) && do_once) {
+  } else if (openingtimer.hasPassed(configuration::opening_message_time) && do_once) {
     current_section_message();
-    timer.restart();
-    timer.stop();
+    openingtimer.restart();
+    openingtimer.stop();
   }
 }
 
@@ -255,9 +255,9 @@ ProjectList Biosynth::selectProject(
 
   if (project == 1) {  // project selected when button not pressed on boot
 
-    return SONG_OF_SEVEN;
+    return  WE_AS_WAVE;
   } else {  // project selected when button not pressed on boot
-    return WE_AS_WAVE;
+    return SONG_OF_SEVEN;
   }
 }
 
