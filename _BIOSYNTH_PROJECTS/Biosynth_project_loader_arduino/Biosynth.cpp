@@ -92,7 +92,7 @@ void Biosynth::update() {
 #if ADVANCE_WITH_ENCODER
   maybe_confirm_section_change();
 #else
-  if (button::foot_pedal.pressed() && lcd_state == 2) {
+  if (button::foot_pedal.pressed()) {
     advance_section();
     Serial.println("Foot pedal pressed. Advanced section");
   }

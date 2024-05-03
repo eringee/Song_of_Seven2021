@@ -28,7 +28,7 @@ void setup() {
 void loop() 
 { 
   biosynth.update();
-  
+
   //vvv what are these two block suposed to do? vvv
   // Is the foot pedal reseting the synth now?
 
