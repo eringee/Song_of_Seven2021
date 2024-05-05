@@ -75,26 +75,10 @@ AudioConnection          patchCord20(mainMixer, 0, AudioOut, 1);
 // GUItool: end automatically generated code
 
 
-////////////////////////////ORIGINAL AUDIO CODE/////////////////////////////////////
+////////////////////////////AUDIO CODE/////////////////////////////////////
     //ADD audio objects here. No need to add the sgt5000 object
-    AudioSynthWaveform       heartLFO;      //xy=64,125 aka waveform5
-    AudioSynthNoiseWhite     respnoise;         //xy=140,494
-    AudioSynthWaveform       respnoiseLFO;      //xy=140,582  aka waveform4
-    AudioEffectBitcrusher    bitcrusher1;    //xy=161,191
-    AudioEffectEnvelope      clickEnvelope;      //xy=272,123
-    AudioSynthWaveform       respWave1;      //xy=335,391 aka waveform2
-    AudioEffectMultiply      multiply1;      //xy=335,518
-    AudioSynthWaveform       respWave2;      //xy=336,435 aka waveform3
-    AudioAmplifier           heartEnvAmp;           //xy=402,167
-    AudioMixer4              respMixer;         //xy=527,424  aka mixer2
-    AudioMixer4              clickGlitchMixer;         //xy=531,164     
-    AudioFilterStateVariable respFilter;        //xy=688,482  aka filter2
-    AudioFilterStateVariable GSRfilter;        //xy=692,174  aka filter1
-    AudioAmplifier           respAmp2;           //xy=735,414
-    AudioMixer4              mainMixer;         //xy=822,306  aka mixer1
-    AudioOutputI2S           AudioOut;       //xy=996,307
+  
 */
-///EXPERIMENTAL CODE/////////////////////////////////////////
 
 AudioSynthWaveform       heartLFO;       //xy=60,109
 AudioSynthNoiseWhite     respnoise;      //xy=160,489
@@ -116,8 +100,7 @@ AudioAmplifier           respAmp2;       //xy=784,396
 AudioMixer4              mainMixer;      //xy=874,317
 AudioOutputI2S           AudioOut;       //xy=1031,323
 
-
-    //vvvADD ALL THE VARIABLE YOUR PROJECT DEPENDS ON UNDER HEREvvvv
+    //vvv ADD ALL THE VARIABLES YOUR PROJECT DEPENDS ON IN THIS SECTION vvvv
 
     const char sections_title[number_of_sections][17] = {"       A       ", "       B       ", "       C       ", "       D       "};
     double sectionGlobal[number_of_sections][number_of_boards] = {
@@ -187,26 +170,7 @@ AudioOutputI2S           AudioOut;       //xy=1031,323
             more 
         */
         int pci= 0;
-/*
-        patch_cords[pci++] = new AudioConnection(heartLFO, bitcrusher1);
-        patch_cords[pci++] = new AudioConnection(respnoise, 0, multiply1, 0); // aka respnoise
-        patch_cords[pci++] = new AudioConnection(respnoiseLFO, 0, multiply1, 1);
-        patch_cords[pci++] = new AudioConnection(bitcrusher1, clickEnvelope);
-        patch_cords[pci++] = new AudioConnection(clickEnvelope, heartEnvAmp);
-        patch_cords[pci++] = new AudioConnection(respWave1, 0, respMixer, 0);
-        patch_cords[pci++] = new AudioConnection(multiply1, 0, respMixer, 2);
-        patch_cords[pci++] = new AudioConnection(respWave2, 0, respMixer, 1);
-        patch_cords[pci++] = new AudioConnection(heartEnvAmp, 0, clickGlitchMixer, 1);
-        patch_cords[pci++] = new AudioConnection(respMixer, 0, respFilter, 0);
-        patch_cords[pci++] = new AudioConnection(respMixer, 0, mainMixer, 1);
-        patch_cords[pci++] = new AudioConnection(clickGlitchMixer, 0, GSRfilter, 0);
-        patch_cords[pci++] = new AudioConnection(respFilter, 1, respAmp2, 0);
-        patch_cords[pci++] = new AudioConnection(GSRfilter, 1, mainMixer, 0);
-        patch_cords[pci++] = new AudioConnection(respAmp2, 0, mainMixer, 3);
-        patch_cords[pci++] = new AudioConnection(mainMixer, 0, AudioOut, 0);
-        patch_cords[pci++] = new AudioConnection(mainMixer, 0, AudioOut, 1);
 
-        */
 
         patch_cords[pci++] = new AudioConnection(heartLFO, bitcrusher1);
         patch_cords[pci++] = new AudioConnection(respnoise, 0, multiply1, 0);
@@ -331,6 +295,11 @@ AudioOutputI2S           AudioOut;       //xy=1031,323
         
         GSRfilter.frequency(y);
         GSRfilter1.frequency(y2);
+       /*
+      //section to silence GSR pops 
+       GSRfilter.frequency(0);
+       GSRfilter1.frequency(0);
+      */
         
         processed_for_leds.heart.sig = smoothHeart*0.7;
         processed_for_leds.gsr.scr = smoothGSR;
