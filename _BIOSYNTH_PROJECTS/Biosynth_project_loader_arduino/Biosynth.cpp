@@ -238,9 +238,10 @@ void Biosynth::advance_section() {
 }
 
 float Biosynth::updatePotentiometer() {
-  float vol = analogRead(pins::audio_shield::volume);
-  vol = (vol / 1024) *
-        0.8;  // make sure the gain doesn't go louder than 0.8 to avoid clipping
+  float knob2= analogRead(pins::audio_shield::volume);
+  if (knob2 != vol) {
+    vol = (knob2/ 1023) * 0.8;
+  }
   return vol;
 }
 

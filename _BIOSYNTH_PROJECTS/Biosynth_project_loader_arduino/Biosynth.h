@@ -35,6 +35,8 @@ class Biosynth
     int lcd_state = 0;
     int current_encoder_value = 0;
 
+    float vol = 0.0;
+
     sample data;
 
     #if LOG
