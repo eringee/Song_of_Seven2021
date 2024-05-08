@@ -22,7 +22,7 @@ class WeAsWaves :public Project{
 
     const char* name{"  AFFECT FLOW"};
     static const int number_of_boards{10};
-    static const int number_of_sections{4};
+    static const int number_of_sections{6};
     int current_section{0};
 
     Heart *heart;
@@ -100,40 +100,88 @@ AudioAmplifier           respAmp2;       //xy=784,396
 AudioMixer4              mainMixer;      //xy=874,317
 AudioOutputI2S           AudioOut;       //xy=1031,323
 
+//vvv ADD ALL THE VARIABLES YOUR PROJECT DEPENDS ON IN THIS SECTION vvvv
+
+  /*const char sections_title[number_of_sections][17] = {"       A       ", "       B       ", "       C       ", "       D       "};  //menu display 17 chars
+      
+  double sectionGlobal[number_of_sections][number_of_boards] = {
+    
+    {mtof.toFrequency(50), 
+    mtof.toFrequency(57), 
+    mtof.toFrequency(62), 
+    mtof.toFrequency(71), 
+    mtof.toFrequency(72)}, // Intro section A  
+
+    {mtof.toFrequency(69), 
+    mtof.toFrequency(76), 
+    mtof.toFrequency(83), 
+    mtof.toFrequency(84), 
+    mtof.toFrequency(91)},  // Intro section B
+      
+    {mtof.toFrequency(69), 
+    mtof.toFrequency(72), 
+    mtof.toFrequency(74), 
+    mtof.toFrequency(79), 
+    mtof.toFrequency(86)},  // intro section C plus song
+          
+    {mtof.toFrequency(46),   
+    mtof.toFrequency(48), 
+    mtof.toFrequency(51), 
+    mtof.toFrequency(54), 
+    mtof.toFrequency(56)},  // Anger section D
+
+    {mtof.toFrequency(),   
+    mtof.toFrequency(), 
+    mtof.toFrequency(), 
+    mtof.toFrequency(), 
+    mtof.toFrequency()},  // Ending section E
+  };
+*/
+
     //vvv ADD ALL THE VARIABLES YOUR PROJECT DEPENDS ON IN THIS SECTION vvvv
 
-    const char sections_title[number_of_sections][17] = {"       A       ", "       B       ", "       C       ", "       D       "};
+    const char sections_title[number_of_sections][17] = {" Section A   ", "   Section B", "  Section  C       ", "  Section D       ","   Section E ","  Section F"};
     double sectionGlobal[number_of_sections][number_of_boards] = {
-        {mtof.toFrequency(67), 
-        mtof.toFrequency(71), 
-        mtof.toFrequency(72), 
-        mtof.toFrequency(74), 
-        mtof.toFrequency(76), 
-        mtof.toFrequency(77), 
-        mtof.toFrequency(81), 
-        mtof.toFrequency(83), 
-        mtof.toFrequency(86), 
-        mtof.toFrequency(88)},  // Gmaj13
+       {mtof.toFrequency(50), 
+    mtof.toFrequency(57), 
+    mtof.toFrequency(62), 
+    mtof.toFrequency(71), 
+    mtof.toFrequency(72)}, // Intro section A  
 
-        {mtof.toFrequency(51), 
-        mtof.toFrequency(54), 
-        mtof.toFrequency(56), 
-        mtof.toFrequency(58), 
-        mtof.toFrequency(61), 
-        mtof.toFrequency(63), 
-        mtof.toFrequency(66), 
-        mtof.toFrequency(68), 
-        mtof.toFrequency(70), 
-        mtof.toFrequency(73)},  // pentatonic scale - add 12 for fun
+ {mtof.toFrequency(69), 
+    mtof.toFrequency(76), 
+    mtof.toFrequency(83), 
+    mtof.toFrequency(84), 
+    mtof.toFrequency(91)},  // Intro section B
     
+    {mtof.toFrequency(69), 
+    mtof.toFrequency(72), 
+    mtof.toFrequency(74), 
+    mtof.toFrequency(79), 
+    mtof.toFrequency(86)},  // intro section C plus song
+          
+    {mtof.toFrequency(46),   
+    mtof.toFrequency(48), 
+    mtof.toFrequency(51), 
+    mtof.toFrequency(54), 
+    mtof.toFrequency(56)},  // Anger section D
 
-    
-        {392,416,448,587,659,1046,1174, 1300, 1400, 1700},     // section 3
-        {1148,1312,1476,1640,1804,1968,2132, 2500, 2600, 2700} // section 4
+    {mtof.toFrequency(55),   
+    mtof.toFrequency(69), 
+    mtof.toFrequency(74), 
+    mtof.toFrequency(81), 
+    mtof.toFrequency(89)},  // Ending section 1E
+
+     {mtof.toFrequency(66),   
+    mtof.toFrequency(76), 
+    mtof.toFrequency(78), 
+    mtof.toFrequency(81), 
+    mtof.toFrequency(83)}  // Ending section 2F
     };
 
-    float respTone;
-    ///Variables for smoothing out biosignals
+  
+  ///Variables for smoothing out biosignals
+   float respTone;
     float smoothHeart = 0.5; //default value for smoothing heart signal for EMA
     float smoothHeartAmp = 0.5; //default value for smoothing heart signal for EMA
     float smoothHeartBPM = 0.5; //default value for smoothing heart signal for EMA
@@ -300,7 +348,7 @@ AudioOutputI2S           AudioOut;       //xy=1031,323
        GSRfilter.frequency(0);
        GSRfilter1.frequency(0);
       */
-        
+
         processed_for_leds.heart.sig = smoothHeart*0.7;
         processed_for_leds.gsr.scr = smoothGSR;
         processed_for_leds.resp.sig = finalResp*1.2;

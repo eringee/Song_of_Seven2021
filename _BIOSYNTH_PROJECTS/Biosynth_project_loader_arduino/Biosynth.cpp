@@ -225,7 +225,7 @@ void Biosynth::section_confirm_message(const int encoder_value) {
 void Biosynth::current_section_message() {
   sprintf(screen::buffer_line_1, "%s",
           project->getSectionTitle(current_section));
-  sprintf(screen::buffer_line_2, "                ");
+  sprintf(screen::buffer_line_2, "   BIOSYNTH %d ", configuration::board_id + 1);
   lcd_state = 2;
   screen::update();
 }
