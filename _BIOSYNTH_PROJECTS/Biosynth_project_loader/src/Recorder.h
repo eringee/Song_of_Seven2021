@@ -36,11 +36,9 @@ class Recorder :public Project{
 
     sample processed_for_leds{};
 
-    Chrono LCD_timer;
-
     //vvv ADD ALL THE VARIABLES YOUR PROJECT DEPENDS ON IN THIS SECTION vvvv
     //!!!!! section title should be no more than 16 characters long. Longer strings will make the teensy crash!!!!!
-    const char sections_title[number_of_sections][17] = {" Neutral ", " Relaxation ", " Concentration ", " Confidence ", " Trust ", " Gratitude "," Joy ", " Surprise ", " Insecurity ", " Anxiety ", " Fear ", "Disgust", " Anger ", " Shame ", " Pain ", " Despair ", " Sadness ", " Tired ", " Laughter ", " Arousal "};
+    const char sections_title[number_of_sections][17] = {" Neutral        ", " Relaxation    ", " Concentration ", " Confidence     ", " Trust          ", " Gratitude      "," Joy            ", " Surprise       ", " Insecurity     ", " Anxiety        ", " Fear           ", " Disgust        ", " Anger          ", " Shame          ", " Pain           ", " Despair        ", " Sadness        ", " Tired          ", " Laughter       ", " Arousal        "};
 
     public:
 
@@ -58,12 +56,6 @@ class Recorder :public Project{
         processed_for_leds.heart.sig =  (map(heart->getRaw(), 0, 1023, 0, 1000))/100;
         processed_for_leds.gsr.scr = (map(sc1->getRaw(), 0, 1023, 0, 1000))/100;
        // processed_for_leds.resp.sig = resp->getRaw();
-
-        if(LCD_timer.hasPassed(40, true)){
-        //LCD
-        sprintf(screen::buffer_line_1, " H : %4d G: %4d", heart->getRaw(), sc1->getRaw());
-        sprintf(screen::buffer_line_1, " RT: %.2f FI: %d", resp->getRaw(), button::foot_pedal.read());
-    }
     };
 
 //Project update volume loop. Modify here if project needs special volume clamping

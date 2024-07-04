@@ -157,7 +157,7 @@ private:
      */
     float updatePotentiometer();
 
-
+    void displayDataOnScreen();
 };
 
 #endif
