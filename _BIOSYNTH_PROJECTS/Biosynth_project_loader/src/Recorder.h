@@ -27,7 +27,6 @@ class Recorder :public Project{
     static const int number_of_boards{1};
     static const int number_of_sections{20};
     int current_section{0};
-    bool feelingIt{false};
 
     Heart *heart;
     SkinConductance *sc1;
@@ -59,12 +58,7 @@ class Recorder :public Project{
 
         //LCD
         sprintf(screen::buffer_line_1, " H : %4d G: %4d", heart->getRaw(), sc1->getRaw());
-        sprintf(screen::buffer_line_1, " RT: %.2f FI: %d", resp->getRaw(), feelingIt);
-
-          if (button::foot_pedal.pressed()) {
-            feelingIt = true;
-            }else{
-            feelingIt = false;}
+        sprintf(screen::buffer_line_1, " RT: %.2f FI: %d", resp->getRaw(), button::foot_pedal.read());
     };
 
 //Project update volume loop. Modify here if project needs special volume clamping

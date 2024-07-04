@@ -83,7 +83,11 @@ void Biosynth::update() {
 
 
 #if LOG
+  #if FOOT_PEDAL 
+  session_log.log_data(biosensors::heart.getRaw(), biosensors::sc1.getRaw(),biosensors::resp.getRaw(), button::foot_pedal.read());
+  #else   
   session_log.log_data(biosensors::heart.getRaw(), biosensors::sc1.getRaw(),biosensors::resp.getRaw());
+  #endif 
 #endif
 
   current_encoder_value = encoder::update(project->getNumberOfSection());
