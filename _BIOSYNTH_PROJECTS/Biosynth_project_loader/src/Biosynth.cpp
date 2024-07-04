@@ -367,6 +367,19 @@ void Biosynth::send_over_serial(Print *output)
                  biosensors::resp.getNormalized());
 }
 
+void Biosynth::displayDataOnScreen(){
+
+     //LCD
+     sprintf(screen::buffer_line_1, " H : %4d G: %4d", biosensors::heart.getRaw(), biosensors::sc1.getRaw());
+     #if FOOT_PEDAL
+     sprintf(screen::buffer_line_2, " RT: %.2f FI: %d", biosensors::resp.getRaw(), button::foot_pedal.read());
+     #else
+     sprintf(screen::buffer_line_2, " RT: %.2f", biosensors::resp.getRaw());
+     #endif
+     screen::update();
+}
+        
+
 #if PLOT_SENSOR
 void Biosynth::plot_sampled_data()
 {
