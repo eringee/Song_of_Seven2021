@@ -41,7 +41,6 @@ void Biosynth::initialize()
 
 #if LOG
   session_log.initialize();
-  // session_log.create_file();
 #endif
 
   project->setup();
@@ -101,8 +100,7 @@ void Biosynth::update()
   button::update();
 
 #if LOG
-  maybe_start_logging();
-  maybe_stop_logging();
+  handle_logging();
 #endif
 
 #if ADVANCE_WITH_ENCODER
@@ -132,35 +130,18 @@ void Biosynth::update()
   }
 }
 
-uint32_t FreeMem()
-{ // for Teensy 3.0
-  uint32_t stackTop;
-  uint32_t heapTop;
-
-  // current position of the stack.
-  stackTop = (uint32_t)&stackTop;
-
-  // current position of heap.
-  void *hTop = malloc(1);
-  heapTop = (uint32_t)hTop;
-  free(hTop);
-
-  // The difference is (approximately) the free, available ram.
-  return stackTop - heapTop;
-}
 
 #if LOG
-void Biosynth::maybe_start_logging()
+void Biosynth::handle_logging()
 {
+  
   switch (lcd_state)
   {
   case CURRENT_SECTION:
     if (button::encoder.pressed() && !session_log.is_logging())
     {
       Serial.println("Ask user to record on SD?");
-      Serial.println(FreeMem());
       session_log.create_file();
-      Serial.println(FreeMem());
       sprintf(screen::buffer_line_1, "Record on SD?");
       sprintf(screen::buffer_line_2, "               ");
       screen::update();
@@ -172,28 +153,38 @@ void Biosynth::maybe_start_logging()
     if (button::encoder.pressed() && !session_log.is_logging())
     {
       Serial.println("Starting logging");
-      // start_logging_message();
       session_log.start_logging();
       lcd_state = LOGGING;
+
+      sprintf(screen::buffer_line_1, "  Now Logging  ");
+      sprintf(screen::buffer_line_2, "              ");
+      screen::update();
     }
     break;
 
   case LOGGING:
-    Serial.println("Current lcd_state is LOGGING");
-    start_logging_message();
-    break;
+    if (button::encoder.pressed() && session_log.is_logging()&& !endLogging.isRunning())
+    {
+      Serial.println("Ending session");
+      session_log.stop_logging();
+      Serial.printf("Number of samples recorded: %d\n", session_log.get_num_samples());
+      endLogging.restart();
+      sprintf(screen::buffer_line_1, "Logging Stopped");
+      sprintf(screen::buffer_line_2, "               ");
+      
+      screen::update();
+    }
+
+    if(endLogging.isRunning() ){
+      if(endLogging.hasPassed(2000, true)){
+        current_section_message();
+        endLogging.stop();
+      }
+      
+    }
   }
 }
 
-void Biosynth::maybe_stop_logging()
-{
-  if (button::encoder.pressed() && lcd_state == CURRENT_SECTION && session_log.is_logging())
-  {
-    Serial.println("Ending session");
-    session_log.stop_logging();
-    stop_logging_message(false);
-  }
-}
 #endif
 
 void Biosynth::opening_message()
@@ -250,40 +241,6 @@ void Biosynth::section_change()
     {
       confirmTimer.start();
     }
-  }
-}
-
-void Biosynth::start_logging_message()
-{
-  static bool doOnce = false;
-  if (!doOnce)
-  {
-    Serial.println("Displaying logging started message");
-    sprintf(screen::buffer_line_1, "  Now Logging  ");
-    sprintf(screen::buffer_line_2, "              ");
-    // lcd_state = LOGGING;
-    screen::update();
-    doOnce = true;
-  }
-}
-
-void Biosynth::stop_logging_message(bool do_once)
-{
-  static Chrono timer;
-
-  if (!do_once)
-  {
-    timer.restart();
-    sprintf(screen::buffer_line_1, "Logging Stopped");
-    sprintf(screen::buffer_line_2, "               ");
-    lcd_state = 4;
-    screen::update();
-  }
-  else if (timer.hasPassed(3000) && do_once)
-  {
-    current_section_message();
-    timer.restart();
-    timer.stop();
   }
 }
 
