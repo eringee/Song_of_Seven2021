@@ -116,6 +116,7 @@ void Biosynth::update()
   if (lcdUpdate.hasPassed(40, true))
   {
     opening_message();
+
 #if LOG
     displayDataOnScreen();
 #endif
@@ -324,15 +325,19 @@ void Biosynth::send_over_serial(Print *output)
 }
 
 void Biosynth::displayDataOnScreen(){
-
+  static Chrono lcd_timer; 
+  if (lcd_state == LOGGING){
+    if(lcd_timer.hasPassed(100, true)){
      //LCD
-     sprintf(screen::buffer_line_1, " H : %4d G: %4d", biosensors::heart.getRaw(), biosensors::sc1.getRaw());
+     sprintf(screen::buffer_line_1, "H: %4d G: %4d", biosensors::heart.getRaw(), biosensors::sc1.getRaw());
      #if FOOT_PEDAL
-     sprintf(screen::buffer_line_2, " RT: %.2f FI: %d", biosensors::resp.getRaw(), button::foot_pedal.read());
+     sprintf(screen::buffer_line_2, "RT: %d FI: %d", biosensors::resp.getRaw(), button::foot_pedal.read());
      #else
      sprintf(screen::buffer_line_2, " RT: %.2f", biosensors::resp.getRaw());
      #endif
      screen::update();
+    }
+  }
 }
         
 
