@@ -56,6 +56,11 @@ void Biosynth::loadProject() {
       project = new WeAsWaves(&biosensors::heart, &biosensors::sc1,
                               &biosensors::resp, &biosensors::sc2);
       break;
+
+    case RECORDER:
+      project = new Recorder(&biosensors::heart, &biosensors::sc1,
+                              &biosensors::resp, &biosensors::sc2);
+      break;
   }
 
   Serial.printf("Project loaded: %s\n", project->getName());
@@ -256,7 +261,7 @@ ProjectList Biosynth::selectProject(
 
   if (project == 1) {  // project selected when button not pressed on boot
 
-    return  WE_AS_WAVE;
+    return  RECORDER; // project 1 is recorder, change for WeAsWaves if used for performance 
   } else {  // project selected when button not pressed on boot
     return SONG_OF_SEVEN;
   }
