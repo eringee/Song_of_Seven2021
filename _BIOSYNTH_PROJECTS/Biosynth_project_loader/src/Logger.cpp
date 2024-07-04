@@ -35,6 +35,8 @@ void logger::initialize(){
     Serial.println("sd card initialized");
 }
 
+
+
 //add filename as argument
 void logger::create_file(){
 
@@ -88,6 +90,7 @@ void logger::log_data(const int heart, const int gsr, const int resp){
     recording.print(gsr);
     recording.write(',');
     recording.println(resp);
+    numSamples++;
   }
 
    //last_cur_pos = recording.curPosition();
@@ -97,7 +100,6 @@ void logger::log_data(const int heart, const int gsr, const int resp){
     recording.truncate();
     recording.rewind();
     recording.close();
-    Serial.println("File finalized");
     finalize = false;
   }
 }
@@ -117,6 +119,7 @@ void logger::log_data(const int heart, const int gsr, const int resp, const bool
     recording.print(resp);
     recording.write(',');
     recording.println(feelingIt);
+    numSamples++;
   }
 
    //last_cur_pos = recording.curPosition();
@@ -135,6 +138,7 @@ void logger::log_data(const int heart, const int gsr, const int resp, const bool
 
 void logger::start_logging(){
   logging = true;
+  numSamples = 0;
 }
 
 void logger::stop_logging(){

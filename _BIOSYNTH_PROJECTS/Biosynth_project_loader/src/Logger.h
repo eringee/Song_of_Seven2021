@@ -32,6 +32,8 @@ class logger{
   const int LOG_FILE_SIZE{file_size * 1024 * 1024};
   bool logging{false};
 
+  int numSamples{0};
+
  
 
   public:
@@ -67,4 +69,8 @@ class logger{
    * @brief return true if device is currently logging data
    */
   bool is_logging();
+
+  inline int get_num_samples(){
+    return numSamples;
+    };
 };

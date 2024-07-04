@@ -25,6 +25,7 @@ class Biosynth
     Chrono  confirmTimer{false}; //timer used to reset lcd state if section change not confirmed 
     Chrono  lcdUpdate; //timer to slow down lcd refresh rate
     Chrono openingtimer;
+    Chrono endLogging{false};
     Project *project{nullptr};
     ProjectList selected_project;
 
@@ -112,7 +113,7 @@ private:
     /**
      * @brief start data logging if user presses the encoder button
      */
-    void maybe_start_logging();
+    void handle_logging();
 
     /**
      * @brief stops data logging if user presses the encoder button and a recording is started
