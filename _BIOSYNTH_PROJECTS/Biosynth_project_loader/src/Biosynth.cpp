@@ -78,12 +78,16 @@ void Biosynth::loadProject()
 void Biosynth::update()
 {
   static Chrono timer;
+  project->update();
+  button::update();
+  Serial.println(button::foot_pedal.read());
   if (timer.hasPassed(configuration::biosensors_sample_rate_ms, true))
-  {
+  { 
+
     biosensors::update();
 #if LOG
 #if FOOT_PEDAL
-    session_log.log_data(biosensors::heart.getRaw(), biosensors::sc1.getRaw(), biosensors::resp.getRaw(), button::foot_pedal.read());
+    session_log.log_data(biosensors::heart.getRaw(), biosensors::sc1.getRaw(), biosensors::resp.getRaw(), !button::foot_pedal.read());
 #else
     session_log.log_data(biosensors::heart.getRaw(), biosensors::sc1.getRaw(), biosensors::resp.getRaw());
 #endif
@@ -94,10 +98,9 @@ void Biosynth::update()
   }
 
   audio_manager::setVolume(updatePotentiometer());
-  project->update();
-
+  
   current_encoder_value = encoder::update(project->getNumberOfSection());
-  button::update();
+  
 
 #if LOG
   handle_logging();
@@ -125,7 +128,7 @@ void Biosynth::update()
     section_change();
     verify_no_touch();
 #endif
-
+    
     led::update(project->getLedProcessed());
   }
 }
@@ -142,7 +145,7 @@ void Biosynth::handle_logging()
     {
       Serial.println("Ask user to record on SD?");
       session_log.create_file();
-      sprintf(screen::buffer_line_1, "Record on SD?");
+      sprintf(screen::buffer_line_1, "Record on SD?  ");
       sprintf(screen::buffer_line_2, "               ");
       screen::update();
       lcd_state = START_LOGGING;
@@ -150,21 +153,35 @@ void Biosynth::handle_logging()
     break;
 
   case START_LOGGING:
-    if (button::encoder.pressed() && !session_log.is_logging())
+    if (button::encoder.pressed() && !session_log.is_logging() && !nowLogging.isRunning())
     {
       Serial.println("Starting logging");
       session_log.start_logging();
-      lcd_state = LOGGING;
-
+      
       sprintf(screen::buffer_line_1, "  Now Logging  ");
       sprintf(screen::buffer_line_2, "              ");
       screen::update();
-    }
+      lcd_state = LOGGING;
+
+      nowLogging.restart();
+      }
+
+   
+
     break;
 
   case LOGGING:
+
+   if(nowLogging.isRunning() && !allowDataOnLCD){
+      if(nowLogging.hasPassed(1000, true)){
+        allowDataOnLCD = true;
+        nowLogging.stop();
+      }
+    }
+
     if (button::encoder.pressed() && session_log.is_logging()&& !endLogging.isRunning())
     {
+      allowDataOnLCD = false;
       Serial.println("Ending session");
       session_log.stop_logging();
       Serial.printf("Number of samples recorded: %d\n", session_log.get_num_samples());
@@ -325,13 +342,17 @@ void Biosynth::send_over_serial(Print *output)
 }
 
 void Biosynth::displayDataOnScreen(){
-  static Chrono lcd_timer; 
-  if (lcd_state == LOGGING){
-    if(lcd_timer.hasPassed(100, true)){
+    if(allowDataOnLCD){
+
+    if(!lcd_timer.isRunning()){
+      lcd_timer.start();
+    }
+
+    if(lcd_timer.hasPassed(200, true)){
      //LCD
      sprintf(screen::buffer_line_1, "H: %4d G: %4d", biosensors::heart.getRaw(), biosensors::sc1.getRaw());
      #if FOOT_PEDAL
-     sprintf(screen::buffer_line_2, "RT: %d FI: %d", biosensors::resp.getRaw(), button::foot_pedal.read());
+     sprintf(screen::buffer_line_2, "RT: %.2f FI: %d", float(biosensors::resp.getNormalized()), !button::foot_pedal.read());
      #else
      sprintf(screen::buffer_line_2, " RT: %.2f", biosensors::resp.getRaw());
      #endif
