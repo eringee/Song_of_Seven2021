@@ -74,7 +74,7 @@ void logger::create_file(){
   //recording.close();   
 }
 
-void logger::log_data(sample signals){
+void logger::log_data(const int heart, const int gsr, const int resp){
 
   //static uint64_t last_cur_pos{0};
   static bool finalize{false};
@@ -83,11 +83,11 @@ void logger::log_data(sample signals){
   //recording.seekCur(last_cur_pos);
   if(logging){
     finalize = true;
-    recording.print(signals.heart.sig);
+    recording.print(heart);
     recording.write(',');
-    recording.print(signals.gsr.scr);
+    recording.print(gsr);
     recording.write(',');
-    recording.println(signals.resp.sig);
+    recording.println(resp);
   }
 
    //last_cur_pos = recording.curPosition();

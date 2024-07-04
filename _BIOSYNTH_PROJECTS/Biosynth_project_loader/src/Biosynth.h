@@ -35,7 +35,6 @@ class Biosynth
 
     float vol = 0.0;
 
-    sample data;
 
     #if LOG
         logger session_log; //logger object only create if specified
@@ -57,7 +56,6 @@ public:
      */
     void update();
 
-    void send_over_serial(const sample *signals, Print *output, int rate_ms);
     void send_over_serial( Print *output);
 private:
     void recvWithEndMarker();
@@ -103,7 +101,7 @@ private:
      * @brief prints out the passed sample to the arduino plotter
      * @param signals sample of data to plot
      */
-    void plot_sampled_data(sample signals);
+    void plot_sampled_data();
 #endif
 
     /**

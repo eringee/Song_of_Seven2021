@@ -78,7 +78,7 @@ void Biosynth::update() {
 
 
 #if LOG
-  session_log.log_data(data);
+  session_log.log_data(biosensors::heart.getRaw(), biosensors::sc1.getRaw(),biosensors::resp.getRaw());
 #endif
 
   current_encoder_value = encoder::update(project->getNumberOfSection());
@@ -286,9 +286,8 @@ void Biosynth::send_over_serial(Print *output) {
 
 
 #if PLOT_SENSOR
-void Biosynth::plot_sampled_data(sample signals) {
-  Serial.printf("%.2f,%.2f,%.2f,%.2f", signals.heart.sig, signals.gsr,
-                signals.resp.sig,signals.gsr2);
+void Biosynth::plot_sampled_data( ) {
+  Serial.printf("%.2f,%.2f,%.2f,%.2f", biosensors::heart.getNormalized(),biosensors::sc1.getSCR(),biosensors::sc2.getSCR(),biosensors::resp.getNormalized());
   Serial.println();
 }
 #endif
