@@ -16,9 +16,10 @@
 enum ProjectList : int
 {
     WE_AS_WAVE,
-    SONG_OF_SEVEN
-    
+    SONG_OF_SEVEN,
+    RECORDER
 };
 
 #include "Song_of_seven.h"
 #include "We_As_Wave.h"
+#include "Recorder.h"
