@@ -225,7 +225,7 @@ void Biosynth::section_confirm_message(const int encoder_value) {
 void Biosynth::current_section_message() {
   sprintf(screen::buffer_line_1, "%s",
           project->getSectionTitle(current_section));
-  sprintf(screen::buffer_line_2, "                ");
+  sprintf(screen::buffer_line_2, "   BIOSYNTH %d ", configuration::board_id + 1);
   lcd_state = 2;
   screen::update();
 }
@@ -238,9 +238,10 @@ void Biosynth::advance_section() {
 }
 
 float Biosynth::updatePotentiometer() {
-  float vol = analogRead(pins::audio_shield::volume);
-  vol = (vol / 1024) *
-        0.8;  // make sure the gain doesn't go louder than 0.8 to avoid clipping
+  float knob2= analogRead(pins::audio_shield::volume);
+  if (knob2 != vol) {
+    vol = (knob2/ 1023) * 0.8;
+  }
   return vol;
 }
 

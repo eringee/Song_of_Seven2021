@@ -22,7 +22,7 @@ class WeAsWaves :public Project{
 
     const char* name{"  AFFECT FLOW"};
     static const int number_of_boards{10};
-    static const int number_of_sections{4};
+    static const int number_of_sections{6};
     int current_section{0};
 
     Heart *heart;
@@ -75,26 +75,10 @@ AudioConnection          patchCord20(mainMixer, 0, AudioOut, 1);
 // GUItool: end automatically generated code
 
 
-////////////////////////////ORIGINAL AUDIO CODE/////////////////////////////////////
+////////////////////////////AUDIO CODE/////////////////////////////////////
     //ADD audio objects here. No need to add the sgt5000 object
-    AudioSynthWaveform       heartLFO;      //xy=64,125 aka waveform5
-    AudioSynthNoiseWhite     respnoise;         //xy=140,494
-    AudioSynthWaveform       respnoiseLFO;      //xy=140,582  aka waveform4
-    AudioEffectBitcrusher    bitcrusher1;    //xy=161,191
-    AudioEffectEnvelope      clickEnvelope;      //xy=272,123
-    AudioSynthWaveform       respWave1;      //xy=335,391 aka waveform2
-    AudioEffectMultiply      multiply1;      //xy=335,518
-    AudioSynthWaveform       respWave2;      //xy=336,435 aka waveform3
-    AudioAmplifier           heartEnvAmp;           //xy=402,167
-    AudioMixer4              respMixer;         //xy=527,424  aka mixer2
-    AudioMixer4              clickGlitchMixer;         //xy=531,164     
-    AudioFilterStateVariable respFilter;        //xy=688,482  aka filter2
-    AudioFilterStateVariable GSRfilter;        //xy=692,174  aka filter1
-    AudioAmplifier           respAmp2;           //xy=735,414
-    AudioMixer4              mainMixer;         //xy=822,306  aka mixer1
-    AudioOutputI2S           AudioOut;       //xy=996,307
+  
 */
-///EXPERIMENTAL CODE/////////////////////////////////////////
 
 AudioSynthWaveform       heartLFO;       //xy=60,109
 AudioSynthNoiseWhite     respnoise;      //xy=160,489
@@ -116,41 +100,89 @@ AudioAmplifier           respAmp2;       //xy=784,396
 AudioMixer4              mainMixer;      //xy=874,317
 AudioOutputI2S           AudioOut;       //xy=1031,323
 
+//vvv ADD ALL THE VARIABLES YOUR PROJECT DEPENDS ON IN THIS SECTION vvvv
 
-    //vvvADD ALL THE VARIABLE YOUR PROJECT DEPENDS ON UNDER HEREvvvv
+  /*const char sections_title[number_of_sections][17] = {"       A       ", "       B       ", "       C       ", "       D       "};  //menu display 17 chars
+      
+  double sectionGlobal[number_of_sections][number_of_boards] = {
+    
+    {mtof.toFrequency(50), 
+    mtof.toFrequency(57), 
+    mtof.toFrequency(62), 
+    mtof.toFrequency(71), 
+    mtof.toFrequency(72)}, // Intro section A  
 
-    const char sections_title[number_of_sections][17] = {"       A       ", "       B       ", "       C       ", "       D       "};
+    {mtof.toFrequency(69), 
+    mtof.toFrequency(76), 
+    mtof.toFrequency(83), 
+    mtof.toFrequency(84), 
+    mtof.toFrequency(91)},  // Intro section B
+      
+    {mtof.toFrequency(69), 
+    mtof.toFrequency(72), 
+    mtof.toFrequency(74), 
+    mtof.toFrequency(79), 
+    mtof.toFrequency(86)},  // intro section C plus song
+          
+    {mtof.toFrequency(46),   
+    mtof.toFrequency(48), 
+    mtof.toFrequency(51), 
+    mtof.toFrequency(54), 
+    mtof.toFrequency(56)},  // Anger section D
+
+    {mtof.toFrequency(),   
+    mtof.toFrequency(), 
+    mtof.toFrequency(), 
+    mtof.toFrequency(), 
+    mtof.toFrequency()},  // Ending section E
+  };
+*/
+
+    //vvv ADD ALL THE VARIABLES YOUR PROJECT DEPENDS ON IN THIS SECTION vvvv
+
+    //!!!!! section title should be no more than 16 characters long. Longer strings will make the teensy crash!!!!!
+    const char sections_title[number_of_sections][17] = {" Section A   ", " Section B   ", " Section C   ", " Section D   "," Section E   "," Section F   "};
     double sectionGlobal[number_of_sections][number_of_boards] = {
-        {mtof.toFrequency(67), 
-        mtof.toFrequency(71), 
-        mtof.toFrequency(72), 
-        mtof.toFrequency(74), 
-        mtof.toFrequency(76), 
-        mtof.toFrequency(77), 
-        mtof.toFrequency(81), 
-        mtof.toFrequency(83), 
-        mtof.toFrequency(86), 
-        mtof.toFrequency(88)},  // Gmaj13
+       {mtof.toFrequency(50), 
+    mtof.toFrequency(57), 
+    mtof.toFrequency(62), 
+    mtof.toFrequency(71), 
+    mtof.toFrequency(72)}, // Intro section A  
 
-        {mtof.toFrequency(51), 
-        mtof.toFrequency(54), 
-        mtof.toFrequency(56), 
-        mtof.toFrequency(58), 
-        mtof.toFrequency(61), 
-        mtof.toFrequency(63), 
-        mtof.toFrequency(66), 
-        mtof.toFrequency(68), 
-        mtof.toFrequency(70), 
-        mtof.toFrequency(73)},  // pentatonic scale - add 12 for fun
+ {mtof.toFrequency(69), 
+    mtof.toFrequency(76), 
+    mtof.toFrequency(83), 
+    mtof.toFrequency(84), 
+    mtof.toFrequency(91)},  // Intro section B
     
+    {mtof.toFrequency(69), 
+    mtof.toFrequency(72), 
+    mtof.toFrequency(74), 
+    mtof.toFrequency(79), 
+    mtof.toFrequency(86)},  // intro section C plus song
+          
+    {mtof.toFrequency(46),   
+    mtof.toFrequency(48), 
+    mtof.toFrequency(51), 
+    mtof.toFrequency(54), 
+    mtof.toFrequency(56)},  // Anger section D
 
-    
-        {392,416,448,587,659,1046,1174, 1300, 1400, 1700},     // section 3
-        {1148,1312,1476,1640,1804,1968,2132, 2500, 2600, 2700} // section 4
+    {mtof.toFrequency(55),   
+    mtof.toFrequency(69), 
+    mtof.toFrequency(74), 
+    mtof.toFrequency(81), 
+    mtof.toFrequency(89)},  // Ending section 1E
+
+     {mtof.toFrequency(66),   
+    mtof.toFrequency(76), 
+    mtof.toFrequency(78), 
+    mtof.toFrequency(81), 
+    mtof.toFrequency(83)}  // Ending section 2F
     };
 
-    float respTone;
-    ///Variables for smoothing out biosignals
+  
+  ///Variables for smoothing out biosignals
+   float respTone;
     float smoothHeart = 0.5; //default value for smoothing heart signal for EMA
     float smoothHeartAmp = 0.5; //default value for smoothing heart signal for EMA
     float smoothHeartBPM = 0.5; //default value for smoothing heart signal for EMA
@@ -187,26 +219,7 @@ AudioOutputI2S           AudioOut;       //xy=1031,323
             more 
         */
         int pci= 0;
-/*
-        patch_cords[pci++] = new AudioConnection(heartLFO, bitcrusher1);
-        patch_cords[pci++] = new AudioConnection(respnoise, 0, multiply1, 0); // aka respnoise
-        patch_cords[pci++] = new AudioConnection(respnoiseLFO, 0, multiply1, 1);
-        patch_cords[pci++] = new AudioConnection(bitcrusher1, clickEnvelope);
-        patch_cords[pci++] = new AudioConnection(clickEnvelope, heartEnvAmp);
-        patch_cords[pci++] = new AudioConnection(respWave1, 0, respMixer, 0);
-        patch_cords[pci++] = new AudioConnection(multiply1, 0, respMixer, 2);
-        patch_cords[pci++] = new AudioConnection(respWave2, 0, respMixer, 1);
-        patch_cords[pci++] = new AudioConnection(heartEnvAmp, 0, clickGlitchMixer, 1);
-        patch_cords[pci++] = new AudioConnection(respMixer, 0, respFilter, 0);
-        patch_cords[pci++] = new AudioConnection(respMixer, 0, mainMixer, 1);
-        patch_cords[pci++] = new AudioConnection(clickGlitchMixer, 0, GSRfilter, 0);
-        patch_cords[pci++] = new AudioConnection(respFilter, 1, respAmp2, 0);
-        patch_cords[pci++] = new AudioConnection(GSRfilter, 1, mainMixer, 0);
-        patch_cords[pci++] = new AudioConnection(respAmp2, 0, mainMixer, 3);
-        patch_cords[pci++] = new AudioConnection(mainMixer, 0, AudioOut, 0);
-        patch_cords[pci++] = new AudioConnection(mainMixer, 0, AudioOut, 1);
 
-        */
 
         patch_cords[pci++] = new AudioConnection(heartLFO, bitcrusher1);
         patch_cords[pci++] = new AudioConnection(respnoise, 0, multiply1, 0);
@@ -331,7 +344,12 @@ AudioOutputI2S           AudioOut;       //xy=1031,323
         
         GSRfilter.frequency(y);
         GSRfilter1.frequency(y2);
-        
+       /*
+      //section to silence GSR pops 
+       GSRfilter.frequency(0);
+       GSRfilter1.frequency(0);
+      */
+
         processed_for_leds.heart.sig = smoothHeart*0.7;
         processed_for_leds.gsr.scr = smoothGSR;
         processed_for_leds.resp.sig = finalResp*1.2;

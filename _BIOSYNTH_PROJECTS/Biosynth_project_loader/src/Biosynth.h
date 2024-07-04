@@ -20,8 +20,6 @@
     #include "Logger.h"
 #endif
 
-
-
 class Biosynth
 {    
     Chrono  confirmTimer{false}; //timer used to reset lcd state if section change not confirmed 
@@ -34,6 +32,8 @@ class Biosynth
     int last_section{-1};
     int lcd_state = 0;
     int current_encoder_value = 0;
+
+    float vol = 0.0;
 
     sample data;
 
