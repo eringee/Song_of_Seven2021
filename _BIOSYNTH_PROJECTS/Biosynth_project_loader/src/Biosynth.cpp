@@ -7,7 +7,6 @@
  */
 #include "Biosynth.h"
 
-
 #include <Chrono.h>
 
 #include "Project_list.h"
@@ -18,16 +17,17 @@
 #include "lcd.h"
 #include "led.h"
 
-enum lcd_state{
-  BOOT=0,
+enum lcd_state
+{
+  BOOT = 0,
   CHANGE_SECTION,
   CURRENT_SECTION,
   START_LOGGING,
   LOGGING
 };
 
-
-void Biosynth::initialize() {
+void Biosynth::initialize()
+{
   Serial.println("Erin Gee's Biosynth");
 
   screen::initialize();
@@ -39,65 +39,63 @@ void Biosynth::initialize() {
   led::initialize();
   biosensors::initialize();
 
-  
 #if LOG
   session_log.initialize();
   // session_log.create_file();
 #endif
 
-
- project->setup();
- audio_manager::mute(false);
- screen::clear();
-
+  project->setup();
+  audio_manager::mute(false);
+  screen::clear();
 }
 
-void Biosynth::loadProject() {
+void Biosynth::loadProject()
+{
   selected_project = selectProject(2000);
 
-  switch (selected_project) {  // add new projects to this switch case (just copy paste the case and change the title and class name)
-    case SONG_OF_SEVEN:
-      project = new SongOfSeven(&biosensors::heart, &biosensors::sc1,
-                                &biosensors::resp, &biosensors::sc2);
-      break;
-
-    case WE_AS_WAVE:
-      project = new WeAsWaves(&biosensors::heart, &biosensors::sc1,
+  switch (selected_project)
+  { // add new projects to this switch case (just copy paste the case and change the title and class name)
+  case SONG_OF_SEVEN:
+    project = new SongOfSeven(&biosensors::heart, &biosensors::sc1,
                               &biosensors::resp, &biosensors::sc2);
-      break;
+    break;
 
-    case RECORDER:
-      project = new Recorder(&biosensors::heart, &biosensors::sc1,
-                              &biosensors::resp, &biosensors::sc2);
-      break;
+  case WE_AS_WAVE:
+    project = new WeAsWaves(&biosensors::heart, &biosensors::sc1,
+                            &biosensors::resp, &biosensors::sc2);
+    break;
+
+  case RECORDER:
+    project = new Recorder(&biosensors::heart, &biosensors::sc1,
+                           &biosensors::resp, &biosensors::sc2);
+    break;
   }
 
   Serial.printf("Project loaded: %s\n", project->getName());
-  
-  selectedProjectMessage(1000);  // get stuck when trying to update lcd
+
+  selectedProjectMessage(1000); // get stuck when trying to update lcd
 }
 
+void Biosynth::update()
+{
+  static Chrono timer;
+  if (timer.hasPassed(configuration::biosensors_sample_rate_ms, true))
+  {
+    biosensors::update();
+#if LOG
+#if FOOT_PEDAL
+    session_log.log_data(biosensors::heart.getRaw(), biosensors::sc1.getRaw(), biosensors::resp.getRaw(), button::foot_pedal.read());
+#else
+    session_log.log_data(biosensors::heart.getRaw(), biosensors::sc1.getRaw(), biosensors::resp.getRaw());
+#endif
+#endif
+#if SEND_OVER_SERIAL
+    send_over_serial(&Serial);
+#endif
+  }
 
-void Biosynth::update() {
-   static Chrono timer;
-    if(timer.hasPassed(configuration::biosensors_sample_rate_ms,true)) {
-      biosensors::update();
-      #if SEND_OVER_SERIAL
-        send_over_serial(&Serial);
-      #endif      
-   }
-  
   audio_manager::setVolume(updatePotentiometer());
   project->update();
-
-
-#if LOG
-  #if FOOT_PEDAL 
-  session_log.log_data(biosensors::heart.getRaw(), biosensors::sc1.getRaw(),biosensors::resp.getRaw(), button::foot_pedal.read());
-  #else   
-  session_log.log_data(biosensors::heart.getRaw(), biosensors::sc1.getRaw(),biosensors::resp.getRaw());
-  #endif 
-#endif
 
   current_encoder_value = encoder::update(project->getNumberOfSection());
   button::update();
@@ -110,13 +108,15 @@ void Biosynth::update() {
 #if ADVANCE_WITH_ENCODER
   maybe_confirm_section_change();
 #else
-  if (button::foot_pedal.pressed() && lcd_state == CURRENT_SECTION) {
+  if (button::foot_pedal.pressed() && lcd_state == CURRENT_SECTION)
+  {
     advance_section();
     Serial.println("Foot pedal pressed. Advanced section");
   }
 #endif
 
-  if (lcdUpdate.hasPassed(40, true)) {
+  if (lcdUpdate.hasPassed(40, true))
+  {
     opening_message();
 #if LOG
     // start_logging_message(true);
@@ -132,56 +132,63 @@ void Biosynth::update() {
   }
 }
 
-uint32_t FreeMem(){ // for Teensy 3.0
-    uint32_t stackTop;
-    uint32_t heapTop;
+uint32_t FreeMem()
+{ // for Teensy 3.0
+  uint32_t stackTop;
+  uint32_t heapTop;
 
-    // current position of the stack.
-    stackTop = (uint32_t) &stackTop;
+  // current position of the stack.
+  stackTop = (uint32_t)&stackTop;
 
-    // current position of heap.
-    void* hTop = malloc(1);
-    heapTop = (uint32_t) hTop;
-    free(hTop);
+  // current position of heap.
+  void *hTop = malloc(1);
+  heapTop = (uint32_t)hTop;
+  free(hTop);
 
-    // The difference is (approximately) the free, available ram.
-    return stackTop - heapTop;
+  // The difference is (approximately) the free, available ram.
+  return stackTop - heapTop;
 }
 
 #if LOG
-void Biosynth::maybe_start_logging() {
-  switch(lcd_state) {
-    case CURRENT_SECTION:
-      if (button::encoder.pressed()&& !session_log.is_logging()) {
-        Serial.println("Ask user to record on SD?");
-        Serial.println(FreeMem());
-        session_log.create_file();
-        Serial.println(FreeMem());
-        sprintf(screen::buffer_line_1, "Record on SD?");
-        sprintf(screen::buffer_line_2, "               ");
-        screen::update();
-        lcd_state = START_LOGGING;
-      }
+void Biosynth::maybe_start_logging()
+{
+  switch (lcd_state)
+  {
+  case CURRENT_SECTION:
+    if (button::encoder.pressed() && !session_log.is_logging())
+    {
+      Serial.println("Ask user to record on SD?");
+      Serial.println(FreeMem());
+      session_log.create_file();
+      Serial.println(FreeMem());
+      sprintf(screen::buffer_line_1, "Record on SD?");
+      sprintf(screen::buffer_line_2, "               ");
+      screen::update();
+      lcd_state = START_LOGGING;
+    }
     break;
 
-    case START_LOGGING:
-      if(button::encoder.pressed() && !session_log.is_logging()) {
-        Serial.println("Starting logging");
-        // start_logging_message();
-        session_log.start_logging();
-        lcd_state = LOGGING; 
-      }
+  case START_LOGGING:
+    if (button::encoder.pressed() && !session_log.is_logging())
+    {
+      Serial.println("Starting logging");
+      // start_logging_message();
+      session_log.start_logging();
+      lcd_state = LOGGING;
+    }
     break;
 
-    case LOGGING:
-      Serial.println("Current lcd_state is LOGGING");
-      start_logging_message();
-    break; 
+  case LOGGING:
+    Serial.println("Current lcd_state is LOGGING");
+    start_logging_message();
+    break;
   }
 }
 
-void Biosynth::maybe_stop_logging() {
-  if (button::encoder.pressed() && lcd_state == CURRENT_SECTION && session_log.is_logging()) {
+void Biosynth::maybe_stop_logging()
+{
+  if (button::encoder.pressed() && lcd_state == CURRENT_SECTION && session_log.is_logging())
+  {
     Serial.println("Ending session");
     session_log.stop_logging();
     stop_logging_message(false);
@@ -189,25 +196,29 @@ void Biosynth::maybe_stop_logging() {
 }
 #endif
 
-void Biosynth::opening_message() {
+void Biosynth::opening_message()
+{
   static bool do_once{false};
-  
 
-  if (!do_once) {
+  if (!do_once)
+  {
     sprintf(screen::buffer_line_1, "Hello!");
     sprintf(screen::buffer_line_2, "I am board #%d", configuration::board_id + 1);
     screen::update();
     do_once = true;
-
-  } else if (openingtimer.hasPassed(configuration::opening_message_time) && do_once) {
+  }
+  else if (openingtimer.hasPassed(configuration::opening_message_time) && do_once)
+  {
     current_section_message();
     openingtimer.restart();
     openingtimer.stop();
   }
 }
 
-void Biosynth::maybe_confirm_section_change() {
-  if (button::encoder.pressed() && lcd_state == CHANGE_SECTION) {
+void Biosynth::maybe_confirm_section_change()
+{
+  if (button::encoder.pressed() && lcd_state == CHANGE_SECTION)
+  {
     Serial.println("Section change confirmed");
     last_section = current_section;
     current_section = current_encoder_value;
@@ -218,9 +229,11 @@ void Biosynth::maybe_confirm_section_change() {
   }
 }
 
-void Biosynth::verify_no_touch() {
+void Biosynth::verify_no_touch()
+{
   if (confirmTimer.hasPassed(configuration::confirmation_delay) &&
-      lcd_state == CHANGE_SECTION) {
+      lcd_state == CHANGE_SECTION)
+  {
     encoder::set_value(current_section);
     current_section_message();
     confirmTimer.restart();
@@ -228,120 +241,136 @@ void Biosynth::verify_no_touch() {
   }
 }
 
-void Biosynth::section_change() {
-  if (current_encoder_value != current_section) {
+void Biosynth::section_change()
+{
+  if (current_encoder_value != current_section)
+  {
     section_confirm_message(current_encoder_value);
-    if (!confirmTimer.isRunning()) {
+    if (!confirmTimer.isRunning())
+    {
       confirmTimer.start();
     }
   }
 }
 
-void Biosynth::start_logging_message() {
+void Biosynth::start_logging_message()
+{
   static bool doOnce = false;
-    if (!doOnce) {
-      Serial.println("Displaying logging started message");
-      sprintf(screen::buffer_line_1, "  Now Logging  ");
-      sprintf(screen::buffer_line_2, "              ");
-      // lcd_state = LOGGING;
-      screen::update();
-      doOnce = true;
-    }
+  if (!doOnce)
+  {
+    Serial.println("Displaying logging started message");
+    sprintf(screen::buffer_line_1, "  Now Logging  ");
+    sprintf(screen::buffer_line_2, "              ");
+    // lcd_state = LOGGING;
+    screen::update();
+    doOnce = true;
+  }
 }
 
-void Biosynth::stop_logging_message(bool do_once) {
+void Biosynth::stop_logging_message(bool do_once)
+{
   static Chrono timer;
 
-  if (!do_once) {
+  if (!do_once)
+  {
     timer.restart();
     sprintf(screen::buffer_line_1, "Logging Stopped");
     sprintf(screen::buffer_line_2, "               ");
     lcd_state = 4;
     screen::update();
-
-  } else if (timer.hasPassed(3000) && do_once) {
+  }
+  else if (timer.hasPassed(3000) && do_once)
+  {
     current_section_message();
     timer.restart();
     timer.stop();
   }
 }
 
-void Biosynth::section_confirm_message(const int encoder_value) {
+void Biosynth::section_confirm_message(const int encoder_value)
+{
   sprintf(screen::buffer_line_1, "%s", project->getSectionTitle(current_encoder_value));
- 
+
   sprintf(screen::buffer_line_2, "   Confirm ?   ");
   lcd_state = CHANGE_SECTION;
   screen::update();
 }
 
-
-void Biosynth::current_section_message() {
+void Biosynth::current_section_message()
+{
   sprintf(screen::buffer_line_1, "%s", project->getSectionTitle(current_section));
   sprintf(screen::buffer_line_2, "   BIOSYNTH %d ", configuration::board_id + 1);
   lcd_state = CURRENT_SECTION;
   screen::update();
 }
 
-void Biosynth::advance_section() {
+void Biosynth::advance_section()
+{
   current_section++;
   current_section = current_section % project->getNumberOfSection();
   project->changeSection(current_section);
   current_section_message();
 }
 
-float Biosynth::updatePotentiometer() {
-  float knob2= analogRead(pins::audio_shield::volume);
-  if (knob2 != vol) {
-    vol = (knob2/ 1023) * 0.8;
+float Biosynth::updatePotentiometer()
+{
+  float knob2 = analogRead(pins::audio_shield::volume);
+  if (knob2 != vol)
+  {
+    vol = (knob2 / 1023) * 0.8;
   }
   return vol;
 }
 
 ProjectList Biosynth::selectProject(
-    const int &timeout) {  // need to be modified if more than two project
+    const int &timeout)
+{ // need to be modified if more than two project
   Chrono waitTime;
   waitTime.restart();
   int project = 0;
-  while (!waitTime.hasPassed(timeout)) {
+  while (!waitTime.hasPassed(timeout))
+  {
     project = button::getEncoder();
   }
 
-  if (project == 1) {  // project selected when button not pressed on boot
+  if (project == 1)
+  { // project selected when button not pressed on boot
 
-    return  RECORDER; // project 1 is recorder, change for WeAsWaves if used for performance 
-  } else {  // project selected when button not pressed on boot
+    return RECORDER; // project 1 is recorder, change for WeAsWaves if used for performance
+  }
+  else
+  { // project selected when button not pressed on boot
     return SONG_OF_SEVEN;
   }
 }
 
-void Biosynth::selectedProjectMessage(const int &displayTime) {
+void Biosynth::selectedProjectMessage(const int &displayTime)
+{
   Chrono waitTime;
 
   sprintf(screen::buffer_line_1, "    Biosynth   ");
   sprintf(screen::buffer_line_2, project->getName());
   screen::update();
   waitTime.restart();
-  while (!waitTime.hasPassed(displayTime)) {
+  while (!waitTime.hasPassed(displayTime))
+  {
     // wait in function
   }
 }
 
+void Biosynth::send_over_serial(Print *output)
+{
 
-void Biosynth::send_over_serial(Print *output) {
-
-    output->printf("%d,%.2f,%.2f,%.2f\n", configuration::board_id,
-                   biosensors::heart.getNormalized(),
-                   biosensors::sc2.getSCR(),
-                   biosensors::resp.getNormalized());
-
+  output->printf("%d,%.2f,%.2f,%.2f\n", configuration::board_id,
+                 biosensors::heart.getNormalized(),
+                 biosensors::sc2.getSCR(),
+                 biosensors::resp.getNormalized());
 }
 
-
 #if PLOT_SENSOR
-void Biosynth::plot_sampled_data( ) {
-  Serial.printf("%.2f,%.2f,%.2f,%.2f", biosensors::heart.getNormalized(),biosensors::sc1.getSCR(),biosensors::sc2.getSCR(),biosensors::resp.getNormalized());
+void Biosynth::plot_sampled_data()
+{
+  Serial.printf("%.2f,%.2f,%.2f,%.2f", biosensors::heart.getNormalized(), biosensors::sc1.getSCR(), biosensors::sc2.getSCR(), biosensors::resp.getNormalized());
   Serial.println();
 }
 #endif
-
-
