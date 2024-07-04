@@ -18,6 +18,14 @@
 #include "lcd.h"
 #include "led.h"
 
+enum lcd_state{
+  BOOT=0,
+  CHANGE_SECTION,
+  CURRENT_SECTION,
+  START_LOGGING,
+  LOGGING
+};
+
 
 void Biosynth::initialize() {
   Serial.println("Erin Gee's Biosynth");
@@ -34,6 +42,7 @@ void Biosynth::initialize() {
   
 #if LOG
   session_log.initialize();
+  // session_log.create_file();
 #endif
 
 
@@ -92,7 +101,7 @@ void Biosynth::update() {
 #if ADVANCE_WITH_ENCODER
   maybe_confirm_section_change();
 #else
-  if (button::foot_pedal.pressed() && lcd_state == 2) {
+  if (button::foot_pedal.pressed() && lcd_state == CURRENT_SECTION) {
     advance_section();
     Serial.println("Foot pedal pressed. Advanced section");
   }
@@ -101,8 +110,8 @@ void Biosynth::update() {
   if (lcdUpdate.hasPassed(40, true)) {
     opening_message();
 #if LOG
-    start_logging_message(true);
-    stop_logging_message(true);
+    // start_logging_message(true);
+    // stop_logging_message(true);
 #endif
 
 #if ADVANCE_WITH_ENCODER
@@ -114,19 +123,56 @@ void Biosynth::update() {
   }
 }
 
+uint32_t FreeMem(){ // for Teensy 3.0
+    uint32_t stackTop;
+    uint32_t heapTop;
+
+    // current position of the stack.
+    stackTop = (uint32_t) &stackTop;
+
+    // current position of heap.
+    void* hTop = malloc(1);
+    heapTop = (uint32_t) hTop;
+    free(hTop);
+
+    // The difference is (approximately) the free, available ram.
+    return stackTop - heapTop;
+}
+
 #if LOG
 void Biosynth::maybe_start_logging() {
-  if (button::encoder.pressed() && lcd_state == 2 &&
-      !session_log.is_logging()) {
-    Serial.println("Starting session");
-    session_log.create_file();
-    session_log.start_logging();
-    start_logging_message(false);
+  switch(lcd_state) {
+    case CURRENT_SECTION:
+      if (button::encoder.pressed()&& !session_log.is_logging()) {
+        Serial.println("Ask user to record on SD?");
+        Serial.println(FreeMem());
+        session_log.create_file();
+        Serial.println(FreeMem());
+        sprintf(screen::buffer_line_1, "Record on SD?");
+        sprintf(screen::buffer_line_2, "               ");
+        screen::update();
+        lcd_state = START_LOGGING;
+      }
+    break;
+
+    case START_LOGGING:
+      if(button::encoder.pressed() && !session_log.is_logging()) {
+        Serial.println("Starting logging");
+        // start_logging_message();
+        session_log.start_logging();
+        lcd_state = LOGGING; 
+      }
+    break;
+
+    case LOGGING:
+      Serial.println("Current lcd_state is LOGGING");
+      start_logging_message();
+    break; 
   }
 }
 
 void Biosynth::maybe_stop_logging() {
-  if (button::encoder.pressed() && lcd_state == 2 && session_log.is_logging()) {
+  if (button::encoder.pressed() && lcd_state == CURRENT_SECTION && session_log.is_logging()) {
     Serial.println("Ending session");
     session_log.stop_logging();
     stop_logging_message(false);
@@ -152,7 +198,7 @@ void Biosynth::opening_message() {
 }
 
 void Biosynth::maybe_confirm_section_change() {
-  if (button::encoder.pressed() && lcd_state == 1) {
+  if (button::encoder.pressed() && lcd_state == CHANGE_SECTION) {
     Serial.println("Section change confirmed");
     last_section = current_section;
     current_section = current_encoder_value;
@@ -165,7 +211,7 @@ void Biosynth::maybe_confirm_section_change() {
 
 void Biosynth::verify_no_touch() {
   if (confirmTimer.hasPassed(configuration::confirmation_delay) &&
-      lcd_state == 1) {
+      lcd_state == CHANGE_SECTION) {
     encoder::set_value(current_section);
     current_section_message();
     confirmTimer.restart();
@@ -182,19 +228,16 @@ void Biosynth::section_change() {
   }
 }
 
-void Biosynth::start_logging_message(bool do_once) {
-  static Chrono timer;
-  if (!do_once) {
-    timer.restart();
-    sprintf(screen::buffer_line_1, "Logging Started");
-    sprintf(screen::buffer_line_2, "               ");
-    lcd_state = 3;
-    screen::update();
-  } else if (timer.hasPassed(3000) && do_once) {
-    current_section_message();
-    timer.restart();
-    timer.stop();
-  }
+void Biosynth::start_logging_message() {
+  static bool doOnce = false;
+    if (!doOnce) {
+      Serial.println("Displaying logging started message");
+      sprintf(screen::buffer_line_1, "  Now Logging  ");
+      sprintf(screen::buffer_line_2, "              ");
+      // lcd_state = LOGGING;
+      screen::update();
+      doOnce = true;
+    }
 }
 
 void Biosynth::stop_logging_message(bool do_once) {
@@ -215,18 +258,18 @@ void Biosynth::stop_logging_message(bool do_once) {
 }
 
 void Biosynth::section_confirm_message(const int encoder_value) {
-  sprintf(screen::buffer_line_1, "%s",
-          project->getSectionTitle(current_encoder_value));
+  sprintf(screen::buffer_line_1, "%s", project->getSectionTitle(current_encoder_value));
+ 
   sprintf(screen::buffer_line_2, "   Confirm ?   ");
-  lcd_state = 1;
+  lcd_state = CHANGE_SECTION;
   screen::update();
 }
 
+
 void Biosynth::current_section_message() {
-  sprintf(screen::buffer_line_1, "%s",
-          project->getSectionTitle(current_section));
+  sprintf(screen::buffer_line_1, "%s", project->getSectionTitle(current_section));
   sprintf(screen::buffer_line_2, "   BIOSYNTH %d ", configuration::board_id + 1);
-  lcd_state = 2;
+  lcd_state = CURRENT_SECTION;
   screen::update();
 }
 

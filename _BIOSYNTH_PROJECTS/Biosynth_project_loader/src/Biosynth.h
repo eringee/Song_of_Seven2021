@@ -124,7 +124,7 @@ private:
      * 
      * @param do_once pass false to display the message on screen and reset the timer. pass true just to opdate the timer
      */
-    void start_logging_message(bool do_once);
+    void start_logging_message();
 
     /** 
      * @brief display a message on screen to tell user logging as stopped
