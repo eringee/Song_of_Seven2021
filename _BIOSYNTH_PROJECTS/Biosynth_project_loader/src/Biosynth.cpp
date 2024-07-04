@@ -121,6 +121,7 @@ void Biosynth::update()
 #if LOG
     // start_logging_message(true);
     // stop_logging_message(true);
+    displayDataOnScreen();
 #endif
 
 #if ADVANCE_WITH_ENCODER
