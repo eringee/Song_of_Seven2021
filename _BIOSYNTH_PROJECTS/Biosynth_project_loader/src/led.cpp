@@ -31,6 +31,8 @@ namespace led{
 
     void update(sample signals){
 
+        // Serial.printf("%.2f,%.2f,%.2f,%.2f\n", signals.heart.sig, signals.gsr.scr, signals.resp.sig, signals.gsr2.scr);
+
 
         leds.setPixel(0,led_colors[0][0]*signals.heart.sig,
                         led_colors[0][1]*signals.heart.sig,

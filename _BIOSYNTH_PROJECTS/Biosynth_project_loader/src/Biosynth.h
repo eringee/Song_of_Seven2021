@@ -24,8 +24,10 @@ class Biosynth
 {    
     Chrono  confirmTimer{false}; //timer used to reset lcd state if section change not confirmed 
     Chrono  lcdUpdate; //timer to slow down lcd refresh rate
+    Chrono lcd_timer{true}; //timer for biodata display on lcd 
     Chrono openingtimer;
     Chrono endLogging{false};
+    Chrono nowLogging{false};
     Project *project{nullptr};
     ProjectList selected_project;
 
@@ -35,6 +37,8 @@ class Biosynth
     int current_encoder_value = 0;
 
     float vol = 0.0;
+
+    bool allowDataOnLCD = false;
 
 
     #if LOG

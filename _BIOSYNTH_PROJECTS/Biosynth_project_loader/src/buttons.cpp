@@ -9,7 +9,7 @@ namespace button{
         encoder.attach(pins::hardware::encoder_button, INPUT_PULLUP);
         encoder.interval(refresh_rate);
  
-        foot_pedal.attach(pins::hardware::foot_pedal, INPUT_PULLDOWN);
+        foot_pedal.attach(pins::hardware::foot_pedal, INPUT_PULLUP);
         foot_pedal.setPressedState(LOW);
         foot_pedal.interval(refresh_rate);
 
