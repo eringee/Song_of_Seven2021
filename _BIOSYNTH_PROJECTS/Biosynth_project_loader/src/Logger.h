@@ -51,6 +51,8 @@ class logger{
    */
   void log_data(const int heart, const int gsr, const int resp); 
 
+  void log_data(const int heart, const int gsr, const int resp, const bool feelingIt); 
+
   /**
    * @brief starts datalogging
    */

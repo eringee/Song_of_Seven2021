@@ -100,9 +100,37 @@ void logger::log_data(const int heart, const int gsr, const int resp){
     Serial.println("File finalized");
     finalize = false;
   }
+}
+void logger::log_data(const int heart, const int gsr, const int resp, const bool feelingIt){
+
+  //static uint64_t last_cur_pos{0};
+  static bool finalize{false};
+
+  //recording = SD.sdfs.open("session.txt", O_WRITE); //make this dynamic with file name
+  //recording.seekCur(last_cur_pos);
+  if(logging){
+    finalize = true;
+    recording.print(heart);
+    recording.write(',');
+    recording.print(gsr);
+    recording.write(',');
+    recording.print(resp);
+    recording.write(',');
+    recording.println(feelingIt);
+  }
+
+   //last_cur_pos = recording.curPosition();
+
+  if(!logging && finalize){
+    recording.sync();
+    recording.truncate();
+    recording.rewind();
+    recording.close();
+    Serial.println("File finalized");
+    finalize = false;
+  }
 
 
-  
 }
 
 void logger::start_logging(){
@@ -116,3 +144,4 @@ void logger::stop_logging(){
 bool logger::is_logging(){
   return logging;
 }
+
