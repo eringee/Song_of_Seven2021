@@ -82,34 +82,49 @@ void Biosynth::loadProject()
 void Biosynth::update() {
 static Chrono updateTimer(Chrono::MICROS);
 
+  project->update();
+  button::update(); 
+
   if (updateTimer.hasPassed((configuration::biosensors_sample_rate_us - 500), true)) {
     biosensors::update();
-  }
 
-    project->update();
-    button::update();   
+    #if SEND_OVER_SERIAL
+      send_over_serial(&Serial);
+          
+    #endif
+  }  
+    audio_manager::setVolume(updatePotentiometer());
+    current_encoder_value = encoder::update(project->getNumberOfSection());
     
 #if LOG
         handle_logging();
     #endif
 
-    if (lcdUpdate.hasPassed(40, true)) {
-        opening_message();
+#if ADVANCE_WITH_ENCODER
+  maybe_confirm_section_change();
+#else
+  if (button::foot_pedal.pressed() && lcd_state == CURRENT_SECTION)
+  {
+    advance_section();
+    Serial.println("Foot pedal pressed. Advanced section");
+  }
+#endif
 
-        #if LOG
-            displayDataOnScreen();
-        #endif
+  if (lcdUpdate.hasPassed(40, true))
+  {
+    opening_message();
 
-        led::update(project->getLedProcessed());
-    }
+#if LOG
+    displayDataOnScreen();
+#endif
 
-    audio_manager::setVolume(updatePotentiometer());
-    current_encoder_value = encoder::update(project->getNumberOfSection());
-
-  #if SEND_OVER_SERIAL
-            send_over_serial(&Serial);
-            //ADD A TIMER HERE
-  #endif
+#if ADVANCE_WITH_ENCODER
+    section_change();
+    verify_no_touch();
+#endif
+    
+    led::update(project->getLedProcessed());
+  }
 }
 
 #if LOG
