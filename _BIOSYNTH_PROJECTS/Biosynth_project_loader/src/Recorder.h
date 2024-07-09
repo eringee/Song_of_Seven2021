@@ -53,10 +53,10 @@ class Recorder :public Project{
     //The biosensor need to be accessed with arrow "->" instead of dots "." because we are dealing with pointers and not objects
     void update() override{
        //LEDs
-        processed_for_leds.heart.sig =  (map(heart->getRaw(), 0, 1023, 0, 1000))/1000;
-        processed_for_leds.gsr.scr = (map(sc1->getRaw(), 0, 1023, 0, 1000))/1000;
-        processed_for_leds.resp.sig = (map(resp->getRaw(), 0, 1023, 0, 1000))/1000;;
-    };
+        processed_for_leds.heart.sig =  biosensors::heart.getNormalized();
+        processed_for_leds.gsr.scr = biosensors::sc1.getSCR();
+        processed_for_leds.resp.sig = biosensors::resp.getNormalized();
+    }
 
 //Project update volume loop. Modify here if project needs special volume clamping
     void updateVolume(float vol) override{

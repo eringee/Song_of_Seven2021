@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"name": "Biosynth_project_loader",
+			"path": ".."
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"typeinfo": "cpp",
+			"ostream": "cpp"
+		}
+	}
+}

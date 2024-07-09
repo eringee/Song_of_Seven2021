@@ -25,7 +25,7 @@ namespace configuration{
     const int confirmation_delay{3000}; //Time allowed to confirm section change
     const int opening_message_time{3000}; //Amount of time the welcome message will be displayed
 
-    const int biosensors_sample_rate_ms{10}; // collect a sample every 10ms
+    const int biosensors_sample_rate_us{10000}; // collect a sample every 10ms
 
 }//namespace configuration
                                                 
