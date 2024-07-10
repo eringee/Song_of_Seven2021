@@ -131,14 +131,17 @@ static Chrono updateTimer(Chrono::MICROS);
 void Biosynth::handle_logging() {
     switch (lcd_state) {
         case CURRENT_SECTION:
-            if (button::encoder.pressed() && !session_log.is_logging()) {
+          if (!button::encoder.pressed()) {
+              allowDataOnLCD = true;
+            } else if (button::encoder.pressed() && !session_log.is_logging()) {
+               allowDataOnLCD = false;
                 Serial.println("Ask user to record on SD?");
                 session_log.create_file();
                 sprintf(screen::buffer_line_1, "Record on SD?  ");
                 sprintf(screen::buffer_line_2, "               ");
                 screen::update();
                 lcd_state = START_LOGGING;
-            }
+            } 
             break;
 
         case START_LOGGING:
