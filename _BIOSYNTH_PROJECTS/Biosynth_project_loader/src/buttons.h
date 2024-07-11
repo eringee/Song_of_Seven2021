@@ -13,7 +13,7 @@ namespace button{
 
     extern Button encoder;
     extern Button foot_pedal;
-    const int refresh_rate{1};
+    const float refresh_rate{0.001};
 
     /** @brief Initialization routine of the component
      */

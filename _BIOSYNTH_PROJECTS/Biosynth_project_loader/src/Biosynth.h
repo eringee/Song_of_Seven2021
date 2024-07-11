@@ -17,13 +17,14 @@
 #include "pins.h"
 #include <Chrono.h>
 #if LOG
-    #include "Logger.h"
+#include "Logger.h"
 #endif
 
 class Biosynth
-{    
+{   
+    // IntervalTimer updateTimer;
     Chrono  confirmTimer{false}; //timer used to reset lcd state if section change not confirmed 
-    Chrono  lcdUpdate; //timer to slow down lcd refresh rate
+    Chrono  lcdUpdate{true}; //timer to slow down lcd refresh rate
     Chrono lcd_timer{true}; //timer for biodata display on lcd 
     Chrono openingtimer;
     Chrono endLogging{false};
@@ -62,6 +63,8 @@ public:
     void update();
 
     void send_over_serial( Print *output);
+
+        void log();
 private:
     void recvWithEndMarker();
     void ping_master();

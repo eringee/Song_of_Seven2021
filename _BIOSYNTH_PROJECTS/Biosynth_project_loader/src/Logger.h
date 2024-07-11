@@ -13,6 +13,7 @@
 
 #include <SD.h>
 #include <RingBuf.h>
+#include <atomic>
 
 #include "biosensors.h"
 
@@ -21,6 +22,8 @@ class FsFile;
 
 //add name checking not to overwrite older log in sd card
 class logger{
+
+  IntervalTimer logTimer;
   FsFile recording;
 
   const char* extension {"txt"};
@@ -30,13 +33,15 @@ class logger{
 
   const int file_size{8}; // in megabyte
   const int LOG_FILE_SIZE{file_size * 1024 * 1024};
-  bool logging{false};
 
   int numSamples{0};
 
- 
 
-  public:
+   
+private:
+  std::atomic<bool> logging{false}; // Declare as atomic and initialize to false
+   
+   public:
   /**
    * @brief intilialize the sd card, blocks into an infinite while if it can't
    */
@@ -51,9 +56,7 @@ class logger{
    * @brief write the data to the file.
    * @param signals sample of data to log
    */
-  void log_data(const int heart, const int gsr, const int resp); 
-
-  void log_data(const int heart, const int gsr, const int resp, const bool feelingIt); 
+  void log_data();  
 
   /**
    * @brief starts datalogging
@@ -64,6 +67,7 @@ class logger{
    * @brief stops data logging
    */
   void stop_logging();
+
 
   /**
    * @brief return true if device is currently logging data
