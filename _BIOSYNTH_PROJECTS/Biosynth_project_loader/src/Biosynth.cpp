@@ -335,7 +335,7 @@ void Biosynth::displayDataOnScreen(){
      //LCD
      sprintf(screen::buffer_line_1, "H: %4d G: %4d", biosensors::heart.getRaw(), biosensors::sc1.getRaw());
      #if FOOT_PEDAL
-     sprintf(screen::buffer_line_2, "R: %5d FI: %d", biosensors::resp.getRaw(), !button::foot_pedal.read());
+     sprintf(screen::buffer_line_2, "R: %.2f FI: %d", biosensors::resp.getTemperature(), !button::foot_pedal.read());
      #else
      sprintf(screen::buffer_line_2, " RT: %.2f", biosensors::resp.getRaw());
      #endif
