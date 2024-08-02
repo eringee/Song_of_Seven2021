@@ -293,8 +293,8 @@ AudioOutputI2S           AudioOut;       //xy=1031,323
         GSRsig = sc1->getSCR();
         
         respSig = resp->getNormalized();
-        respAmp = resp->amplitudeChange();
-        respBPM = resp->bpmChange();
+        respAmp = resp->getAmplitudeChange();
+        respBPM = resp->getRpmChange();
 
          ////////////////////////smooth signals       
         smoothHeart += 0.005 * (heartSig - smoothHeart);
