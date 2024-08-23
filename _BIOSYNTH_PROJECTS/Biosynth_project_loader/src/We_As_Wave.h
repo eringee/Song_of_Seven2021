@@ -244,7 +244,7 @@ AudioOutputI2S           AudioOut;       //xy=1031,323
     }
 
     void setupSounds(){ //SETUP THE INITIAL SOUNDS IN THE PROJECT HERE
-
+Serial.println("Setup sounds");
         //RESP dependent variables
         respTone = (sectionGlobal[0][configuration::board_id]);
         respWave1.begin(0.1 , respTone, WAVEFORM_SINE);
@@ -293,8 +293,9 @@ AudioOutputI2S           AudioOut;       //xy=1031,323
         GSRsig = sc1->getSCR();
         
         respSig = resp->getNormalized();
-        respAmp = resp->amplitudeChange();
-        respBPM = resp->bpmChange();
+        respSig = mapTo01(respSig,-2,2,CONSTRAIN);
+        respAmp = resp->getScaledAmplitude();
+        respBPM = resp->getScaledRpm();
 
          ////////////////////////smooth signals       
         smoothHeart += 0.005 * (heartSig - smoothHeart);
