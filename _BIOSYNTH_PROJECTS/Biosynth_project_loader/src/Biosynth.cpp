@@ -40,9 +40,6 @@ void Biosynth::initialize() {
     led::initialize();
     biosensors::initialize();
 
-    // updateTimer.priority(1);
-    // updateTimer.begin(biosensors::update,configuration::biosensors_sample_rate_us);
-
     #if LOG
         session_log.initialize();
     #endif
@@ -80,19 +77,19 @@ void Biosynth::loadProject()
 }
 
 void Biosynth::update() {
-static Chrono updateTimer(Chrono::MICROS);
+// static Chrono updateTimer(Chrono::MICROS);
 
   project->update();
   button::update(); 
 
-  if (updateTimer.hasPassed((configuration::biosensors_sample_rate_us - 500), true)) {
+  // if (updateTimer.hasPassed((configuration::biosensors_sample_rate_us - 500), true)) {
     biosensors::update();
 
     #if SEND_OVER_SERIAL
       send_over_serial(&Serial);
           
     #endif
-  }  
+  
     audio_manager::setVolume(updatePotentiometer());
     current_encoder_value = encoder::update(project->getNumberOfSection());
     
@@ -293,7 +290,7 @@ ProjectList Biosynth::selectProject(
   if (project == 1)
   { // project selected when button not pressed on boot
 
-    return RECORDER; // project 1 is recorder, change for WeAsWaves if used for performance
+    return WE_AS_WAVE; // project 1 is recorder, change for WeAsWaves if used for performance
   }
   else
   { // project selected when button not pressed on boot
@@ -337,7 +334,7 @@ void Biosynth::displayDataOnScreen(){
      #if FOOT_PEDAL
      sprintf(screen::buffer_line_2, "R: %.2f FI: %d", biosensors::resp.getTemperature(), !button::foot_pedal.read());
      #else
-     sprintf(screen::buffer_line_2, " RT: %.2f", biosensors::resp.getRaw());
+     sprintf(screen::buffer_line_2, "RT: %5d        ", biosensors::resp.getRaw());
      #endif
 
     screen::update();

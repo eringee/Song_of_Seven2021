@@ -55,7 +55,7 @@ class Recorder :public Project{
        //LEDs
         processed_for_leds.heart.sig =  biosensors::heart.getNormalized();
         processed_for_leds.gsr.scr = biosensors::sc1.getSCR();
-        processed_for_leds.resp.sig = biosensors::resp.getNormalized();
+        processed_for_leds.resp.sig = biosensors::resp.getScaled();
     }
 
 //Project update volume loop. Modify here if project needs special volume clamping

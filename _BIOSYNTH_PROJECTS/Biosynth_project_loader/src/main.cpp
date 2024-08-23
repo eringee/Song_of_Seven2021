@@ -11,11 +11,13 @@
 
 #include "configuration.h"
 #include "Biosynth.h"
+#include "Plaquette.h"
 
 Biosynth biosynth{};
 
-void setup() {
+Metro testMetro(0.5);
 
+void begin() {
   Serial.begin(9600);
   delay(configuration::boot_delay);
   
@@ -24,7 +26,7 @@ void setup() {
   Serial.println("End of setup");
 }
 
-void loop() 
+void step() 
 { 
   biosynth.update();
   

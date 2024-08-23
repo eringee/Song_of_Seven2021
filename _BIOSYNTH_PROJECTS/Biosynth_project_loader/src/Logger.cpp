@@ -72,16 +72,17 @@ void logger::log_data() {
     recording.print(biosensors::sc1.getRaw());
     recording.write(',');
     recording.print(biosensors::resp.getTemperature());
-    #if LOG
+    #if FOOT_PEDAL
     recording.write(',');
-    recording.println(!button::foot_pedal.read());
+    recording.print(!button::foot_pedal.read());
     #endif
+    recording.write('\n');
     numSamples++;
 }
 
 
 void logger::start_logging(){
-  // Serial.println("start logging");
+//   Serial.println("start logging");
   numSamples = 0;
    logTimer.begin([this](){log_data();}, configuration::biosensors_sample_rate_us);
    logging.store(true);
