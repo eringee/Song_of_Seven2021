@@ -27,7 +27,7 @@ namespace pins{
     namespace sensors{
         const int heart{21};
         const int gsr{20};
-        const int respiration{17};
+        const int respiration{3};
         const int gsr2{16};
 
     }//namespace sensors

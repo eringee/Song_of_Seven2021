@@ -9,6 +9,7 @@
 #include <Respiration.h>
 #include <SkinConductance.h>
 #include <Heart.h>
+// #include "ExternalADC.h"
 
 //struc used to hold sampled data. It makes it easier to pass the data to various functions
 //acees struct members using name of variable .heart or .gsr or .respiration
@@ -51,6 +52,8 @@ namespace biosensors{
     extern SkinConductance sc2;
     extern Respiration resp;
 
+    // extern ADS1115 ADS;
+
    /** @brief Initialize the biosensors
     */
     void initialize();
@@ -62,6 +65,5 @@ namespace biosensors{
     /** @brief  sample, smooth and returns the biosensors data
      *  @return sample containing the 3 sensors data
      */
-
 
 }//namespace biosensors
