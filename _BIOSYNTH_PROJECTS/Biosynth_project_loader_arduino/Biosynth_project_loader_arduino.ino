@@ -8,29 +8,29 @@
  * @date 2022-04-02
  */
 #include <Arduino.h>
-#include <ArduinoLog.h>
+
 #include "configuration.h"
 #include "Biosynth.h"
 
 Biosynth biosynth{};
+
+
 
 void setup() {
 
   Serial.begin(9600);
   delay(configuration::boot_delay);
   
-  //To silent the logging replace LOG_LEVEL_INFO with LOG_LEVEL_SILENT
-  //I recommend leaving at least LOG_LEVEL_WARNING to print errors at least
-  Log.begin(LOG_LEVEL_SILENT,&Serial); 
+
   
   biosynth.initialize();
-  Log.warningln("End of setup");
+  Serial.println("End of setup");
 }
 
 void loop() 
 { 
   biosynth.update();
-  
+
   //vvv what are these two block suposed to do? vvv
   // Is the foot pedal reseting the synth now?
 

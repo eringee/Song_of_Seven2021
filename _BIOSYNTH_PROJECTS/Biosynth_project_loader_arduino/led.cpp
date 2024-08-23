@@ -1,7 +1,6 @@
 #include "led.h"
 #include "configuration.h"
 #include "pins.h"
-#include <ArduinoLog.h>
 #include "biosensors.h"
 
 namespace led{
@@ -27,7 +26,7 @@ namespace led{
         }
         leds.show();
 
-        Log.infoln("Leds initialized");
+        Serial.println("Leds initialized");
     }
 
     void update(sample signals){
@@ -36,15 +35,15 @@ namespace led{
         leds.setPixel(0,led_colors[0][0]*signals.heart.sig,
                         led_colors[0][1]*signals.heart.sig,
                         led_colors[0][2]*signals.heart.sig); 
-        leds.setPixel(1,led_colors[1][0]*signals.gsr,
-                        led_colors[1][1]*signals.gsr,
-                        led_colors[1][2]*signals.gsr); 
+        leds.setPixel(1,led_colors[1][0]*signals.gsr.scr,
+                        led_colors[1][1]*signals.gsr.scr,
+                        led_colors[1][2]*signals.gsr.scr); 
         leds.setPixel(2,led_colors[2][0]*signals.resp.sig,
                         led_colors[2][1]*signals.resp.sig,
                         led_colors[2][2]*signals.resp.sig); 
-        leds.setPixel(3,led_colors[2][0]*signals.gsr2,
-                        led_colors[2][1]*signals.gsr2,
-                        led_colors[2][2]*signals.gsr2); 
+        leds.setPixel(3,led_colors[2][0]*signals.gsr2.scr,
+                        led_colors[2][1]*signals.gsr2.scr,
+                        led_colors[2][2]*signals.gsr2.scr); 
         
         leds.show();
     }

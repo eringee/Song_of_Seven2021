@@ -18,5 +18,7 @@ namespace audio_manager{
     /** @brief Initialization routine for pjrc audio shield
      */
     void audio_shield_initialization();
+    void setVolume(float v);
+    void mute(bool on);
 
 }//namespace audio_manager

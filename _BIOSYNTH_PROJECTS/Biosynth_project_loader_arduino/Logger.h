@@ -49,7 +49,7 @@ class logger{
    * @brief write the data to the file.
    * @param signals sample of data to log
    */
-  void log_data(sample signals); 
+  void log_data(const int heart, const int gsr, const int resp); 
 
   /**
    * @brief starts datalogging

@@ -26,11 +26,13 @@ class logger{
   const char* extension {"txt"};
   const char* filename {"session_recording"};
 
-  const int LOG_INTERVAL_USEC{10000};
+  const int LOG_INTERVAL_USEC{10000}; //unused variable
 
   const int file_size{8}; // in megabyte
   const int LOG_FILE_SIZE{file_size * 1024 * 1024};
   bool logging{false};
+
+  int numSamples{0};
 
  
 
@@ -49,7 +51,9 @@ class logger{
    * @brief write the data to the file.
    * @param signals sample of data to log
    */
-  void log_data(sample signals); 
+  void log_data(const int heart, const int gsr, const int resp); 
+
+  void log_data(const int heart, const int gsr, const int resp, const bool feelingIt); 
 
   /**
    * @brief starts datalogging
@@ -65,4 +69,8 @@ class logger{
    * @brief return true if device is currently logging data
    */
   bool is_logging();
+
+  inline int get_num_samples(){
+    return numSamples;
+    };
 };

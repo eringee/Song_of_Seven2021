@@ -6,7 +6,11 @@
  * @version 1.1
  * @date 2022-04-02 
  */
+#ifndef BIOSYNTH_H
+#define BIOSYNTH_H
 #pragma once
+
+#include <Arduino.h>
 
 #include "configuration.h"
 #include "Project_list.h"
@@ -20,12 +24,16 @@ class Biosynth
 {    
     Chrono  confirmTimer{false}; //timer used to reset lcd state if section change not confirmed 
     Chrono  lcdUpdate; //timer to slow down lcd refresh rate
+    Chrono openingtimer;
     Project *project{nullptr};
     ProjectList selected_project;
+
     int current_section{0};
     int last_section{-1};
     int lcd_state = 0;
     int current_encoder_value = 0;
+
+    float vol = 0.0;
 
     sample data;
 
@@ -49,7 +57,15 @@ public:
      */
     void update();
 
+    void send_over_serial(const sample *signals, Print *output, int rate_ms);
+    void send_over_serial( Print *output);
 private:
+    void recvWithEndMarker();
+    void ping_master();
+    void wait_for_slave();
+    void send_command(const char* command);
+    bool wait_for_command(const int timeout, const char* command);
+    void set_role();
 
     /** @brief check to see if the user confirmed a section change 
      */
@@ -123,10 +139,6 @@ private:
      */
     void loadProject();
 
-    /** @brief finalize the biosynth setup with the project information
-     */
-    void finalize();
-
     /**
      * @brief display the loaded project on the screen
      * @param displayTime amount of time to display project name in ms
@@ -149,3 +161,4 @@ private:
 
 };
 
+#endif

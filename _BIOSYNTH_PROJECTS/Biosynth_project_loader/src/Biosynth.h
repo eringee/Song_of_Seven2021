@@ -6,7 +6,11 @@
  * @version 1.1
  * @date 2022-04-02 
  */
+#ifndef BIOSYNTH_H
+#define BIOSYNTH_H
 #pragma once
+
+#include <Arduino.h>
 
 #include "configuration.h"
 #include "Project_list.h"
@@ -20,14 +24,22 @@ class Biosynth
 {    
     Chrono  confirmTimer{false}; //timer used to reset lcd state if section change not confirmed 
     Chrono  lcdUpdate; //timer to slow down lcd refresh rate
+    Chrono lcd_timer{true}; //timer for biodata display on lcd 
+    Chrono openingtimer;
+    Chrono endLogging{false};
+    Chrono nowLogging{false};
     Project *project{nullptr};
     ProjectList selected_project;
+
     int current_section{0};
     int last_section{-1};
     int lcd_state = 0;
     int current_encoder_value = 0;
 
-    sample data;
+    float vol = 0.0;
+
+    bool allowDataOnLCD = false;
+
 
     #if LOG
         logger session_log; //logger object only create if specified
@@ -49,7 +61,14 @@ public:
      */
     void update();
 
+    void send_over_serial( Print *output);
 private:
+    void recvWithEndMarker();
+    void ping_master();
+    void wait_for_slave();
+    void send_command(const char* command);
+    bool wait_for_command(const int timeout, const char* command);
+    void set_role();
 
     /** @brief check to see if the user confirmed a section change 
      */
@@ -87,7 +106,7 @@ private:
      * @brief prints out the passed sample to the arduino plotter
      * @param signals sample of data to plot
      */
-    void plot_sampled_data(sample signals);
+    void plot_sampled_data();
 #endif
 
     /**
@@ -98,7 +117,7 @@ private:
     /**
      * @brief start data logging if user presses the encoder button
      */
-    void maybe_start_logging();
+    void handle_logging();
 
     /**
      * @brief stops data logging if user presses the encoder button and a recording is started
@@ -110,7 +129,7 @@ private:
      * 
      * @param do_once pass false to display the message on screen and reset the timer. pass true just to opdate the timer
      */
-    void start_logging_message(bool do_once);
+    void start_logging_message();
 
     /** 
      * @brief display a message on screen to tell user logging as stopped
@@ -142,6 +161,7 @@ private:
      */
     float updatePotentiometer();
 
-
+    void displayDataOnScreen();
 };
 
+#endif

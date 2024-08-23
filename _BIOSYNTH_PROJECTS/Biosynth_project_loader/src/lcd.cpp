@@ -1,5 +1,5 @@
 #include "lcd.h"
-#include <ArduinoLog.h>
+
 
 namespace screen{
 
@@ -12,7 +12,7 @@ namespace screen{
     void initialize(){
         lcd.init();
         lcd.backlight();
-        Log.infoln("LCD display initialized");
+        Serial.println("LCD display initialized");
         bootMessage();
         
     }
