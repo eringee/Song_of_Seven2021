@@ -13,7 +13,7 @@
 #define FOOT_PEDAL false            //Set to true if using the foot pedal in the project
 #define REVERSE_ENCODER false      //Set to true if the encoder rotation needs to be reversed
 #define ADVANCE_WITH_ENCODER true //Set to true if you want to advance sections using the encoder. If false, press the foot pedal to advance section
-#define SEND_OVER_SERIAL false
+#define SEND_OVER_SERIAL true
 
 namespace configuration{
     

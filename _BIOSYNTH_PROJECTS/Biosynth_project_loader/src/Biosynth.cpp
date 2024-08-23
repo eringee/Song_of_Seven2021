@@ -82,6 +82,7 @@ void Biosynth::update() {
   project->update();
   button::update(); 
 
+
   // if (updateTimer.hasPassed((configuration::biosensors_sample_rate_us - 500), true)) {
     biosensors::update();
 
