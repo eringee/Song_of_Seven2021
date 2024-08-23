@@ -80,7 +80,7 @@ void Biosynth::update()
   static Chrono timer;
   project->update();
   button::update();
-  Serial.println(button::foot_pedal.read());
+  
   if (timer.hasPassed(configuration::biosensors_sample_rate_ms, true))
   { 
 

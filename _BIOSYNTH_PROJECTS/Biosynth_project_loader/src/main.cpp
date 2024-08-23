@@ -19,7 +19,6 @@ void setup() {
   Serial.begin(9600);
   delay(configuration::boot_delay);
   
-
   
   biosynth.initialize();
   Serial.println("End of setup");

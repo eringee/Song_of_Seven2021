@@ -375,7 +375,7 @@ AudioOutputI2S           AudioOut;       //xy=1031,323
 
 void changeSection(const int currentSection) override //this is where we change sections AND frequencies...
 {
- Serial.println(currentSection);   
+ //Serial.println(currentSection);   
  if (currentSection==0){
         respWave1.begin(0.5, respTone, WAVEFORM_SINE);
         respWave2.begin(0.2, respTone, WAVEFORM_SINE);   
