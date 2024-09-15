@@ -143,7 +143,7 @@ AudioOutputI2S           AudioOut;       //xy=1031,323
     //!!!!! section title should be no more than 16 characters long. Longer strings will make the teensy crash!!!!!
     const char sections_title[number_of_sections][17] = {" Section A   ", " Section B   ", " Section C   ", " Section D   "," Section E   "," Section F   "};
     double sectionGlobal[number_of_sections][number_of_boards] = {
-       {mtof.toFrequency(50), 
+    {mtof.toFrequency(50), 
     mtof.toFrequency(57), 
     mtof.toFrequency(62), 
     mtof.toFrequency(71), 

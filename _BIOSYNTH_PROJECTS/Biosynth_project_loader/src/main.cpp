@@ -11,13 +11,14 @@
 
 #include "configuration.h"
 #include "Biosynth.h"
-#include "Plaquette.h"
+#include "PlaquetteLib.h"
 
 Biosynth biosynth{};
 
 Metro testMetro(0.5);
 
-void begin() {
+void setip() {
+  Plaquette.begin()
   Serial.begin(9600);
   delay(configuration::boot_delay);
   
@@ -26,8 +27,9 @@ void begin() {
   Serial.println("End of setup");
 }
 
-void step() 
+void loop() 
 { 
+  Plaquette.step();
   biosynth.update();
   
   //vvv what are these two block suposed to do? vvv
