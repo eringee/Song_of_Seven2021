@@ -66,4 +66,8 @@ namespace biosensors{
      *  @return sample containing the 3 sensors data
      */
 
+    /** @brief get external ADC value for respiration
+     */
+    int getADCValue();
+
 }//namespace biosensors

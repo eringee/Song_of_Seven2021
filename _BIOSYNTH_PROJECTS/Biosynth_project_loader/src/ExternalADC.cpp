@@ -256,7 +256,7 @@ int16_t ADS1115::readADC(uint8_t pin)
 int16_t ADS1115::getValue()
 {
   int16_t raw = _readRegister(_address, ADS1115_REG_CONVERT);
-  if (_bitShift) raw >>= _bitShift;  //  Shift 12-bit results
+  // if (_bitShift) raw >>= _bitShift;  //  Shift 12-bit results
   return raw;
 }
 

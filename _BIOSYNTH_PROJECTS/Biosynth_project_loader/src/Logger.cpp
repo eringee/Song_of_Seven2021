@@ -71,7 +71,7 @@ void logger::log_data() {
     recording.write(',');
     recording.print(biosensors::sc1.getRaw());
     recording.write(',');
-    recording.print(biosensors::resp.getTemperature());
+    recording.print(biosensors::resp.getRaw());
     #if FOOT_PEDAL
     recording.write(',');
     recording.print(!button::foot_pedal.read());

@@ -2,11 +2,9 @@
 #include <Chrono.h>
 #include "configuration.h"
 #include "pins.h"
-#include <Wire.h>
+#include "ExternalADC.h"
 
 namespace biosensors{
-
-    static unsigned long getADCValue();
 
     Heart heart(pins::sensors::heart);
     SkinConductance sc1(pins::sensors::gsr);
@@ -28,15 +26,19 @@ namespace biosensors{
      resp.reset();
      ADS.begin();                  // external ADC
      ADS.setMode(0);               // continuous mode
-     ADS.readADC(pins::sensors::respiration);            // first reading   
 
      Serial.println("Biosensors initialized");
     }
 
-    static unsigned long getADCValue(){
-      unsigned long value = ADS.getValue();
-       Serial.println(resp.getRaw());
-         return value;   
+    int getADCValue(){
+      static int value = 0;
+      static int firstValue = 0;
+      if (firstValue == 0){
+       firstValue = ADS.readADC(pins::sensors::respiration);            // first reading   
+      } else {
+       value = ADS.getValue();
+      }
+      return value; 
      } 
 
 

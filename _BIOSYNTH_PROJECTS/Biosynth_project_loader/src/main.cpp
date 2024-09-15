@@ -8,7 +8,6 @@
  * @date 2022-04-02
  */
 #include <Arduino.h>
-
 #include "configuration.h"
 #include "Biosynth.h"
 #include "PlaquetteLib.h"
@@ -17,10 +16,11 @@ Biosynth biosynth{};
 
 Metro testMetro(0.5);
 
-void setip() {
-  Plaquette.begin()
+void setup() {
+  Plaquette.begin();
   Serial.begin(9600);
   delay(configuration::boot_delay);
+  Wire.begin();
   
   
   biosynth.initialize();
