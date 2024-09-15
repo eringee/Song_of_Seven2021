@@ -2,15 +2,16 @@
 #include <Chrono.h>
 #include "configuration.h"
 #include "pins.h"
-
-
+#include "ExternalADC.h"
 
 namespace biosensors{
 
     Heart heart(pins::sensors::heart);
     SkinConductance sc1(pins::sensors::gsr);
     SkinConductance sc2(pins::sensors::gsr2);
-    Respiration resp(pins::sensors::respiration);
+    Respiration resp(getADCValue);
+
+    ADS1115 ADS(pins::sensors::respiration);
 
     void initialize(){
      pinMode(pins::sensors::heart,INPUT);
@@ -22,11 +23,23 @@ namespace biosensors{
      pinMode(pins::sensors::gsr2,INPUT);
      sc2.reset();
 
-     pinMode(pins::sensors::respiration,INPUT);
      resp.reset();
+     ADS.begin();                  // external ADC
+     ADS.setMode(0);               // continuous mode
 
      Serial.println("Biosensors initialized");
     }
+
+    int getADCValue(){
+      static int value = 0;
+      static int firstValue = 0;
+      if (firstValue == 0){
+       firstValue = ADS.readADC(pins::sensors::respiration);            // first reading   
+      } else {
+       value = ADS.getValue();
+      }
+      return value; 
+     } 
 
 
     void update(){

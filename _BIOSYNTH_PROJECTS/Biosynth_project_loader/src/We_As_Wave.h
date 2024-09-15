@@ -143,7 +143,7 @@ AudioOutputI2S           AudioOut;       //xy=1031,323
     //!!!!! section title should be no more than 16 characters long. Longer strings will make the teensy crash!!!!!
     const char sections_title[number_of_sections][17] = {" Section A   ", " Section B   ", " Section C   ", " Section D   "," Section E   "," Section F   "};
     double sectionGlobal[number_of_sections][number_of_boards] = {
-       {mtof.toFrequency(50), 
+    {mtof.toFrequency(50), 
     mtof.toFrequency(57), 
     mtof.toFrequency(62), 
     mtof.toFrequency(71), 
@@ -244,7 +244,7 @@ AudioOutputI2S           AudioOut;       //xy=1031,323
     }
 
     void setupSounds(){ //SETUP THE INITIAL SOUNDS IN THE PROJECT HERE
-
+Serial.println("Setup sounds");
         //RESP dependent variables
         respTone = (sectionGlobal[0][configuration::board_id]);
         respWave1.begin(0.1 , respTone, WAVEFORM_SINE);
@@ -293,8 +293,9 @@ AudioOutputI2S           AudioOut;       //xy=1031,323
         GSRsig = sc1->getSCR();
         
         respSig = resp->getNormalized();
-        respAmp = resp->amplitudeChange();
-        respBPM = resp->bpmChange();
+        respSig = mapTo01(respSig,-2,2,CONSTRAIN);
+        respAmp = resp->getScaledAmplitude();
+        respBPM = resp->getScaledRpm();
 
          ////////////////////////smooth signals       
         smoothHeart += 0.005 * (heartSig - smoothHeart);
@@ -375,7 +376,7 @@ AudioOutputI2S           AudioOut;       //xy=1031,323
 
 void changeSection(const int currentSection) override //this is where we change sections AND frequencies...
 {
- Serial.println(currentSection);   
+ //Serial.println(currentSection);   
  if (currentSection==0){
         respWave1.begin(0.5, respTone, WAVEFORM_SINE);
         respWave2.begin(0.2, respTone, WAVEFORM_SINE);   

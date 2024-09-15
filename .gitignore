@@ -1,4 +1,5 @@
 
-/LEDSHOW
-_BIOSYNTH_PROJECTS/Biodata_recorder/.vscode/extensions.json
-_BIOSYNTH_PROJECTS/Biosynth_project_loader/.vscode/extensions.json
+/LEDSHOW/Backup
+*.mp3
+_BIOSYNTH_PROJECTS/Biodata_recorder/.vscode
+_BIOSYNTH_PROJECTS/Biosynth_project_loader/.vscode
