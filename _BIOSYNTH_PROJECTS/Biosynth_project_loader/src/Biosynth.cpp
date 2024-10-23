@@ -291,7 +291,7 @@ ProjectList Biosynth::selectProject(
   if (project == 1)
   { // project selected when button not pressed on boot
 
-    return RECORDER; // project 1 is recorder, change for WeAsWaves if used for performance
+    return WE_AS_WAVE; // project 1 is recorder, change for WE_AS_WAVE if used for performance
   }
   else
   { // project selected when button not pressed on boot

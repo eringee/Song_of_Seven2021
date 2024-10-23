@@ -351,9 +351,9 @@ Serial.println("Setup sounds");
        GSRfilter1.frequency(0);
       */
 
-        processed_for_leds.heart.sig = smoothHeart*0.7;
-        processed_for_leds.gsr.scr = smoothGSR;
-        processed_for_leds.resp.sig = finalResp*1.2;
+       processed_for_leds.heart.sig =  biosensors::heart.getNormalized();
+        processed_for_leds.gsr.scr = biosensors::sc1.getSCR();
+        processed_for_leds.resp.sig = biosensors::resp.getScaled();
 
     };
 
