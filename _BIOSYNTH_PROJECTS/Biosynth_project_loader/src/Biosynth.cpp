@@ -51,6 +51,7 @@ void Biosynth::initialize() {
 
 void Biosynth::loadProject()
 {
+  Serial.println("Select project");
   selected_project = selectProject(2000);
 
   switch (selected_project)
@@ -61,6 +62,7 @@ void Biosynth::loadProject()
     break;
 
   case WE_AS_WAVE:
+    Serial.println("we as wave");
     project = new WeAsWaves(&biosensors::heart, &biosensors::sc1,
                             &biosensors::resp, &biosensors::sc2);
     break;
@@ -68,6 +70,16 @@ void Biosynth::loadProject()
   case RECORDER:
     project = new Recorder(&biosensors::heart, &biosensors::sc1,
                            &biosensors::resp, &biosensors::sc2);
+    break;
+
+  case OSC:
+    project = new Osc(&biosensors::heart, &biosensors::sc1,
+                           &biosensors::resp, &biosensors::sc2);
+    break;
+
+  case AFFECT_FLOW:
+    project = new AffectFlow(&biosensors::heart, &biosensors::sc1,
+                            &biosensors::resp, &biosensors::sc2);
     break;
   }
 
@@ -88,14 +100,13 @@ void Biosynth::update() {
 
     #if SEND_OVER_SERIAL
       send_over_serial(&Serial);
-          
     #endif
   
     audio_manager::setVolume(updatePotentiometer());
     current_encoder_value = encoder::update(project->getNumberOfSection());
     
 #if LOG
-        handle_logging();
+    handle_logging();
     #endif
 
 #if ADVANCE_WITH_ENCODER
@@ -112,7 +123,11 @@ void Biosynth::update() {
   {
     opening_message();
 
-#if LOG
+#if DISPLAY_DATA
+    allowDataOnLCD = true;
+#endif
+
+#if LOG || DISPLAY_DATA
     displayDataOnScreen();
 #endif
 
@@ -123,6 +138,8 @@ void Biosynth::update() {
     
     led::update(project->getLedProcessed());
   }
+
+
 }
 
 #if LOG
@@ -183,7 +200,6 @@ void Biosynth::handle_logging() {
     }
 }
 #endif
-
 
 void Biosynth::opening_message()
 {
@@ -290,8 +306,7 @@ ProjectList Biosynth::selectProject(
 
   if (project == 1)
   { // project selected when button not pressed on boot
-
-    return WE_AS_WAVE; // project 1 is recorder, change for WE_AS_WAVE if used for performance
+    return RECORDER; // project 1 is OSC, change if needed
   }
   else
   { // project selected when button not pressed on boot
@@ -302,7 +317,6 @@ ProjectList Biosynth::selectProject(
 void Biosynth::selectedProjectMessage(const int &displayTime)
 {
   Chrono waitTime;
-
   sprintf(screen::buffer_line_1, "    Biosynth   ");
   sprintf(screen::buffer_line_2, project->getName());
   screen::update();
@@ -315,11 +329,34 @@ void Biosynth::selectedProjectMessage(const int &displayTime)
 
 void Biosynth::send_over_serial(Print *output)
 {
-
-  output->printf("%d,%.2f,%.2f,%.2f\n", configuration::board_id,
+  output->printf("%d,%.2f,%.2f,%.2f,%.2f,%d,%.2f,%.2f,%d,%.2f,%.2f,%d,%d,%.2f,%.2f,%.2f, %.2f, %.2f,%d, %.2f,%.2f,%.2f,%.2f,%.2f,%.2f\n", 
+                 biosensors::heart.getRaw(), 
                  biosensors::heart.getNormalized(),
-                 biosensors::sc2.getSCR(),
-                 biosensors::resp.getNormalized());
+                 biosensors::heart.amplitudeChange(),
+                 biosensors::heart.getBPM(),
+                 biosensors::heart.bpmChange(),
+                 
+                 biosensors::sc1.getRaw(),
+                 biosensors::sc1.getSCR(),
+                 biosensors::sc1.getSCL(),
+
+                 biosensors::resp.getRaw(),
+                 biosensors::resp.getNormalized(),
+                 biosensors::resp.getScaled(),
+                 biosensors::resp.isExhaling(),
+                 biosensors::resp.getRawAmplitude(),
+                 biosensors::resp.getNormalizedAmplitude(),
+                 biosensors::resp.getScaledAmplitude(),
+                 biosensors::resp.getAmplitudeLevel(),
+                 biosensors::resp.getAmplitudeChange(),
+                 biosensors::resp.getAmplitudeVariability(),
+                 biosensors::resp.getInterval(),
+                 biosensors::resp.getRpm(),
+                 biosensors::resp.getNormalizedRpm(),
+                 biosensors::resp.getScaledRpm(),
+                 biosensors::resp.getRpmLevel(),
+                 biosensors::resp.getRpmChange(),
+                 biosensors::resp.getRpmVariability());
 }
 
 void Biosynth::displayDataOnScreen(){
