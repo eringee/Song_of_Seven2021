@@ -9,28 +9,30 @@ namespace biosensors{
     Heart heart(pins::sensors::heart);
     SkinConductance sc1(pins::sensors::gsr);
     SkinConductance sc2(pins::sensors::gsr2);
-    Respiration resp(getADCValue);
+    Respiration resp;
 
     ADS1115 ADS(pins::sensors::respiration);
 
     void initialize(){
+
      pinMode(pins::sensors::heart,INPUT);
-     heart.reset();
+     heart.initialize();
 
      pinMode(pins::sensors::gsr,INPUT);
-     sc1.reset();
+     sc1.initialize();
 
      pinMode(pins::sensors::gsr2,INPUT);
-     sc2.reset();
+     sc2.initialize();
 
-     resp.reset();
+     resp.initialize();
+
      ADS.begin();                  // external ADC
      ADS.setMode(0);               // continuous mode
 
      Serial.println("Biosensors initialized");
     }
 
-    int getADCValue(){
+    int respSignal(){
       static int value = 0;
       static int firstValue = 0;
       if (firstValue == 0){
@@ -41,14 +43,29 @@ namespace biosensors{
       return value; 
      } 
 
+    int heartSignal(){
+      static int value = 0;
+      value = analogRead(pins::sensors::heart);
+      return value;
+    }
+
+    int skinSignal(){
+      static int value = 0;
+      value = analogRead(pins::sensors::gsr);
+      return value;
+    }
+
+    int skinSignal2(){
+      static int value = 0;
+      value = analogRead(pins::sensors::gsr2);
+      return value;
+    }
 
     void update(){
-       
-            heart.update();
-            sc1.update();
-            resp.update();
-            sc2.update();
-        
+            heart.update(heartSignal());
+            sc1.update(skinSignal());
+            resp.update(respSignal());
+            sc2.update(skinSignal2());   
     }
 
 }//namespace biosensors

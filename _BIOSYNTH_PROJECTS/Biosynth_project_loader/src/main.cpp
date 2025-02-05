@@ -14,8 +14,6 @@
 
 Biosynth biosynth{};
 
-Metro testMetro(0.5);
-
 void setup() {
   Plaquette.begin();
   Serial.begin(9600);

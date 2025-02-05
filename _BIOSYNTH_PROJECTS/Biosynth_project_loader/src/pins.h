@@ -13,11 +13,11 @@ namespace pins{
     
     //Pins 0 and 1 are used for Serial communication over Serial1
 
-    namespace sd{
-        const int cs{10};     //any digital pin
-        const int mosi{7};    //alternative can be 11
-        const int sck{14};    //alternative can be 13    
-    }//namespace sd
+    // namespace sd{
+    //     const int cs{10};     //any digital pin
+    //     const int mosi{7};    //alternative can be 11
+    //     const int sck{14};    //alternative can be 13    
+    // }//namespace sd
 
     namespace audio_shield{
         // Pin used for audio data 9, 11, 13, 22, 23

@@ -61,27 +61,26 @@ void Biosynth::loadProject()
                               &biosensors::resp, &biosensors::sc2);
     break;
 
-  case WE_AS_WAVE:
-    Serial.println("we as wave");
-    project = new WeAsWaves(&biosensors::heart, &biosensors::sc1,
-                            &biosensors::resp, &biosensors::sc2);
-    break;
+  // case WE_AS_WAVE:
+  //   project = new WeAsWaves(&biosensors::heart, &biosensors::sc1,
+  //                           &biosensors::resp, &biosensors::sc2);
+  //   break;
 
   case RECORDER:
     project = new Recorder(&biosensors::heart, &biosensors::sc1,
                            &biosensors::resp, &biosensors::sc2);
     break;
 
-  case OSC:
-    project = new Osc(&biosensors::heart, &biosensors::sc1,
-                           &biosensors::resp, &biosensors::sc2);
-    break;
+  // case OSC:
+  //   project = new Osc(&biosensors::heart, &biosensors::sc1,
+  //                          &biosensors::resp, &biosensors::sc2);
+  //   break;
 
   case AFFECT_FLOW:
     project = new AffectFlow(&biosensors::heart, &biosensors::sc1,
                             &biosensors::resp, &biosensors::sc2);
     break;
-  }
+   }
 
   Serial.printf("Project loaded: %s\n", project->getName());
 
@@ -90,7 +89,6 @@ void Biosynth::loadProject()
 
 void Biosynth::update() {
 // static Chrono updateTimer(Chrono::MICROS);
-
   project->update();
   button::update(); 
 
@@ -306,7 +304,7 @@ ProjectList Biosynth::selectProject(
 
   if (project == 1)
   { // project selected when button not pressed on boot
-    return RECORDER; // project 1 is OSC, change if needed
+    return AFFECT_FLOW; // project 1 is OSC, change if needed
   }
   else
   { // project selected when button not pressed on boot

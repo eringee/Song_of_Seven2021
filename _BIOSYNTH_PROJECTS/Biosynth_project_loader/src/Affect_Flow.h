@@ -1,3 +1,5 @@
+
+
 /**
  * @file Affect_Flow.h
  * @author Erin Gee & Etienne Montenegro & Luana Belinsky
@@ -13,19 +15,12 @@
 #include <Arduino.h>
 #include <Audio.h>
 #include <Chrono.h>
-#include "PlaquetteLib.h"
 //include library needed for the project here
 #include <mtof.h>
 
-#define PRINTSERIAL Serial
-#define SENDSERIAL Serial2
-#define RXD2 9
-#define TXD2 10
-#define DEBUG_PRINT
+//  #define DEBUG_PRINT
 
-using namespace pq;
-
-static Metronome sendingMetro(0.02);
+static Chrono sendingMetro;
 
 //create a class that inherit Projet class and modify ist member for the project
 class AffectFlow :public Project{
@@ -42,6 +37,7 @@ class AffectFlow :public Project{
     SkinConductance *sc2;
 
     sample processed_for_leds{};
+
 
     // Packet structure
     enum PacketType {
@@ -338,7 +334,7 @@ AudioOutputI2S           AudioOut;       //xy=1031,323
     }
 
     void setupSounds(){ //SETUP THE INITIAL SOUNDS IN THE PROJECT HERE
-    Serial.println("Setup sounds");
+        Serial.println("Setup sounds");
         //RESP dependent variables
         respTone = (sectionGlobal[0][configuration::board_id]);
         respWave1.begin(0.1 , respTone, WAVEFORM_SINE);
@@ -370,9 +366,9 @@ AudioOutputI2S           AudioOut;       //xy=1031,323
             va_start(args, format);
             char buffer[100]; // allocate a buffer to hold the converted string
             vsnprintf(buffer, 100, format, args); // convert the format string to a buffer
-            PRINTSERIAL.print(buffer);
+            Serial.print(buffer);
             va_end(args);
-            PRINTSERIAL.println();
+            Serial.println();
             #endif
         }
 
@@ -380,7 +376,6 @@ AudioOutputI2S           AudioOut;       //xy=1031,323
     uint32_t checksum = 0;
     switch (packetType) {
         case PACKET_HEART: {
-        heart_packet* heartpacket = &heartPacket;
         checksum = 0;
         checksum = heartPacket.data.checksum();
         heartPacket.checksum = checksum;
@@ -388,7 +383,6 @@ AudioOutputI2S           AudioOut;       //xy=1031,323
         break;
         }
         case PACKET_SKIN: {
-        skin_packet* skinpacket = &skinPacket;
         checksum = 0;
         checksum = skinPacket.data.checksum();
         skinPacket.checksum = checksum;
@@ -396,7 +390,6 @@ AudioOutputI2S           AudioOut;       //xy=1031,323
         break;
         }
         case PACKET_RESPIRATION: {
-        resp_packet* resppacket = &respPacket;
         checksum = 0;
         checksum = respPacket.data.checksum();
         respPacket.checksum = checksum;
@@ -451,9 +444,9 @@ AudioOutputI2S           AudioOut;       //xy=1031,323
     }
 
     void sendPackets() {
-    SENDSERIAL.write((uint8_t*)&heartPacket, sizeof(heartPacket));
-    SENDSERIAL.write((uint8_t*)&skinPacket, sizeof(skinPacket));
-    SENDSERIAL.write((uint8_t*)&respPacket, sizeof(respPacket));
+        Serial3.write((uint8_t*)&heartPacket, sizeof(heartPacket));
+        Serial3.write((uint8_t*)&skinPacket, sizeof(skinPacket));
+        Serial3.write((uint8_t*)&respPacket, sizeof(respPacket));
     }
 
     public:
@@ -466,22 +459,19 @@ AudioOutputI2S           AudioOut;       //xy=1031,323
         createPatchCords();
         setupSounds();
 
-        // Setup Plaquette
-        Plaquette.begin();
         // Initialize Serial port
-        PRINTSERIAL.begin(115200);
-        SENDSERIAL.begin(115200, SERIAL_8N1);
+        Serial3.begin(115200, SERIAL_8N1);
     }
 
     //Project update loop. Access the  biosensors from here, process the data and modify audio objects
     //The biosensor need to be accessed with arrow "->" instead of dots "." because we are dealing with pointers and not objects
     void update() override{
-
-        if(sendingMetro){
-        fillPacket(PACKET_HEART);
-        fillPacket(PACKET_SKIN);
-        fillPacket(PACKET_RESPIRATION);
-        sendPackets();
+        if(sendingMetro.hasPassed(10)){
+            fillPacket(PACKET_HEART);
+            fillPacket(PACKET_SKIN);
+            fillPacket(PACKET_RESPIRATION);
+            sendPackets();
+            sendingMetro.restart();
         }
 
         //Retrieve sensor values
@@ -550,7 +540,7 @@ AudioOutputI2S           AudioOut;       //xy=1031,323
        GSRfilter1.frequency(0);
       */
 
-       processed_for_leds.heart.sig =  biosensors::heart.getNormalized();
+        processed_for_leds.heart.sig =  biosensors::heart.getNormalized();
         processed_for_leds.gsr.scr = biosensors::sc1.getSCR();
         processed_for_leds.resp.sig = biosensors::resp.getScaled();
 
