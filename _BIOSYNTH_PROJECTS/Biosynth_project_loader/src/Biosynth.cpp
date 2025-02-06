@@ -61,20 +61,15 @@ void Biosynth::loadProject()
                               &biosensors::resp, &biosensors::sc2);
     break;
 
-  // case WE_AS_WAVE:
-  //   project = new WeAsWaves(&biosensors::heart, &biosensors::sc1,
-  //                           &biosensors::resp, &biosensors::sc2);
-  //   break;
-
   case RECORDER:
     project = new Recorder(&biosensors::heart, &biosensors::sc1,
                            &biosensors::resp, &biosensors::sc2);
     break;
 
-  // case OSC:
-  //   project = new Osc(&biosensors::heart, &biosensors::sc1,
-  //                          &biosensors::resp, &biosensors::sc2);
-  //   break;
+  case DATA_OSC:
+    project = new DataOSC(&biosensors::heart, &biosensors::sc1,
+                           &biosensors::resp, &biosensors::sc2);
+    break;
 
   case AFFECT_FLOW:
     project = new AffectFlow(&biosensors::heart, &biosensors::sc1,
@@ -304,10 +299,10 @@ ProjectList Biosynth::selectProject(
 
   if (project == 1)
   { // project selected when button not pressed on boot
-    return AFFECT_FLOW; // project 1 is OSC, change if needed
+    return DATA_OSC; // project 1 is AFFECT_FLOW, change if needed
   }
   else
-  { // project selected when button not pressed on boot
+  { // project selected when button pressed on boot
     return SONG_OF_SEVEN;
   }
 }

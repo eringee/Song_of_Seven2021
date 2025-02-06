@@ -58,12 +58,6 @@ class Recorder :public Project{
         processed_for_leds.resp.sig = biosensors::resp.getScaled();
     }
 
-//Project update volume loop. Modify here if project needs special volume clamping
-    void updateVolume(float vol) override{
-
-    }
-
-//This is where you set the sound difference for every sections
 
 void changeSection(const int currentSection) override //this is where we change sections AND frequencies...
 {
