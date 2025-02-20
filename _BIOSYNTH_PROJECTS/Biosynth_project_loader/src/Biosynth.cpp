@@ -299,7 +299,7 @@ ProjectList Biosynth::selectProject(
 
   if (project == 1)
   { // project selected when button not pressed on boot
-    return DATA_OSC; // project 1 is AFFECT_FLOW, change if needed
+    return AFFECT_FLOW; // project 1 is AFFECT_FLOW, change if needed
   }
   else
   { // project selected when button pressed on boot
