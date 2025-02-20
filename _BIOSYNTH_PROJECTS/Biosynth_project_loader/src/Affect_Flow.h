@@ -198,6 +198,7 @@ AudioOutputI2S           AudioOut;       //xy=1031,323
 
     float smoothGSR = 0.1;   //default value for smoothing sc1 signal for EMA
 
+    float smoothResp0 = 0.5;  //default value for smoothing resp signal
     float smoothResp = 0.5;  //default value for smoothing resp signal
     float smoothResp2 = 0.5;  //default value for smoothing resp signal
     float smoothResp3 = 0.5;  //default value for smoothing resp signal
@@ -259,7 +260,7 @@ AudioOutputI2S           AudioOut;       //xy=1031,323
 
         // set bandpass around the respTone frequencies
         respFilter.frequency(respTone); 
-        // respFilter.resonance(1.0); 
+        respFilter.resonance(1.0); 
 
         respnoise.amplitude(0.1);
         respnoiseLFO.begin(0.3, 15, WAVEFORM_SINE); // LFO applied to respNoise
@@ -309,8 +310,7 @@ AudioOutputI2S           AudioOut;       //xy=1031,323
         
         GSRsig = sc1->getSCR();
         
-        respSig = resp->getNormalized();
-        respSig = mapTo01(respSig,-2,2,CONSTRAIN);
+        respSig = resp->getScaled();
         respAmp = resp->getScaledAmplitude();
         respBPM = resp->getScaledRpm();
 
@@ -320,11 +320,12 @@ AudioOutputI2S           AudioOut;       //xy=1031,323
         smoothGSR += 0.8 * (GSRsig - smoothGSR); // run EMA filter
         smoothGSRreduced = max((smoothGSR-0.1), 0.0);  //subtract a bit from GSR value but don't pass 0  
     
-        // smoothResp += 0.0005  * (respSig - smoothResp);
-        // smoothResp2 += 0.0001 * (respSig - smoothResp2);
-        // smoothResp3 += 0.00005 * (respSig - smoothResp3);      
-        // finalResp = max((smoothResp-0.25), 0);
-        finalResp = respSig;
+        smoothResp += 0.0005  * (respSig - smoothResp);
+        smoothResp2 += 0.0001 * (respSig - smoothResp2);
+        smoothResp3 += 0.00005 * (respSig - smoothResp3);     
+        smoothResp0 += 0.03 * (respSig - smoothResp0);   
+        finalResp = max((smoothResp-0.25), 0);
+        
       
         //////AUDIO TRANSFORMATIONS////////////////////////////////////////////////
 
@@ -371,7 +372,7 @@ AudioOutputI2S           AudioOut;       //xy=1031,323
 
         processed_for_leds.heart.sig =  biosensors::heart.getNormalized();
         processed_for_leds.gsr.scr = biosensors::sc1.getSCR();
-        processed_for_leds.resp.sig = biosensors::resp.getScaled();
+        processed_for_leds.resp.sig = smoothResp0;
 
     };
 
