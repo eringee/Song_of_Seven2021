@@ -201,7 +201,7 @@ void Biosynth::opening_message()
   if (!do_once)
   {
     sprintf(screen::buffer_line_1, "Hello!");
-    sprintf(screen::buffer_line_2, "I am board #%d", configuration::board_id + 1);
+    sprintf(screen::buffer_line_2, "I am board #%d", configuration::board_id);
     screen::update();
     do_once = true;
   }
