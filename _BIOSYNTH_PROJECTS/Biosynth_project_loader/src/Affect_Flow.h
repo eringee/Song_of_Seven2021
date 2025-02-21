@@ -1,25 +1,34 @@
+
+
 /**
- * @file We_As_Waves.h
- * @author Erin Gee & Etienne Montenegro
+ * @file Affect_Flow.h
+ * @author Erin Gee & Etienne Montenegro & Luana Belinsky
  * @brief WaW project class. USE THIS FILE AS TEMPLATE FOR OTHER PROJECTS. DO NOT FORGET TO OVERRIDE ALL THE Projects.h methods
  * @version 1.0
- * @date 2022-11-02
- * @copyright Copyright (c) 2022
+ * @date 2025-01-30
+ * @copyright Copyright (c) 2025
  * 
  */
 #pragma once
+
+//  #define DEBUG_PRINT
+
 #include "configuration.h"
 #include "Projects.h"
 #include <Arduino.h>
 #include <Audio.h>
+#include <Chrono.h>
 //include library needed for the project here
 #include <mtof.h>
+#include "Packets.h"
+
+
+static Chrono sendingMetro;
 
 //create a class that inherit Projet class and modify ist member for the project
-class WeAsWaves :public Project{
+class AffectFlow :public Project{
     
     private:
-
     const char* name{"  AFFECT FLOW"};
     static const int number_of_boards{10};
     static const int number_of_sections{6};
@@ -143,13 +152,13 @@ AudioOutputI2S           AudioOut;       //xy=1031,323
     //!!!!! section title should be no more than 16 characters long. Longer strings will make the teensy crash!!!!!
     const char sections_title[number_of_sections][17] = {" Section A   ", " Section B   ", " Section C   ", " Section D   "," Section E   "," Section F   "};
     double sectionGlobal[number_of_sections][number_of_boards] = {
-       {mtof.toFrequency(50), 
+    {mtof.toFrequency(50), 
     mtof.toFrequency(57), 
     mtof.toFrequency(62), 
     mtof.toFrequency(71), 
     mtof.toFrequency(72)}, // Intro section A  
 
- {mtof.toFrequency(69), 
+    {mtof.toFrequency(69), 
     mtof.toFrequency(76), 
     mtof.toFrequency(83), 
     mtof.toFrequency(84), 
@@ -181,14 +190,15 @@ AudioOutputI2S           AudioOut;       //xy=1031,323
     };
 
   
-  ///Variables for smoothing out biosignals
-   float respTone;
+    //Variables for smoothing out biosignals
+    float respTone;
     float smoothHeart = 0.5; //default value for smoothing heart signal for EMA
     float smoothHeartAmp = 0.5; //default value for smoothing heart signal for EMA
     float smoothHeartBPM = 0.5; //default value for smoothing heart signal for EMA
 
     float smoothGSR = 0.1;   //default value for smoothing sc1 signal for EMA
 
+    float smoothResp0 = 0.5;  //default value for smoothing resp signal
     float smoothResp = 0.5;  //default value for smoothing resp signal
     float smoothResp2 = 0.5;  //default value for smoothing resp signal
     float smoothResp3 = 0.5;  //default value for smoothing resp signal
@@ -210,8 +220,6 @@ AudioOutputI2S           AudioOut;       //xy=1031,323
 
     int GSRfilt; // value for storing filter data relative to GSR
     float respBPMfun;
-
-
 
     void createPatchCords(){
         /* This is mandatory for dynamic project loading. Redo all the patchcord connections provided by the 
@@ -244,7 +252,7 @@ AudioOutputI2S           AudioOut;       //xy=1031,323
     }
 
     void setupSounds(){ //SETUP THE INITIAL SOUNDS IN THE PROJECT HERE
-
+        Serial.println("Setup sounds");
         //RESP dependent variables
         respTone = (sectionGlobal[0][configuration::board_id]);
         respWave1.begin(0.1 , respTone, WAVEFORM_SINE);
@@ -252,7 +260,7 @@ AudioOutputI2S           AudioOut;       //xy=1031,323
 
         // set bandpass around the respTone frequencies
         respFilter.frequency(respTone); 
-        // respFilter.resonance(1.0); 
+        respFilter.resonance(1.0); 
 
         respnoise.amplitude(0.1);
         respnoiseLFO.begin(0.3, 15, WAVEFORM_SINE); // LFO applied to respNoise
@@ -272,18 +280,28 @@ AudioOutputI2S           AudioOut;       //xy=1031,323
 
     public:
 
-    WeAsWaves(Heart *_heart = nullptr,SkinConductance *_sc1 = nullptr, Respiration *_resp = nullptr,SkinConductance *_sc2 = nullptr): heart{_heart},sc1{_sc1},resp{_resp},sc2{_sc2}
+    AffectFlow(Heart *_heart = nullptr,SkinConductance *_sc1 = nullptr, Respiration *_resp = nullptr,SkinConductance *_sc2 = nullptr): heart{_heart},sc1{_sc1},resp{_resp},sc2{_sc2}
     {};
 
     void setup() override {
         AudioMemory(80);  //MODIFY AUDIO MEMORY HERE
         createPatchCords();
         setupSounds();
+
+        // Initialize Serial port
+        Serial3.begin(115200, SERIAL_8N1);
     }
 
     //Project update loop. Access the  biosensors from here, process the data and modify audio objects
     //The biosensor need to be accessed with arrow "->" instead of dots "." because we are dealing with pointers and not objects
     void update() override{
+        if(sendingMetro.hasPassed(10)){
+            fillPacket(heart);
+            fillPacket(sc1);
+            fillPacket(resp);
+            sendPackets();
+            sendingMetro.restart();
+        }
 
         //Retrieve sensor values
         heartSig = heart->getNormalized();
@@ -292,9 +310,9 @@ AudioOutputI2S           AudioOut;       //xy=1031,323
         
         GSRsig = sc1->getSCR();
         
-        respSig = resp->getNormalized();
-        respAmp = resp->amplitudeChange();
-        respBPM = resp->bpmChange();
+        respSig = resp->getScaled();
+        respAmp = resp->getScaledAmplitude();
+        respBPM = resp->getScaledRpm();
 
          ////////////////////////smooth signals       
         smoothHeart += 0.005 * (heartSig - smoothHeart);
@@ -304,8 +322,10 @@ AudioOutputI2S           AudioOut;       //xy=1031,323
     
         smoothResp += 0.0005  * (respSig - smoothResp);
         smoothResp2 += 0.0001 * (respSig - smoothResp2);
-        smoothResp3 += 0.00005 * (respSig - smoothResp3);      
+        smoothResp3 += 0.00005 * (respSig - smoothResp3);     
+        smoothResp0 += 0.03 * (respSig - smoothResp0);   
         finalResp = max((smoothResp-0.25), 0);
+        
       
         //////AUDIO TRANSFORMATIONS////////////////////////////////////////////////
 
@@ -350,9 +370,9 @@ AudioOutputI2S           AudioOut;       //xy=1031,323
        GSRfilter1.frequency(0);
       */
 
-        processed_for_leds.heart.sig = smoothHeart*0.7;
-        processed_for_leds.gsr.scr = smoothGSR;
-        processed_for_leds.resp.sig = finalResp*1.2;
+        processed_for_leds.heart.sig =  biosensors::heart.getNormalized();
+        processed_for_leds.gsr.scr = biosensors::sc1.getSCR();
+        processed_for_leds.resp.sig = smoothResp0;
 
     };
 
@@ -373,7 +393,7 @@ AudioOutputI2S           AudioOut;       //xy=1031,323
 
 //This is where you set the sound difference for every sections
 
-void changeSection(const int currentSection) override //this is where we change sections AND frequencies...
+    void changeSection(const int currentSection) override //this is where we change sections AND frequencies...
 {
  //Serial.println(currentSection);   
  if (currentSection==0){
@@ -394,19 +414,19 @@ void changeSection(const int currentSection) override //this is where we change 
         }
 }
 
-const char* getName() override { //Do not modify, just copy paste to new project
-    return name;
-};
+    const char* getName() override { //Do not modify, just copy paste to new project
+        return name;
+    };
 
-const int getNumberOfSection() override { //Do not modify, just copy paste to new project
-    return number_of_sections;
-}
+    const int getNumberOfSection() override { //Do not modify, just copy paste to new project
+        return number_of_sections;
+    }
 
-const char* getSectionTitle(const int section_index) override { //Do not modify, just copy paste to new project
-    return sections_title[section_index];
-}
+    const char* getSectionTitle(const int section_index) override { //Do not modify, just copy paste to new project
+        return sections_title[section_index];
+    }
 
-sample getLedProcessed() override{ //Do not modify, just copy paste to new project
-    return processed_for_leds;
-}
-};
+    sample getLedProcessed() override{ //Do not modify, just copy paste to new project
+        return processed_for_leds;
+    }
+    };

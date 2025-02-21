@@ -15,8 +15,8 @@ namespace pins{
 
     namespace sd{
         const int cs{10};     //any digital pin
-        const int mosi{7};    //alternative can be 11
-        const int sck{14};    //alternative can be 13    
+        const int mosi{7};    //Pin 7 is also used for Serial3 communication with ESP32 Tinypico. Cannot log + send data to ESP32at the same time
+        const int sck{14};    
     }//namespace sd
 
     namespace audio_shield{
@@ -27,7 +27,7 @@ namespace pins{
     namespace sensors{
         const int heart{21};
         const int gsr{20};
-        const int respiration{17};
+        const int respiration{2};
         const int gsr2{16};
 
     }//namespace sensors

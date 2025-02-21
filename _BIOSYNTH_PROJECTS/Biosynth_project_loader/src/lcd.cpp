@@ -27,7 +27,7 @@ namespace screen{
 
     void bootMessage(){
         sprintf(buffer_line_1, "    Biosynth    ");
-        sprintf(buffer_line_2, "      2022      "); // add version number var or year var
+        sprintf(buffer_line_2, "      2025      "); // add version number var or year var
         update();
     }
 
