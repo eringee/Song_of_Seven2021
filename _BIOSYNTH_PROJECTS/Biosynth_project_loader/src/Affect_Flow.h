@@ -198,7 +198,7 @@ AudioOutputI2S           AudioOut;       //xy=1031,323
 
     float smoothGSR = 0.1;   //default value for smoothing sc1 signal for EMA
 
-    float smoothResp0 = 0.5;  //default value for smoothing resp signal
+    float smoothRespLED = 0.5;  //default value for smoothing resp signal
     float smoothResp = 0.5;  //default value for smoothing resp signal
     float smoothResp2 = 0.5;  //default value for smoothing resp signal
     float smoothResp3 = 0.5;  //default value for smoothing resp signal
@@ -288,7 +288,8 @@ AudioOutputI2S           AudioOut;       //xy=1031,323
         createPatchCords();
         setupSounds();
 
-        // Initialize Serial port
+        // Initialize Serial port 
+        // ESP32 - do not touch
         Serial3.begin(115200, SERIAL_8N1);
     }
 
@@ -322,21 +323,21 @@ AudioOutputI2S           AudioOut;       //xy=1031,323
     
         smoothResp += 0.0005  * (respSig - smoothResp);
         smoothResp2 += 0.0001 * (respSig - smoothResp2);
-        smoothResp3 += 0.00005 * (respSig - smoothResp3);     
-        smoothResp0 += 0.03 * (respSig - smoothResp0);   
-        finalResp = max((smoothResp-0.25), 0);
+        smoothResp3 += 0.00005 * (respSig - smoothResp3);   
+        finalResp = max((smoothResp-0.25), 0); 
         
+        // Smoothing for the LEDs
+        smoothRespLED += 0.03 * (respSig - smoothRespLED);   
       
         //////AUDIO TRANSFORMATIONS////////////////////////////////////////////////
 
         //RESPIRATION///////////////////////////////
     
         //use breaths per minute to detune fundamental - if breathing is regular it will not be affected
-        respBPMfun = (respBPM*(3*configuration::board_id+1))-0.5; 
+        respBPMfun = (respBPM*(3*configuration::board_id))-0.5; 
         respWave2.frequency(respBPMfun+respTone); //detuned wave mixed with fundamental
         
         respnoiseLFO.frequency(respAmp*100); //gently modulate respNoise through the amplitude of the breath
-
         
         respAmp2.gain(smoothResp3*0.75); //secondary resptone comes in through lowpass filter    
         respFilter.frequency(respTone*(respAmp)); // moving bandpass around the secondary respTone    
@@ -372,7 +373,7 @@ AudioOutputI2S           AudioOut;       //xy=1031,323
 
         processed_for_leds.heart.sig =  biosensors::heart.getNormalized();
         processed_for_leds.gsr.scr = biosensors::sc1.getSCR();
-        processed_for_leds.resp.sig = smoothResp0;
+        processed_for_leds.resp.sig = smoothRespLED;
 
     };
 

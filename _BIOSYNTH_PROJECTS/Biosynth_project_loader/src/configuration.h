@@ -18,7 +18,7 @@
 
 namespace configuration{
     
-    const int board_id{4};
+    const int board_id{7};
  
     const float volume{0.6}; //Initial volume of the board
 

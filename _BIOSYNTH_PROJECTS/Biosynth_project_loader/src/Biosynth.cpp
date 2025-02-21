@@ -263,7 +263,7 @@ void Biosynth::section_confirm_message(const int encoder_value)
 void Biosynth::current_section_message()
 {
   sprintf(screen::buffer_line_1, "%s", project->getSectionTitle(current_section));
-  sprintf(screen::buffer_line_2, "   BIOSYNTH %d ", configuration::board_id + 1);
+  sprintf(screen::buffer_line_2, "   BIOSYNTH %d ", configuration::board_id);
   lcd_state = CURRENT_SECTION;
   screen::update();
 }
