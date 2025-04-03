@@ -61,20 +61,69 @@ void logger::create_file() {
         recording.close();
         return;
     }
+
+    recording.println("HeartRaw,HeartNormalized,HeartBeatDetected,HeartAmplitudeChange,HeartBPM,HeartBPMChange,SkinRaw,SkinSCR,SkinSCL,RespRaw,RespNormalized,RespScaled,RespisExhaling,RespRawAmplitude,RespNormalizedAmplitude,RespScaledAmplitude,RespAmplitudeLevel,RespAmplitudeChange,RespAmplitudeVariability,RespInterval,RespRpm,RespNormalizedRpm,RespScaledRpm,RespRpmLevel,RespRpmChange,RespRpmVariability");
+    recording.flush();  // Ensure the header is written to the file
 }
 
 
 void logger::log_data() {
 // Serial.println("log data");
 // Serial.println(logging.load());
-    recording.print(biosensors::heart.getRaw());
-    recording.write(',');
-    recording.print(biosensors::sc1.getRaw());
-    recording.write(',');
-    recording.print(biosensors::resp.getRaw());
+recording.print(biosensors::heart.getRaw());
+recording.write(',');
+recording.print(biosensors::heart.getNormalized());
+recording.write(',');
+recording.print(biosensors::heart.beatDetected());
+recording.write(',');
+recording.print(biosensors::heart.amplitudeChange());
+recording.write(',');
+recording.print(biosensors::heart.getBPM());
+recording.write(',');
+recording.print(biosensors::heart.bpmChange());
+recording.write(',');
+recording.print(biosensors::sc1.getRaw());
+recording.write(',');
+recording.print(biosensors::sc1.getSCR());
+recording.write(',');
+recording.print(biosensors::sc1.getSCL());
+recording.write(',');
+recording.print(biosensors::resp.getRaw());
+recording.write(',');
+recording.print(biosensors::resp.getNormalized());
+recording.write(',');
+recording.print(biosensors::resp.getScaled());
+recording.write(',');
+recording.print(biosensors::resp.isExhaling());
+recording.write(',');
+recording.print(biosensors::resp.getRawAmplitude());
+recording.write(',');
+recording.print(biosensors::resp.getNormalizedAmplitude());
+recording.write(',');
+recording.print(biosensors::resp.getScaledAmplitude());
+recording.write(',');
+recording.print(biosensors::resp.getAmplitudeLevel());
+recording.write(',');
+recording.print(biosensors::resp.getAmplitudeChange());
+recording.write(',');
+recording.print(biosensors::resp.getAmplitudeVariability());
+recording.write(',');
+recording.print(biosensors::resp.getInterval());
+recording.write(',');
+recording.print(biosensors::resp.getRpm());
+recording.write(',');
+recording.print(biosensors::resp.getNormalizedRpm());
+recording.write(',');
+recording.print(biosensors::resp.getScaledRpm());
+recording.write(',');
+recording.print(biosensors::resp.getRpmLevel());
+recording.write(',');
+recording.print(biosensors::resp.getRpmChange());
+recording.write(',');
+recording.print(biosensors::resp.getRpmVariability());
     #if FOOT_PEDAL
-    recording.write(',');
-    recording.print(!button::foot_pedal.read());
+    // recording.write(',');
+    // recording.print(!button::foot_pedal.read());
     #endif
     recording.write('\n');
     numSamples++;

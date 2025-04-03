@@ -79,4 +79,9 @@ const char* getSectionTitle(const int section_index) override { //Do not modify,
 sample getLedProcessed() override{ //Do not modify, just copy paste to new project
     return processed_for_leds;
 }
+
+void updateVolume(float vol) override{
+
+}
+
 };
