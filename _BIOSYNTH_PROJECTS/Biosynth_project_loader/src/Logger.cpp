@@ -62,7 +62,7 @@ void logger::create_file() {
         return;
     }
 
-    recording.println("HeartRaw,HeartNormalized,HeartBeatDetected,HeartAmplitudeChange,HeartBPM,HeartBPMChange,SkinRaw,SkinSCR,SkinSCL,RespRaw,RespNormalized,RespScaled,RespisExhaling,RespRawAmplitude,RespNormalizedAmplitude,RespScaledAmplitude,RespAmplitudeLevel,RespAmplitudeChange,RespAmplitudeVariability,RespInterval,RespRpm,RespNormalizedRpm,RespScaledRpm,RespRpmLevel,RespRpmChange,RespRpmVariability");
+    recording.println("NumSamples,HeartRaw,HeartNormalized,HeartBeatDetected,HeartAmplitudeChange,HeartBPM,HeartBPMChange,SkinRaw,SkinSCR,SkinSCL,RespRaw,RespNormalized,RespScaled,RespisExhaling,RespRawAmplitude,RespNormalizedAmplitude,RespScaledAmplitude,RespAmplitudeLevel,RespAmplitudeChange,RespAmplitudeVariability,RespInterval,RespRpm,RespNormalizedRpm,RespScaledRpm,RespRpmLevel,RespRpmChange,RespRpmVariability");
     recording.flush();  // Ensure the header is written to the file
 }
 
@@ -70,6 +70,8 @@ void logger::create_file() {
 void logger::log_data() {
 // Serial.println("log data");
 // Serial.println(logging.load());
+recording.print(numSamples);
+recording.write(' ');
 recording.print(biosensors::heart.getRaw());
 recording.write(',');
 recording.print(biosensors::heart.getNormalized());
