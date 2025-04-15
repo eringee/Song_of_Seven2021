@@ -64,4 +64,9 @@ namespace biosensors{
      */
 
 
+    int respSignal();
+    int heartSignal();
+    int skinSignal();
+    int skinSignal2();
+
 }//namespace biosensors
