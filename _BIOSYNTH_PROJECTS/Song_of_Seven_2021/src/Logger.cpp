@@ -83,6 +83,8 @@ void logger::log_data(sample signals){
   //recording.seekCur(last_cur_pos);
   if(logging){
     finalize = true;
+    recording.print(numSamples);
+    recording.write(' ');
     recording.print(signals.heart);
     recording.write(',');
     recording.print(signals.gsr);
