@@ -29,18 +29,37 @@ void logger::initialize() {
         }
     }
     Serial.println("SD card initialized");
+
+char buff[64]{};
+sprintf(buff, "biosynth_%d_session_", configuration::board_id);
+
+int maxSession = 0;
+File root = SD.open("/");
+while (File file = root.openNextFile()) {
+  char filename[64];
+  strcpy(filename, file.name()); // Use strcpy() to copy the filename
+  if (strncmp(filename, buff, strlen(buff)) == 0) {
+    int session = atoi(filename + strlen(buff));
+    if (session > maxSession) {
+      maxSession = session;
+    }
+  }
+  file.close(); // Don't forget to close the file after you're done with it
+}
+session = maxSession + 1;
+sprintf(buff, "biosynth_%d_session_%d_recording_", configuration::board_id, session);
 }
 
 void logger::create_file() {
     char buff[64]{};
     int count {1};
 
-    sprintf(buff, "%s_%d.%s", filename, count, extension);
+    sprintf(buff, "biosynth_%d_session_%d_recording_%d.%s", configuration::board_id, session, count, extension);
 
     while (SD.sdfs.exists(buff)) {
         Serial.println("File already exists");
         count++;
-        sprintf(buff, "%s_%d.%s", filename, count, extension);
+        sprintf(buff, "biosynth_%d_session_%d_recording_%d.%s", configuration::board_id, session, count, extension);
         Serial.printf("Trying new filename %s\n", buff);
     }
 
@@ -62,7 +81,7 @@ void logger::create_file() {
         return;
     }
 
-    recording.println("HeartRaw,HeartNormalized,HeartBeatDetected,HeartAmplitudeChange,HeartBPM,HeartBPMChange,SkinRaw,SkinSCR,SkinSCL,RespRaw,RespNormalized,RespScaled,RespisExhaling,RespRawAmplitude,RespNormalizedAmplitude,RespScaledAmplitude,RespAmplitudeLevel,RespAmplitudeChange,RespAmplitudeVariability,RespInterval,RespRpm,RespNormalizedRpm,RespScaledRpm,RespRpmLevel,RespRpmChange,RespRpmVariability");
+    recording.println("NumSamples,HeartRaw,HeartNormalized,HeartBeatDetected,HeartAmplitudeChange,HeartBPM,HeartBPMChange,SkinRaw,SkinSCR,SkinSCL,RespRaw,RespNormalized,RespScaled,RespisExhaling,RespRawAmplitude,RespNormalizedAmplitude,RespScaledAmplitude,RespAmplitudeLevel,RespAmplitudeChange,RespAmplitudeVariability,RespInterval,RespRpm,RespNormalizedRpm,RespScaledRpm,RespRpmLevel,RespRpmChange,RespRpmVariability");
     recording.flush();  // Ensure the header is written to the file
 }
 
@@ -70,61 +89,64 @@ void logger::create_file() {
 void logger::log_data() {
 // Serial.println("log data");
 // Serial.println(logging.load());
+recording.print(numSamples);
+recording.write(',');
 recording.print(biosensors::heart.getRaw());
-recording.write(',');
+recording.write(' ');
 recording.print(biosensors::heart.getNormalized());
-recording.write(',');
+recording.write(' ');
 recording.print(biosensors::heart.beatDetected());
-recording.write(',');
+recording.write(' ');
 recording.print(biosensors::heart.amplitudeChange());
-recording.write(',');
+recording.write(' ');
 recording.print(biosensors::heart.getBPM());
-recording.write(',');
+recording.write(' ');
 recording.print(biosensors::heart.bpmChange());
-recording.write(',');
+recording.write(' ');
 recording.print(biosensors::sc1.getRaw());
-recording.write(',');
+recording.write(' ');
 recording.print(biosensors::sc1.getSCR());
-recording.write(',');
+recording.write(' ');
 recording.print(biosensors::sc1.getSCL());
-recording.write(',');
+recording.write(' ');
 recording.print(biosensors::resp.getRaw());
-recording.write(',');
+recording.write(' ');
 recording.print(biosensors::resp.getNormalized());
-recording.write(',');
+recording.write(' ');
 recording.print(biosensors::resp.getScaled());
-recording.write(',');
+recording.write(' ');
 recording.print(biosensors::resp.isExhaling());
-recording.write(',');
+recording.write(' ');
 recording.print(biosensors::resp.getRawAmplitude());
-recording.write(',');
+recording.write(' ');
 recording.print(biosensors::resp.getNormalizedAmplitude());
-recording.write(',');
+recording.write(' ');
 recording.print(biosensors::resp.getScaledAmplitude());
-recording.write(',');
+recording.write(' ');
 recording.print(biosensors::resp.getAmplitudeLevel());
-recording.write(',');
+recording.write(' ');
 recording.print(biosensors::resp.getAmplitudeChange());
-recording.write(',');
+recording.write(' ');
 recording.print(biosensors::resp.getAmplitudeVariability());
-recording.write(',');
+recording.write(' ');
 recording.print(biosensors::resp.getInterval());
-recording.write(',');
+recording.write(' ');
 recording.print(biosensors::resp.getRpm());
-recording.write(',');
+recording.write(' ');
 recording.print(biosensors::resp.getNormalizedRpm());
-recording.write(',');
+recording.write(' ');
 recording.print(biosensors::resp.getScaledRpm());
-recording.write(',');
+recording.write(' ');
 recording.print(biosensors::resp.getRpmLevel());
-recording.write(',');
+recording.write(' ');
 recording.print(biosensors::resp.getRpmChange());
-recording.write(',');
+recording.write(' ');
 recording.print(biosensors::resp.getRpmVariability());
     #if FOOT_PEDAL
     // recording.write(',');
     // recording.print(!button::foot_pedal.read());
     #endif
+    recording.write(';');
     recording.write('\n');
     numSamples++;
 }

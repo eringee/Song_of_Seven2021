@@ -11,9 +11,10 @@
 
 namespace button{
 
-    extern Button encoder;
-    extern Button foot_pedal;
-    const float refresh_rate{0.001};
+    extern Bounce2::Button encoder;
+    extern Bounce2::Button foot_pedal;
+    const float refresh_rate{0.1};
+    extern bool foot_pedal_confirmed;
 
     /** @brief Initialization routine of the component
      */

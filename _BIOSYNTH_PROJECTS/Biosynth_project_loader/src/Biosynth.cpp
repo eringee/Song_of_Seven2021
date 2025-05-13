@@ -139,9 +139,9 @@ void Biosynth::update() {
 void Biosynth::handle_logging() {
     switch (lcd_state) {
         case CURRENT_SECTION:
-          if (!button::foot_pedal.pressed()) {
+          if (!button::foot_pedal_confirmed) {
               allowDataOnLCD = true;
-            } else if (button::foot_pedal.pressed() && !session_log.is_logging()) {
+            } else if (button::foot_pedal_confirmed && !session_log.is_logging()) {
                allowDataOnLCD = false;
                 Serial.println("Ask user to record on SD?");
                 session_log.create_file();
@@ -153,7 +153,7 @@ void Biosynth::handle_logging() {
             break;
 
         case START_LOGGING:
-            if (button::foot_pedal.pressed() && !session_log.is_logging() && !nowLogging.isRunning()) {
+            if (button::foot_pedal_confirmed && !session_log.is_logging() && !nowLogging.isRunning()) {
                 Serial.println("Starting logging");
                 session_log.start_logging();
                 sprintf(screen::buffer_line_1, "  Now Logging  ");
@@ -172,14 +172,14 @@ void Biosynth::handle_logging() {
                 }
             }
 
-            if (button::foot_pedal.pressed() && session_log.is_logging() && !endLogging.isRunning()) {
+            if (button::foot_pedal_confirmed && session_log.is_logging() && !endLogging.isRunning()) {
                 allowDataOnLCD = false;
                 Serial.println("Ending session");
                 session_log.stop_logging();
                 Serial.printf("Number of samples recorded: %d\n", session_log.get_num_samples());
                 endLogging.restart();
                 sprintf(screen::buffer_line_1, "Logging Stopped");
-                sprintf(screen::buffer_line_2, "               ");
+                sprintf(screen::buffer_line_2, "                ");
                 screen::update();
             }
 
@@ -361,13 +361,15 @@ void Biosynth::displayDataOnScreen(){
 
     if(lcd_timer.hasPassed(200, true)){
      //LCD
+     // line 1
      sprintf(screen::buffer_line_1, "H: %4d G: %4d", biosensors::heart.getRaw(), biosensors::sc1.getRaw());
-     sprintf(screen::buffer_line_2, "RT: %5d        ", biosensors::resp.getRaw());
-     #if FOOT_PEDAL
-    //  sprintf(screen::buffer_line_2, "R: %.2f FI: %d", biosensors::resp.getTemperature(), !button::foot_pedal.read());
-     #else
-     sprintf(screen::buffer_line_2, "RT: %5d        ", biosensors::resp.getRaw());
-     #endif
+    
+     // line 2
+    if (session_log.is_logging()){
+      sprintf(screen::buffer_line_2, "RT: %5d    REC", biosensors::resp.getRaw());
+    } else {
+      sprintf(screen::buffer_line_2, "RT: %5d        ", biosensors::resp.getRaw());
+    }
 
     screen::update();
     }
