@@ -90,7 +90,7 @@ void logger::log_data() {
 // Serial.println("log data");
 // Serial.println(logging.load());
 recording.print(numSamples);
-recording.write(',');
+recording.write(', ');
 recording.print(biosensors::heart.getRaw());
 recording.write(' ');
 recording.print(biosensors::heart.getNormalized());
