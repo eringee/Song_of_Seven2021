@@ -30,24 +30,24 @@ void logger::initialize() {
     }
     Serial.println("SD card initialized");
 
-char buff[64]{};
-sprintf(buff, "biosynth_%d_session_", configuration::board_id);
+    char buff[64]{};
+    sprintf(buff, "biosynth_%d_session_", configuration::board_id);
 
-int maxSession = 0;
-File root = SD.open("/");
-while (File file = root.openNextFile()) {
-  char filename[64];
-  strcpy(filename, file.name()); // Use strcpy() to copy the filename
-  if (strncmp(filename, buff, strlen(buff)) == 0) {
-    int session = atoi(filename + strlen(buff));
-    if (session > maxSession) {
-      maxSession = session;
+    int maxSession = 0;
+    File root = SD.open("/");
+    while (File file = root.openNextFile()) {
+    char filename[64];
+    strcpy(filename, file.name()); // Use strcpy() to copy the filename
+    if (strncmp(filename, buff, strlen(buff)) == 0) {
+        int session = atoi(filename + strlen(buff));
+        if (session > maxSession) {
+        maxSession = session;
+        }
     }
-  }
-  file.close(); // Don't forget to close the file after you're done with it
-}
-session = maxSession + 1;
-sprintf(buff, "biosynth_%d_session_%d_recording_", configuration::board_id, session);
+    file.close(); // Don't forget to close the file after you're done with it
+    }
+    session = maxSession + 1;
+    sprintf(buff, "biosynth_%d_session_%d_recording_", configuration::board_id, session);
 }
 
 void logger::create_file() {
@@ -142,23 +142,16 @@ recording.write(' ');
 recording.print(biosensors::resp.getRpmChange());
 recording.write(' ');
 recording.print(biosensors::resp.getRpmVariability());
-    #if FOOT_PEDAL
-    // recording.write(',');
-    // recording.print(!button::foot_pedal.read());
-    #endif
-    recording.write(';');
-    recording.write('\n');
-    numSamples++;
+recording.write(';');
+recording.write('\n');
+numSamples++;
 }
 
 
 void logger::start_logging(){
-//   Serial.println("start logging");
-  numSamples = 0;
+   numSamples = 0;
    logTimer.begin([this](){log_data();}, configuration::biosensors_sample_rate_us);
    logging.store(true);
-    // Serial.print("logging set to: ");
-    // Serial.println(logging.load());
 }
 
 void logger::stop_logging(){

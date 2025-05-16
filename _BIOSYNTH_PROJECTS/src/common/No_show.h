@@ -20,13 +20,17 @@
 
 
 //create a class that inherit Projet class and modify ist member for the project
-class Recorder :public Project{
+class NoShow :public Project{
     
     private:
 
+    #ifdef PROJECT_NAME
+    const char* name = STR(PROJECT_NAME);
+    #else
     const char* name{"  RECORDER"};
+    #endif
     static const int number_of_boards{1};
-    static const int number_of_sections{20};
+    static const int number_of_sections{1};
     int current_section{0};
 
     Heart *heart;
@@ -38,15 +42,15 @@ class Recorder :public Project{
 
     //vvv ADD ALL THE VARIABLES YOUR PROJECT DEPENDS ON IN THIS SECTION vvvv
     //!!!!! section title should be no more than 16 characters long. Longer strings will make the teensy crash!!!!!
-    const char sections_title[number_of_sections][17] = {" Neutral        ", " Relaxation    ", " Concentration ", " Confidence     ", " Trust          ", " Gratitude      "," Joy            ", " Surprise       ", " Insecurity     ", " Anxiety        ", " Fear           ", " Disgust        ", " Anger          ", " Shame          ", " Pain           ", " Despair        ", " Sadness        ", " Tired          ", " Laughter       ", " Arousal        "};
+    const char sections_title[number_of_sections][17] = {"                "};
 
     public:
 
-    Recorder(Heart *_heart = nullptr,SkinConductance *_sc1 = nullptr, Respiration *_resp = nullptr,SkinConductance *_sc2 = nullptr): heart{_heart},sc1{_sc1},resp{_resp},sc2{_sc2}
+    NoShow(Heart *_heart = nullptr,SkinConductance *_sc1 = nullptr, Respiration *_resp = nullptr,SkinConductance *_sc2 = nullptr): heart{_heart},sc1{_sc1},resp{_resp},sc2{_sc2}
     {};
 
     void setup() override {
-        Serial.println("Recorder set up");
+        Serial.println("Set up done");
     }
 
     //Project update loop. Access the  biosensors from here, process the data and modify audio objects

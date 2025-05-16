@@ -11,10 +11,15 @@
 
 namespace button{
 
-    extern Bounce2::Button encoder;
-    extern Bounce2::Button foot_pedal;
-    const float refresh_rate{0.1};
-    extern bool foot_pedal_confirmed;
+    class BiosynthButton : public Bounce2::Button
+    {
+    public:
+        bool longPress(int duration);
+    };
+
+    extern BiosynthButton encoder;
+    extern BiosynthButton foot_pedal;
+    const float refresh_rate{1};
 
     /** @brief Initialization routine of the component
      */

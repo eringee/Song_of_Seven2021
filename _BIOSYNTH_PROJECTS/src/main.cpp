@@ -28,27 +28,6 @@ void setup() {
 void loop() 
 { 
   Plaquette.step();
-  biosynth.update();
-  
-  //vvv what are these two block suposed to do? vvv
-  // Is the foot pedal reseting the synth now?
-
-  // Answer: It was just something simple to test the function of the cable.
-
-  //if(pedalMarker==0){ 
-  //  footPedal.update();
-  //  if (footPedal.read()==LOW) {
-  //    pedalMarker=1;
-  //    openingMessageTimer.restart();
-  //  }
- // }
-
-  // if(pedalMarker==1) {
-  //   setupSounds();
-  //   opening_message();
-  //   checkSectionChange();
-  //   biosynth.update();
-  // }
-  
+  biosynth.update();  
 
 }

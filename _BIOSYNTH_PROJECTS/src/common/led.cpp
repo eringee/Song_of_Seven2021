@@ -8,11 +8,11 @@ namespace led{
     byte drawing_memory[4*3];         //  3 bytes per LED
     DMAMEM byte display_memory[4*12]; // 12 bytes per LED
     WS2812Serial leds(4, display_memory, drawing_memory, pins::hardware::led, WS2812_GRB);
-    //Set the colors for the sensors here. !!!IT MIGHT NOT BE THE RIGHT ORDER!!!
+    //Set the colors for the sensors here. 
     int led_colors [4][3] = {{250, 0, 250},  //HEART
                             {100, 255, 250},//GSR
                             {10, 48, 240},  //RESPIRATION
-                            {140, 10, 240}};//UNUSED
+                            {140, 10, 240}};//GSR2
 
     const int led_brightness{80};
 
@@ -30,9 +30,6 @@ namespace led{
     }
 
     void update(sample signals){
-
-        // Serial.printf("%.2f,%.2f,%.2f,%.2f\n", signals.heart.sig, signals.gsr.scr, signals.resp.sig, signals.gsr2.scr);
-
 
         leds.setPixel(0,led_colors[0][0]*signals.heart.sig,
                         led_colors[0][1]*signals.heart.sig,

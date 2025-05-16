@@ -10,16 +10,12 @@
  */
 
 #pragma once
-//!!!I'VE REMOVE THIS DEFINE BECAUSE IT DOESNT SEEM TO MAKE THE AUDIO GLITCH!!!
-//#define ENCODER_DO_NOT_USE_INTERRUPTS
 #include <Encoder.h>
 
 namespace encoder{
-    
 
     extern Encoder encoder;
    
-
     /** @brief Initialization routine of the component
      */
     void initialize();

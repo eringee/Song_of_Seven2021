@@ -1,5 +1,5 @@
 #include "lcd.h"
-
+#include "configuration.h"
 
 namespace screen{
 
@@ -7,7 +7,6 @@ namespace screen{
    
     char buffer_line_1[17]{};
     char buffer_line_2[17]{};
-
 
     void initialize(){
         lcd.init();
@@ -22,12 +21,11 @@ namespace screen{
         lcd.print(buffer_line_1);
         lcd.setCursor(0, 1);
         lcd.print(buffer_line_2);
-
     }
 
     void bootMessage(){
         sprintf(buffer_line_1, "    Biosynth    ");
-        sprintf(buffer_line_2, "      2025      "); // add version number var or year var
+        sprintf(buffer_line_2, "      %4d      ", configuration::version_year);
         update();
     }
 

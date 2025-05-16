@@ -27,7 +27,11 @@ namespace pins{
     namespace sensors{
         const int heart{21};
         const int gsr{20};
-        const int respiration{2};
+        #ifdef EXT_ADC_RESP
+        const int respiration{2}; // pin on External ADC
+        #else
+        const int respiration{17}; // pin on Teensy
+        #endif
         const int gsr2{16};
 
     }//namespace sensors

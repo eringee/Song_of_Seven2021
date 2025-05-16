@@ -15,13 +15,17 @@
 
 enum ProjectList : int
 {
-    SONG_OF_SEVEN,
-    RECORDER,
-    DATA_OSC, 
-    AFFECT_FLOW
+    SONGOFSEVEN,
+    AFFECTFLOW,
+    NOSHOW
 };
 
-#include "Song_of_seven.h"
-#include "Recorder.h"
+#ifdef AFFECT_FLOW
 #include "Affect_Flow.h"
-#include "Data_OSC.h"
+#endif
+#ifdef SONG_OF_SEVEN
+#include "Song_of_seven.h"
+#endif
+#ifdef NO_SHOW
+#include "No_show.h"
+#endif

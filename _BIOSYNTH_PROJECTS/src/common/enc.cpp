@@ -5,8 +5,8 @@
 
 namespace encoder{
 
-    #if REVERSE_ENCODER == false
-    Encoder encoder(pins::hardware::encoder_B, pins::hardware::encoder_A);
+    #ifdef REVERSE_ENCODER
+        Encoder encoder(pins::hardware::encoder_B, pins::hardware::encoder_A);
     #else
         Encoder encoder(pins::hardware::encoder_A, pins::hardware::encoder_B);
     #endif
@@ -16,11 +16,9 @@ namespace encoder{
         Serial.println("Encoder initialized");
     }
 
-
     void set_value(const int& value){
         encoder.write(value * 4); //multiply by 4 because it is a quadrature encoder
     }
-
 
     int limit(const int& pos, const int& min_pos, const int& max_pos){
        
@@ -47,7 +45,6 @@ namespace encoder{
 
         //test for time for debouncing purpose. Could be removed if using encoder with the interrups
         if(current_encoder_value != newPosition && (current_read_time-last_read_time) >= 500){
-            // Serial.printf("Encoder position is : %d\n" , newPosition);
             current_encoder_value = newPosition;
             last_read_time = millis();
         }
