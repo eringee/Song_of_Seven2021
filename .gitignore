@@ -1,5 +1,3 @@
-
-/LEDSHOW/Backup
 *.mp3
-_BIOSYNTH_PROJECTS/Biodata_recorder/.vscode
-_BIOSYNTH_PROJECTS/Biosynth_project_loader/.vscode
+_BIOSYNTH_PROJECTS/.vscode
+_BIOSYNTH_PROJECTS/.pio

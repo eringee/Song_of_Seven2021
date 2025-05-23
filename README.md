@@ -1,12 +1,31 @@
-# Song_of_Seven2021
- 2021 upgrade to Song of Seven
+# BioSynth
+
+## Description
+The BioSynth is an affective biofeedback device that turns physiological signals —heart rate, skin conductance, and respiration—into sound, light, and other expressive media. 
+Created by Erin Gee and collaborators, it uses Gee's [BioData](https://github.com/eringee/BioData.git) library to convert raw bioignals into meaningful indicators for artistic use. The system is built with creative technologists, performers, and researchers in mind, to facilitate integration between body data and interactive media environments.
+
+BioSynth is modular, extensible, and designed for embedded systems using [PlatformIO](https://platformio.org/) for development. It supports features like OSC communication and real-time data logging. This repository serves as a central hub for all related projects and code associated with the BioSynth ecosystem.
+
+## Music pieces
+This repository contains the pieces Song Of Seven (2021) and Affect Flow (2022).
+
+## Features 
+Features include :
+- Sending biodata through OSC with ESP32
+- Logging biodata on an SD card
+- Using an external ADC for 16-bit data resolution
+
+## PlatformIO Environments
+Each show or project is encapsulated in a PlatformIO environment that can be independently built and uploaded. 
+
+Environments included are : 
+- cinexmedia (to record biodata on an SD card)
+- teensy_OSC (to send biodata through OSC)
+- tinypico_OSC (to send biodata through OSC)
+- calgary_affect_flow (latest version of Affect Flow show with OSC light control)
+- basic_song_of_seven (latest version of Song Of Seven)
+
+## More
+2021 schematic : https://oshwlab.com/siri87/biosynth2021 
+
  
- Requires Teensy Audio library
-
-To do: 
-
-1) Import initial Teensy Audio Library conditions and test audio on the board
-2) Attach biosignals to individual tones
-3) Create a definition at the top of the file for saying whether this is box 1-7 (each box plays different tones)
-4) Develop UI that greets user with which box version it is, then allows to switch to each "section" of the musical score, to change tones
-5) Develop additional UI that automatically fades in / out tones when button pressed - or install the A15 pot?  Not clear yet

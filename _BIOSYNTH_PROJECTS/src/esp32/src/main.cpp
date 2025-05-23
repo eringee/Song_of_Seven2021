@@ -3,6 +3,7 @@
 #include <WiFiUdp.h>
 #include <OSCMessage.h>
 #include <OSCBundle.h>
+#include "Packets.h"
 
 #define RXD2 4
 #define TXD2 5
@@ -17,13 +18,6 @@ OSCBundle bundle;
 #define BUFFER_SIZE 1024
 uint8_t packetBuffer[BUFFER_SIZE];  // maximum packet size
 uint8_t bytesRead = 0;
-
-enum PacketType {
-    PACKET_UNKNOWN,
-    PACKET_HEART,
-    PACKET_SKIN,
-    PACKET_RESPIRATION
-};
 
 struct BioData {
     struct Heart {
@@ -62,99 +56,8 @@ struct BioData {
     } respiration;
 } bioData;
 
-// Packet structures
-struct heart_packet {
-    int32_t magic_in = 0x11223344;
-    int32_t checksum = 0;
-    struct data {
-        int16_t heart_raw = 0;
-        bool heart_beat_detected =0;
-        char padding = 0;
-        float heart_normalized = 0;
-        float heart_bpm = 0;
-        float heart_bpm_change =0;
-        float heart_amplitude_change = 0;
-        int32_t checksum() {
-            uint8_t* begin = reinterpret_cast<uint8_t*>(this);
-            uint8_t* end = begin + sizeof(*this);
-            int32_t sum = 0;
-            for(auto it = begin ; it != end; ++it)   sum += *it; 
-            return sum;
-        }
-    } data;
-    int32_t magic_out = 0x44332211;
-} heartPacket;
-static_assert(sizeof(heart_packet) == 4+4+2+4+4+4+4+1+1+4, "Heart packet size should be 32 bytes");
-
-struct skin_packet {
-    int32_t magic_in = 0x22334455;
-    int32_t checksum =0;
-    struct data {
-        int32_t skin_raw =0;
-        float skin_scr =0;
-        float skin_scl =0;
-        int32_t checksum() {
-            uint8_t* begin = reinterpret_cast<uint8_t*>(this);
-            uint8_t* end = begin + sizeof(*this);
-            int32_t sum = 0;
-            for(auto it = begin ; it != end; ++it)   sum += *it; 
-            return sum;
-        }
-    } data;
-    int32_t magic_out = 0x55443322;
-} skinPacket;
-static_assert(sizeof(skin_packet) == 4+4+4+4+4+4, "Skin packet size should be 24 bytes");
-
-struct resp_packet {
-    int32_t magic_in = 0x33445566;
-    int32_t checksum =0;
-
-    struct data{
-        int16_t resp_raw =0;
-        bool resp_is_exhaling =0;
-        char padding =0;
-        float resp_normalized =0;
-        float resp_scaled =0;
-        float resp_raw_amplitude =0;
-        float resp_normalized_amplitude =0;
-        float resp_scaled_amplitude =0;
-        float resp_amplitude_level =0;
-        float resp_amplitude_change =0;
-        float resp_amplitude_variability =0;
-        float resp_interval =0;
-        float resp_rpm =0;
-        float resp_normalized_rpm =0;
-        float resp_scaled_rpm =0;
-        float resp_rpm_level =0;
-        float resp_rpm_change =0;
-        float resp_rpm_variability =0;
-        int32_t checksum() {
-            uint8_t* begin = reinterpret_cast<uint8_t*>(this);
-            uint8_t* end = begin + sizeof(*this);
-            int32_t sum = 0;
-            for(auto it = begin ; it != end; ++it)   sum += *it; 
-            return sum;
-        }
-    } data;
-    int32_t magic_out = 0x66554433;
-} respPacket;
-static_assert(sizeof(resp_packet) == 4+4+2+1+1+4+4+4+4+4+4+4+4+4+4+4+4+4+4+4+4, "Resp packet size should be 76 bytes");
-
 // Variables for packet verification
 bool confirmationSent = false;
-
-// Debugging function
-void debugPrint(const char* format, ...) {
-    #ifdef DEBUG_PRINT
-    va_list args;
-    va_start(args, format);
-    char buffer[100]; // allocate a buffer to hold the converted string
-    vsnprintf(buffer, 100, format, args); // convert the format string to a buffer
-    PRINTSERIAL.print(buffer);
-    va_end(args);
-    PRINTSERIAL.println();
-    #endif
-}
 
 // Functions for packet sending, parsing, and verification
 void prepPuaraOSCMessage(float message, const char* oscNamespace) {
@@ -364,7 +267,13 @@ void setup() {
 }
 
 void loop() {
-    // prepPuaraOSCMessage(10, "/puara/skin/Raw");
+// prepPuaraOSCMessage(10, "/puara/skin/Raw");
+//     if (puara.IP1_ready()) {
+//     Udp.beginPacket(puara.getIP1().c_str(), puara.getPORT1());
+//     bundle.send(Udp);
+//     Udp.endPacket();
+//     bundle.empty();
+//     }
 
 if (dataReceived()) {
     for (int i = 0; i < bytesRead - 3; i++) {
