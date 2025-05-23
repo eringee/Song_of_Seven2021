@@ -17,7 +17,7 @@
 #include "lcd.h"
 #include "led.h"
 
-#ifdef AUDIO
+#ifndef NO_MUSIC
 #include "audio_manager.h"
 #endif
 
@@ -50,7 +50,7 @@ void Biosynth::initialize() {
     led::initialize();
     biosensors::initialize();
 
-    #ifdef AUDIO
+    #ifndef NO_MUSIC
     audio_manager::audio_shield_initialization();
     audio_manager::mute(true);
     #endif
@@ -61,7 +61,7 @@ void Biosynth::initialize() {
 
     project->setup();
 
-    #ifdef AUDIO
+    #ifndef NO_MUSIC
     audio_manager::mute(false);
     #endif
 
@@ -131,7 +131,7 @@ void Biosynth::update() {
   lcdUpdate.restart();
   }
 
-  #ifdef AUDIO
+  #ifndef NO_MUSIC
   audio_manager::setVolume(updatePotentiometer());
   #endif
     
