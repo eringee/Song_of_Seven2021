@@ -3,3 +3,6 @@
 *.mp3
 _BIOSYNTH_PROJECTS/Biodata_recorder/.vscode
 _BIOSYNTH_PROJECTS/Biosynth_project_loader/.vscode
+.DS_Store
+.DS_Store
+_BIOSYNTH_PROJECTS/.DS_Store
