@@ -5,11 +5,7 @@
 
 namespace encoder{
 
-    #ifdef REVERSE_ENCODER
-        Encoder encoder(pins::hardware::encoder_B, pins::hardware::encoder_A);
-    #else
-        Encoder encoder(pins::hardware::encoder_A, pins::hardware::encoder_B);
-    #endif
+    Encoder encoder(pins::hardware::encoder_B, pins::hardware::encoder_A);
 
     void initialize(){
         set_value(0);

@@ -65,6 +65,10 @@ void Biosynth::initialize() {
     audio_manager::mute(false);
     #endif
 
+    #ifdef OSC
+    Serial3.begin(115200, SERIAL_8N1);
+    #endif
+
     screen::clear();
     updateLCD();
     lcdUpdate.restart();
@@ -73,6 +77,16 @@ void Biosynth::initialize() {
 void Biosynth::loadProject()
 {
   Serial.println("Select project");
+
+  #ifdef SONG_OF_SEVEN
+  selected_project = SONGOFSEVEN;
+  #endif
+  #ifdef AFFECT_FLOW
+  selected_project = AFFECTFLOW;
+  #endif
+  #ifdef NO_MUSIC
+  selected_project = NOMUSIC;
+  #endif
 
   switch (selected_project)
   { // add new projects to this switch case (just copy paste the case and change the title and class name)
@@ -162,7 +176,7 @@ void Biosynth::updateLCD() {
     case CURRENTSECTION:{
       Chrono waitTime;
       sprintf(screen::buffer_line_1, "%s", project->getSectionTitle(current_section));
-      sprintf(screen::buffer_line_2, "   BIOSYNTH %d ", configuration::board_id);
+      sprintf(screen::buffer_line_2, "   BIOSYNTH %d  ", configuration::board_id);
       screen::update();
       waitTime.restart();
       #ifdef DISPLAY_DATA
@@ -234,11 +248,11 @@ float Biosynth::updatePotentiometer()
 
 #ifdef OSC
 void Biosynth::send_to_ESP32() {
-  static bool doonce = false;
-  if (!doonce){
-    sendBoardID(configuration::board_id);
-    doonce = true;
-  }
+  // static bool doonce = false;
+  // if (!doonce){
+  //   sendBoardID(configuration::board_id);
+  //   doonce = true;
+  // }
   if(sendingChrono.hasPassed(10)){
     fillPacket(biosensors::heart);
     fillPacket(biosensors::sc1);
@@ -335,21 +349,21 @@ void Biosynth::handle_logging() {
 
 #ifdef ADVANCE_WITH_ENCODER
 void Biosynth::advanceWithEncoder() {
-  if (button::encoder.pressed() && lcd_state == CHANGE_SECTION)
+  if (button::encoder.pressed() && lcd_state == CHANGESECTION)
   {
     Serial.println("Section change confirmed");
     last_section = current_section;
     current_section = current_encoder_value;
     project->changeSection(current_encoder_value);
-    lcd_state = CURRENT_SECTION;
-    updateLDC();
+    lcd_state = CURRENTSECTION;
+    updateLCD();
     confirmTimer.restart();
     confirmTimer.stop();
   }
   if (current_encoder_value != current_section)
   {
-    lcd_state = CHANGE_SECTION;
-    updateLDC();
+    lcd_state = CHANGESECTION;
+    updateLCD();
     if (!confirmTimer.isRunning())
     {
       confirmTimer.start();
@@ -357,11 +371,11 @@ void Biosynth::advanceWithEncoder() {
   }
 
    if (confirmTimer.hasPassed(configuration::confirmation_delay) &&
-      lcd_state == CHANGE_SECTION)
+      lcd_state == CHANGESECTION)
   {
     encoder::set_value(current_section);
-    lcd_state = CURRENT_SECTION;
-    updateLDC();
+    lcd_state = CURRENTSECTION;
+    updateLCD();
     confirmTimer.restart();
     confirmTimer.stop();
   }
@@ -370,12 +384,12 @@ void Biosynth::advanceWithEncoder() {
 
 #ifdef ADVANCE_WITH_PEDAL
 void Biosynth::advanceWithPedal() {
-  if (button::foot_pedal.longPress(500) && lcd_state == CURRENT_SECTION){
+  if (button::foot_pedal.longPress(500) && lcd_state == CURRENTSECTION){
     current_section++;
     current_section = current_section % project->getNumberOfSection();
     project->changeSection(current_section);
-    lcd_state = CURRENT_SECTION;
-    updateLDC();
+    lcd_state = CURRENTSECTION;
+    updateLCD();
     Serial.println("Foot pedal pressed. Advanced section");
     }
 }

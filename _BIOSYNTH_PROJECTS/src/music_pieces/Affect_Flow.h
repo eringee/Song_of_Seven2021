@@ -275,10 +275,6 @@ AudioOutputI2S           AudioOut;       //xy=1031,323
         AudioMemory(80);  //MODIFY AUDIO MEMORY HERE
         createPatchCords();
         setupSounds();
-
-        // Initialize Serial port 
-        // ESP32 - do not touch
-        Serial3.begin(115200, SERIAL_8N1);
     }
 
     //Project update loop. Access the  biosensors from here, process the data and modify audio objects

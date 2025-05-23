@@ -267,7 +267,13 @@ void setup() {
 }
 
 void loop() {
-    // prepPuaraOSCMessage(10, "/puara/skin/Raw");
+// prepPuaraOSCMessage(10, "/puara/skin/Raw");
+//     if (puara.IP1_ready()) {
+//     Udp.beginPacket(puara.getIP1().c_str(), puara.getPORT1());
+//     bundle.send(Udp);
+//     Udp.endPacket();
+//     bundle.empty();
+//     }
 
 if (dataReceived()) {
     for (int i = 0; i < bytesRead - 3; i++) {
