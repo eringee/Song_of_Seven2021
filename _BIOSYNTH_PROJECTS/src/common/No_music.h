@@ -20,12 +20,12 @@
 
 
 //create a class that inherit Projet class and modify ist member for the project
-class NoShow :public Project{
+class NoMusic :public Project{
     
     private:
 
     #ifdef PROJECT_NAME
-    const char* name = STR(PROJECT_NAME);
+    const char* name = PROJECT_NAME;
     #else
     const char* name{"  RECORDER"};
     #endif
@@ -46,7 +46,7 @@ class NoShow :public Project{
 
     public:
 
-    NoShow(Heart *_heart = nullptr,SkinConductance *_sc1 = nullptr, Respiration *_resp = nullptr,SkinConductance *_sc2 = nullptr): heart{_heart},sc1{_sc1},resp{_resp},sc2{_sc2}
+    NoMusic(Heart *_heart = nullptr,SkinConductance *_sc1 = nullptr, Respiration *_resp = nullptr,SkinConductance *_sc2 = nullptr): heart{_heart},sc1{_sc1},resp{_resp},sc2{_sc2}
     {};
 
     void setup() override {

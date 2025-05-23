@@ -18,9 +18,6 @@
 static AudioConnection *patch_cords[50];
 
 class Project{
-    #define ST(A) #A
-    #define STR(A) ST(A)
-
     const char* name{"project"};
     static const int number_of_boards{7};
     static const int number_of_sections{4};

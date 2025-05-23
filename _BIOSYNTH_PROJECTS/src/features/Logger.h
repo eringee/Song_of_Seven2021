@@ -72,6 +72,11 @@ private:
    */
   bool is_logging();
 
+  /**
+   * @brief erase the file on the sd card
+   */
+  void erase_file();
+
   inline int get_num_samples(){
     return numSamples;
     };

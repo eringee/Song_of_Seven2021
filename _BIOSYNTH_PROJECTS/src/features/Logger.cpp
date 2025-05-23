@@ -167,3 +167,9 @@ bool logger::is_logging() {
     bool state = logging;
     return state;
 }
+
+void logger::erase_file() {
+    recording.close();
+    recording.remove();
+    Serial.println("File erased");
+}

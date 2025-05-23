@@ -29,7 +29,7 @@ class Biosynth
     Chrono endLogging{false};
     Chrono nowLogging{false};
     Project *project{nullptr};
-    ProjectList selected_project{NOSHOW};
+    ProjectList selected_project{NOMUSIC};
 
     int current_section{0};
     int last_section{-1};
@@ -97,6 +97,12 @@ private:
      * @param output 
      */
     void send_over_serial( Print *output);
+
+    /**
+     * @brief sends the biosensor data over serial to ESP32
+     * 
+     */
+    void send_to_ESP32();
 
 };
 

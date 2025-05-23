@@ -17,13 +17,8 @@
 #include "Projects.h"
 #include <Arduino.h>
 #include <Audio.h>
-#include <Chrono.h>
 //include library needed for the project here
 #include <mtof.h>
-#include "Packets.h"
-
-
-static Chrono sendingMetro;
 
 //create a class that inherit Projet class and modify ist member for the project
 class AffectFlow :public Project{
@@ -289,14 +284,6 @@ AudioOutputI2S           AudioOut;       //xy=1031,323
     //Project update loop. Access the  biosensors from here, process the data and modify audio objects
     //The biosensor need to be accessed with arrow "->" instead of dots "." because we are dealing with pointers and not objects
     void update() override{
-        if(sendingMetro.hasPassed(10)){
-            fillPacket(heart);
-            fillPacket(sc1);
-            fillPacket(resp);
-            sendPackets();
-            sendingMetro.restart();
-        }
-
         //Retrieve sensor values
         heartSig = heart->getNormalized();
         heartAmp = heart->amplitudeChange();

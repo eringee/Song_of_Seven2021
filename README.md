@@ -2,7 +2,11 @@
  2025 upgrade to Song of Seven repo
  
  TODO : 
- 1) Rename repo
- 2) New README file
- 3) config file into build-flags
- 4) create env for every show
+ 1) Fix Tinypico packets
+ 2) test just OSC
+ 3) test affect flow
+ 3) test 5 recording
+ 4) test all biosynths
+ 1) New README file
+ 2) Comments in plaformio.ini
+ 3) Index of all build flags??

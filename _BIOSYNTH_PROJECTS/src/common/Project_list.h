@@ -17,7 +17,7 @@ enum ProjectList : int
 {
     SONGOFSEVEN,
     AFFECTFLOW,
-    NOSHOW
+    NOMUSIC
 };
 
 #ifdef AFFECT_FLOW
@@ -26,6 +26,6 @@ enum ProjectList : int
 #ifdef SONG_OF_SEVEN
 #include "Song_of_seven.h"
 #endif
-#ifdef NO_SHOW
-#include "No_show.h"
+#ifdef NO_MUSIC
+#include "No_music.h"
 #endif

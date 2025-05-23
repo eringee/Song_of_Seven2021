@@ -21,6 +21,10 @@
 #include "audio_manager.h"
 #endif
 
+#ifdef OSC
+#include "Packets.h"
+#endif
+
 enum state
 {
   BOOT,
@@ -34,6 +38,7 @@ enum state
 
 state lcd_state = BOOT;
 Chrono lcdUpdate;
+Chrono sendingChrono;
 
 void Biosynth::initialize() {
     Serial.println("Erin Gee's Biosynth");
@@ -86,9 +91,9 @@ void Biosynth::loadProject()
     break;
   }
 
-  case NOSHOW:{
-    #ifdef NO_SHOW
-      project = new NoShow(&biosensors::heart, &biosensors::sc1,
+  case NOMUSIC:{
+    #ifdef NO_MUSIC
+      project = new NoMusic(&biosensors::heart, &biosensors::sc1,
                             &biosensors::resp, &biosensors::sc2);
     #endif
     break;
@@ -131,6 +136,10 @@ void Biosynth::update() {
   #ifdef SEND_OVER_SERIAL
   send_over_serial(&Serial);
   #endif
+
+  #ifdef OSC
+  send_to_ESP32();
+  #endif
 }
 
 void Biosynth::updateLCD() {
@@ -157,7 +166,7 @@ void Biosynth::updateLCD() {
       screen::update();
       waitTime.restart();
       #ifdef DISPLAY_DATA
-      while (!waitTime.hasPassed(500))
+      while (!waitTime.hasPassed(2000))
       {
         // wait in function
       }
@@ -223,6 +232,23 @@ float Biosynth::updatePotentiometer()
   return vol;
 }
 
+#ifdef OSC
+void Biosynth::send_to_ESP32() {
+  static bool doonce = false;
+  if (!doonce){
+    sendBoardID(configuration::board_id);
+    doonce = true;
+  }
+  if(sendingChrono.hasPassed(10)){
+    fillPacket(biosensors::heart);
+    fillPacket(biosensors::sc1);
+    fillPacket(biosensors::resp);
+    sendPackets();
+    sendingChrono.restart();
+    }
+}
+#endif
+
 #ifdef LOG
 void Biosynth::handle_logging() {
   bool pressed;
@@ -251,7 +277,7 @@ void Biosynth::handle_logging() {
 
         case LOGGING:{
             if (nowLogging.isRunning()) {
-                if (nowLogging.hasPassed(1000, true)) {
+                if (nowLogging.hasPassed(500, true)) {
                     lcd_state = DISPLAYDATA;
                     updateLCD();
                     nowLogging.stop();
@@ -270,9 +296,14 @@ void Biosynth::handle_logging() {
 
         case CONFIRMLOGGING:{
             if (idleTimer.hasPassed(5000, true)) {
+                #ifdef DISPLAY_DATA
+                lcd_state = DISPLAYDATA;
+                #else
                 lcd_state = CURRENTSECTION;
+                #endif
                 updateLCD();
                 idleTimer.restart();
+                session_log.erase_file();
             }
             if (pressed && !session_log.is_logging() && !nowLogging.isRunning()) {
                 Serial.println("Starting logging");

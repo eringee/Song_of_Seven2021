@@ -19,7 +19,7 @@ namespace button{
 
     extern BiosynthButton encoder;
     extern BiosynthButton foot_pedal;
-    const float refresh_rate{1};
+    const float refresh_rate{0};
 
     /** @brief Initialization routine of the component
      */
