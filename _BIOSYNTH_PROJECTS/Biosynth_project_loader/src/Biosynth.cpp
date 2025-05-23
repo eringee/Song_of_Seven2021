@@ -299,7 +299,7 @@ ProjectList Biosynth::selectProject(
 
   if (project == 1)
   { // project selected when button not pressed on boot
-    return RECORDER; // project 1 is AFFECT_FLOW, change if needed
+    return AFFECT_FLOW; // project 1 is AFFECT_FLOW, change if needed
   }
   else
   { // project selected when button pressed on boot
@@ -365,11 +365,15 @@ void Biosynth::displayDataOnScreen(){
      sprintf(screen::buffer_line_1, "H: %4d G: %4d", biosensors::heart.getRaw(), biosensors::sc1.getRaw());
     
      // line 2
+    #if LOG
     if (session_log.is_logging()){
       sprintf(screen::buffer_line_2, "RT: %5d    REC", biosensors::resp.getRaw());
     } else {
       sprintf(screen::buffer_line_2, "RT: %5d        ", biosensors::resp.getRaw());
     }
+    #else
+    sprintf(screen::buffer_line_2, "RT: %5d        ", biosensors::resp.getRaw());
+    #endif
 
     screen::update();
     }
